@@ -25,43 +25,104 @@ namespace a3
                 });
 
         }
-        public async Task App_Insert_MainQueueAsync(_Main_Queue mq)
+        public async Task App_Insert_MainQueueAsync(_Main_Queue mq, bool Guest)
         {
-
-            Console.Write("App Insert MainQueue running...");
-
-            await Task.Run(() => firebase.Child("Main_Queue/").PostAsync<_Main_Queue>(mq));
-
-            Console.Write("App Insert MainQueue done.");
+            try
+            {
+            //Guest is True, Student is False
+            if (Guest)
+                await Task.Run(() => firebase.Child("Main_Queue/").PostAsync<_Main_Queue>(mq));
+            else
+                await Task.Run(() => firebase.Child("Main_Queue/").Child(mq.Student_No).PutAsync<_Main_Queue>(mq));
+            }
+            catch (FirebaseException e) { Console.WriteLine("Error ->" + e.InnerException); }
         }
-        public async Task App_Delete_MainQueue(int q_id)
+        public async Task App_Insert_QueueInfoAsync(_Queue_Info qi)
+        {
+            string ChildRowName = qi.Servicing_Office.ToString();
+            try
+            {
+                await Task.Run(() => firebase.Child("Queue_Info/").Child(ChildRowName).PutAsync<_Queue_Info>(qi));
+            }
+            catch (FirebaseException e) { Console.WriteLine("Error ->" + e.InnerException); }
+            
+        }
+        public async Task App_Insert_TransactionTypeAsync(_Transaction_Type _tt_t)
+        {
+            string ChildName = _tt_t.id.ToString();
+            try
+            {
+                await Task.Run(() => firebase.Child("Transaction_Type/").Child(ChildName).PutAsync<_Transaction_Type>(_tt_t));
+            }
+            catch (FirebaseException e) { Console.WriteLine("Error ->" + e.InnerException); }
+        }
+        public async Task App_Insert_TransferQueueAsync(_Transfer_Queue _t_q, bool Guest)
+        {
+            try
+            {
+            // Guest is True, Student is False
+            if (Guest)
+                await Task.Run(() => firebase.Child("Transfer_Queue/").PostAsync<_Transfer_Queue>(_t_q));
+            else
+                await Task.Run(() => firebase.Child("Transfer_Queue/").Child(_t_q.Student_No).PutAsync<_Transfer_Queue >(_t_q));
+            }
+            catch (FirebaseException e) { Console.WriteLine("Error ->" + e.InnerException); }
+        }
+        public async Task App_Insert_ServicingTerminalAsync(_Servicing_Terminal _st)
+        {
+            
+            string atServicingOffice = _st.Servicing_Office.ToString();
+            string atWindow = _st.Window.ToString();
+            try
+            {
+                await Task.Run(() => firebase.Child("Servicing_Terminal/").Child(atServicingOffice).Child(atWindow).PutAsync<_Servicing_Terminal>(_st));
+            }
+            catch (FirebaseException e) { Console.WriteLine("Error ->" + e.InnerException); }
+            
+        }
+        public async Task App_Delete_MainQueueAsync()
         {
             string node = "Main_Queue/";
-            Console.WriteLine("Deleting on -> Main_Queue");
-
-            string key = "";
-            var cc = await firebase.Child(node).OrderBy("ID").StartAt(q_id).EndAt((q_id) + 1).LimitToFirst(1).OnceAsync<_Main_Queue>();
-            foreach (var b in cc) { key = b.Key; }
-
-            Console.WriteLine("App Delete MainQueue key - > " + key);
-
-            try { await firebase.Child(node).Child(key).DeleteAsync(); }
+            try { await Task.Run(() => firebase.Child(node).DeleteAsync()); }
             catch (Exception e) { Console.Write("Delete failed ! Error ->" + e); }
             finally { Console.Write("Delete finished."); }
 
         }
-        public async Task App_Delete_QueueTransaction(string ID_Pattern)
+        public async Task App_Delete_TransactionTypeAsync()
+        {
+            string node = "Transaction_Type/";
+            try { await Task.Run(() => firebase.Child(node).DeleteAsync()); }
+            catch (Exception e) { Console.Write("Delete failed ! Error ->" + e); }
+            finally { Console.Write("Delete finished."); }
+        }
+        public async Task App_Delete_QueueInfoAsync()
+        {
+            string node = "Queue_Info/";
+            try { await Task.Run(() => firebase.Child(node).DeleteAsync()); }
+            catch (Exception e) { Console.Write("Delete failed ! Error ->" + e); }
+            finally { Console.Write("Delete finished."); }
+
+        }
+        public async Task App_Delete_TransferQueueAsync()
+        {
+            string node = "Transfer_Queue/";
+            try { await Task.Run(() => firebase.Child(node).DeleteAsync()); }
+            catch (Exception e) { Console.Write("Delete failed ! Error ->" + e); }
+            finally { Console.Write("Delete finished."); }
+
+        }
+        public async Task App_Delete_ServicingTerminalAsync()
+        {
+            string node = "Servicing_Terminal/";
+            try { await Task.Run(() => firebase.Child(node).DeleteAsync()); }
+            catch (Exception e) { Console.Write("Delete failed ! Error ->" + e); }
+            finally { Console.Write("Delete finished."); }
+
+        }
+        public async Task App_Delete_QueueTransactionAsync()
         {
             string node = "Queue_Transaction/";
-            Console.WriteLine("Deleting on -> Queue_Transacation");
-
-            string key = "";
-            var cc = await firebase.Child(node).OrderBy("ID_Pattern").StartAt(ID_Pattern).LimitToFirst(1).OnceAsync<_Queue_Transaction>();
-            foreach (var b in cc) { key = b.Key; }
-
-            Console.WriteLine("Key returned is " + key);
-
-            try { await firebase.Child(node).Child(key).DeleteAsync(); }
+            try { await firebase.Child(node).DeleteAsync(); }
             catch (Exception e) { Console.Write("Delete failed ! Error ->" + e); }
             finally { Console.Write("Delete finished."); }
         }

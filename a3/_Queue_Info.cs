@@ -12,6 +12,8 @@ namespace a3
         public int Mode { get; set; }
         public string Status { get; set; }
         public int Window { get; set; }
+        public string Customer_Queue_Number { get; set; }
+        public int Avg_Serving_Time { get; set; } = 0;
 
     }
 }

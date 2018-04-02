@@ -30,8 +30,6 @@
         {
             this.panel1 = new System.Windows.Forms.Panel();
             this.label1 = new System.Windows.Forms.Label();
-            this.comboBox1 = new System.Windows.Forms.ComboBox();
-            this.checkBox2 = new System.Windows.Forms.CheckBox();
             this.checkBox1 = new System.Windows.Forms.CheckBox();
             this.comboBox2 = new System.Windows.Forms.ComboBox();
             this.lblonlineSync = new System.Windows.Forms.Label();
@@ -44,16 +42,22 @@
             this.lblonlineDBStatus = new System.Windows.Forms.Label();
             this.btnExit = new System.Windows.Forms.Button();
             this.panel2 = new System.Windows.Forms.Panel();
+            this.button1 = new System.Windows.Forms.Button();
+            this.button2 = new System.Windows.Forms.Button();
+            this.panel4 = new System.Windows.Forms.Panel();
+            this.button6 = new System.Windows.Forms.Button();
+            this.richTextBox1 = new System.Windows.Forms.RichTextBox();
             this.panel1.SuspendLayout();
             this.panel2.SuspendLayout();
+            this.panel4.SuspendLayout();
             this.SuspendLayout();
             // 
             // panel1
             // 
             this.panel1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(32)))), ((int)(((byte)(41)))), ((int)(((byte)(50)))));
+            this.panel1.Controls.Add(this.button2);
+            this.panel1.Controls.Add(this.button1);
             this.panel1.Controls.Add(this.label1);
-            this.panel1.Controls.Add(this.comboBox1);
-            this.panel1.Controls.Add(this.checkBox2);
             this.panel1.Controls.Add(this.checkBox1);
             this.panel1.Controls.Add(this.comboBox2);
             this.panel1.Controls.Add(this.lblonlineSync);
@@ -64,9 +68,10 @@
             this.panel1.Controls.Add(this.txtOnlineStatus);
             this.panel1.Controls.Add(this.lbllocalDBStatus);
             this.panel1.Controls.Add(this.lblonlineDBStatus);
-            this.panel1.Location = new System.Drawing.Point(11, 12);
+            this.panel1.Location = new System.Drawing.Point(15, 15);
+            this.panel1.Margin = new System.Windows.Forms.Padding(4);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(344, 286);
+            this.panel1.Size = new System.Drawing.Size(459, 402);
             this.panel1.TabIndex = 0;
             // 
             // label1
@@ -75,40 +80,12 @@
             this.label1.Cursor = System.Windows.Forms.Cursors.Default;
             this.label1.Font = new System.Drawing.Font("Calibri", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label1.ForeColor = System.Drawing.Color.White;
-            this.label1.Location = new System.Drawing.Point(101, 248);
+            this.label1.Location = new System.Drawing.Point(135, 305);
+            this.label1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(83, 19);
+            this.label1.Size = new System.Drawing.Size(96, 24);
             this.label1.TabIndex = 23;
             this.label1.Text = "Sync Every";
-            // 
-            // comboBox1
-            // 
-            this.comboBox1.Font = new System.Drawing.Font("Segoe UI Semilight", 10F);
-            this.comboBox1.FormattingEnabled = true;
-            this.comboBox1.Items.AddRange(new object[] {
-            "Cashier",
-            "Registrar",
-            "UGTO"});
-            this.comboBox1.Location = new System.Drawing.Point(134, 175);
-            this.comboBox1.Name = "comboBox1";
-            this.comboBox1.Size = new System.Drawing.Size(148, 25);
-            this.comboBox1.TabIndex = 22;
-            // 
-            // checkBox2
-            // 
-            this.checkBox2.Appearance = System.Windows.Forms.Appearance.Button;
-            this.checkBox2.AutoSize = true;
-            this.checkBox2.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(192)))), ((int)(((byte)(0)))));
-            this.checkBox2.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
-            this.checkBox2.Font = new System.Drawing.Font("Calibri", 11F, System.Drawing.FontStyle.Bold);
-            this.checkBox2.ForeColor = System.Drawing.Color.White;
-            this.checkBox2.Location = new System.Drawing.Point(290, 173);
-            this.checkBox2.Name = "checkBox2";
-            this.checkBox2.Size = new System.Drawing.Size(38, 28);
-            this.checkBox2.TabIndex = 21;
-            this.checkBox2.Text = "ON";
-            this.checkBox2.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            this.checkBox2.UseVisualStyleBackColor = false;
             // 
             // checkBox1
             // 
@@ -118,9 +95,10 @@
             this.checkBox1.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
             this.checkBox1.Font = new System.Drawing.Font("Calibri", 11F, System.Drawing.FontStyle.Bold);
             this.checkBox1.ForeColor = System.Drawing.Color.White;
-            this.checkBox1.Location = new System.Drawing.Point(290, 139);
+            this.checkBox1.Location = new System.Drawing.Point(387, 171);
+            this.checkBox1.Margin = new System.Windows.Forms.Padding(4);
             this.checkBox1.Name = "checkBox1";
-            this.checkBox1.Size = new System.Drawing.Size(38, 28);
+            this.checkBox1.Size = new System.Drawing.Size(46, 33);
             this.checkBox1.TabIndex = 20;
             this.checkBox1.Text = "ON";
             this.checkBox1.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -134,11 +112,11 @@
             "15 Seconds",
             "30 Seconds",
             "60 Seconds",
-            "2 Minutes",
-            "5 Minutes"});
-            this.comboBox2.Location = new System.Drawing.Point(187, 246);
+            "2 Minutes"});
+            this.comboBox2.Location = new System.Drawing.Point(249, 303);
+            this.comboBox2.Margin = new System.Windows.Forms.Padding(4);
             this.comboBox2.Name = "comboBox2";
-            this.comboBox2.Size = new System.Drawing.Size(141, 25);
+            this.comboBox2.Size = new System.Drawing.Size(187, 31);
             this.comboBox2.TabIndex = 19;
             // 
             // lblonlineSync
@@ -147,9 +125,10 @@
             this.lblonlineSync.Cursor = System.Windows.Forms.Cursors.Default;
             this.lblonlineSync.Font = new System.Drawing.Font("Calibri", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblonlineSync.ForeColor = System.Drawing.Color.White;
-            this.lblonlineSync.Location = new System.Drawing.Point(21, 220);
+            this.lblonlineSync.Location = new System.Drawing.Point(28, 271);
+            this.lblonlineSync.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.lblonlineSync.Name = "lblonlineSync";
-            this.lblonlineSync.Size = new System.Drawing.Size(163, 19);
+            this.lblonlineSync.Size = new System.Drawing.Size(200, 24);
             this.lblonlineSync.TabIndex = 17;
             this.lblonlineSync.Text = "Online Syncronization:";
             // 
@@ -158,20 +137,22 @@
             this.lblServicingOffice.AutoSize = true;
             this.lblServicingOffice.Font = new System.Drawing.Font("Calibri", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblServicingOffice.ForeColor = System.Drawing.Color.White;
-            this.lblServicingOffice.Location = new System.Drawing.Point(16, 177);
+            this.lblServicingOffice.Location = new System.Drawing.Point(21, 218);
+            this.lblServicingOffice.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.lblServicingOffice.Name = "lblServicingOffice";
-            this.lblServicingOffice.Size = new System.Drawing.Size(114, 19);
+            this.lblServicingOffice.Size = new System.Drawing.Size(145, 24);
             this.lblServicingOffice.TabIndex = 16;
-            this.lblServicingOffice.Text = "Servicing Office";
+            this.lblServicingOffice.Text = "Servicing Offices";
             // 
             // lblMobileQ
             // 
             this.lblMobileQ.AutoSize = true;
             this.lblMobileQ.Font = new System.Drawing.Font("Calibri", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblMobileQ.ForeColor = System.Drawing.Color.White;
-            this.lblMobileQ.Location = new System.Drawing.Point(16, 141);
+            this.lblMobileQ.Location = new System.Drawing.Point(21, 174);
+            this.lblMobileQ.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.lblMobileQ.Name = "lblMobileQ";
-            this.lblMobileQ.Size = new System.Drawing.Size(201, 19);
+            this.lblMobileQ.Size = new System.Drawing.Size(246, 24);
             this.lblMobileQ.TabIndex = 15;
             this.lblMobileQ.Text = "Mobile Queuing Application";
             // 
@@ -182,11 +163,12 @@
             this.btnShowQ.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnShowQ.Font = new System.Drawing.Font("Segoe UI Semilight", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnShowQ.ForeColor = System.Drawing.Color.White;
-            this.btnShowQ.Location = new System.Drawing.Point(20, 87);
+            this.btnShowQ.Location = new System.Drawing.Point(27, 107);
+            this.btnShowQ.Margin = new System.Windows.Forms.Padding(4);
             this.btnShowQ.Name = "btnShowQ";
-            this.btnShowQ.Size = new System.Drawing.Size(308, 32);
+            this.btnShowQ.Size = new System.Drawing.Size(411, 39);
             this.btnShowQ.TabIndex = 14;
-            this.btnShowQ.Text = "Show Queue Information";
+            this.btnShowQ.Text = "System Settings";
             this.btnShowQ.UseVisualStyleBackColor = false;
             // 
             // txtLocalStatus
@@ -195,9 +177,10 @@
             this.txtLocalStatus.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.txtLocalStatus.Font = new System.Drawing.Font("Segoe UI Semilight", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.txtLocalStatus.ForeColor = System.Drawing.Color.Black;
-            this.txtLocalStatus.Location = new System.Drawing.Point(192, 50);
+            this.txtLocalStatus.Location = new System.Drawing.Point(256, 62);
+            this.txtLocalStatus.Margin = new System.Windows.Forms.Padding(4);
             this.txtLocalStatus.Name = "txtLocalStatus";
-            this.txtLocalStatus.Size = new System.Drawing.Size(136, 22);
+            this.txtLocalStatus.Size = new System.Drawing.Size(181, 27);
             this.txtLocalStatus.TabIndex = 13;
             this.txtLocalStatus.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
@@ -207,9 +190,10 @@
             this.txtOnlineStatus.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.txtOnlineStatus.Font = new System.Drawing.Font("Segoe UI Semilight", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.txtOnlineStatus.ForeColor = System.Drawing.Color.Black;
-            this.txtOnlineStatus.Location = new System.Drawing.Point(192, 11);
+            this.txtOnlineStatus.Location = new System.Drawing.Point(256, 14);
+            this.txtOnlineStatus.Margin = new System.Windows.Forms.Padding(4);
             this.txtOnlineStatus.Name = "txtOnlineStatus";
-            this.txtOnlineStatus.Size = new System.Drawing.Size(136, 22);
+            this.txtOnlineStatus.Size = new System.Drawing.Size(181, 27);
             this.txtOnlineStatus.TabIndex = 12;
             this.txtOnlineStatus.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
@@ -218,22 +202,24 @@
             this.lbllocalDBStatus.AutoSize = true;
             this.lbllocalDBStatus.Font = new System.Drawing.Font("Calibri", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lbllocalDBStatus.ForeColor = System.Drawing.Color.White;
-            this.lbllocalDBStatus.Location = new System.Drawing.Point(16, 50);
+            this.lbllocalDBStatus.Location = new System.Drawing.Point(21, 62);
+            this.lbllocalDBStatus.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.lbllocalDBStatus.Name = "lbllocalDBStatus";
-            this.lbllocalDBStatus.Size = new System.Drawing.Size(160, 19);
+            this.lbllocalDBStatus.Size = new System.Drawing.Size(144, 24);
             this.lbllocalDBStatus.TabIndex = 11;
-            this.lbllocalDBStatus.Text = "Show Local DB Status:";
+            this.lbllocalDBStatus.Text = "Local DB Status:";
             // 
             // lblonlineDBStatus
             // 
             this.lblonlineDBStatus.AutoSize = true;
             this.lblonlineDBStatus.Font = new System.Drawing.Font("Calibri", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblonlineDBStatus.ForeColor = System.Drawing.Color.White;
-            this.lblonlineDBStatus.Location = new System.Drawing.Point(16, 14);
+            this.lblonlineDBStatus.Location = new System.Drawing.Point(21, 17);
+            this.lblonlineDBStatus.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.lblonlineDBStatus.Name = "lblonlineDBStatus";
-            this.lblonlineDBStatus.Size = new System.Drawing.Size(170, 19);
+            this.lblonlineDBStatus.Size = new System.Drawing.Size(158, 24);
             this.lblonlineDBStatus.TabIndex = 10;
-            this.lblonlineDBStatus.Text = "Show Online DB Status:";
+            this.lblonlineDBStatus.Text = "Online DB Status:";
             // 
             // btnExit
             // 
@@ -242,9 +228,10 @@
             this.btnExit.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnExit.Font = new System.Drawing.Font("Segoe UI Semilight", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnExit.ForeColor = System.Drawing.Color.White;
-            this.btnExit.Location = new System.Drawing.Point(116, 9);
+            this.btnExit.Location = new System.Drawing.Point(149, 19);
+            this.btnExit.Margin = new System.Windows.Forms.Padding(4);
             this.btnExit.Name = "btnExit";
-            this.btnExit.Size = new System.Drawing.Size(113, 32);
+            this.btnExit.Size = new System.Drawing.Size(151, 39);
             this.btnExit.TabIndex = 5;
             this.btnExit.Text = "Exit";
             this.btnExit.UseVisualStyleBackColor = false;
@@ -253,24 +240,92 @@
             // 
             this.panel2.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(32)))), ((int)(((byte)(41)))), ((int)(((byte)(50)))));
             this.panel2.Controls.Add(this.btnExit);
-            this.panel2.Location = new System.Drawing.Point(12, 304);
+            this.panel2.Location = new System.Drawing.Point(17, 425);
+            this.panel2.Margin = new System.Windows.Forms.Padding(4);
             this.panel2.Name = "panel2";
-            this.panel2.Size = new System.Drawing.Size(343, 50);
+            this.panel2.Size = new System.Drawing.Size(457, 72);
             this.panel2.TabIndex = 1;
+            // 
+            // button1
+            // 
+            this.button1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(181)))), ((int)(((byte)(41)))), ((int)(((byte)(42)))));
+            this.button1.FlatAppearance.BorderSize = 0;
+            this.button1.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.button1.Font = new System.Drawing.Font("Segoe UI Semilight", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.button1.ForeColor = System.Drawing.Color.White;
+            this.button1.Location = new System.Drawing.Point(269, 348);
+            this.button1.Margin = new System.Windows.Forms.Padding(4);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(151, 39);
+            this.button1.TabIndex = 6;
+            this.button1.Text = "Apply Changes";
+            this.button1.UseVisualStyleBackColor = false;
+            // 
+            // button2
+            // 
+            this.button2.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(181)))), ((int)(((byte)(41)))), ((int)(((byte)(42)))));
+            this.button2.FlatAppearance.BorderSize = 0;
+            this.button2.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.button2.Font = new System.Drawing.Font("Segoe UI Semilight", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.button2.ForeColor = System.Drawing.Color.White;
+            this.button2.Location = new System.Drawing.Point(282, 211);
+            this.button2.Margin = new System.Windows.Forms.Padding(4);
+            this.button2.Name = "button2";
+            this.button2.Size = new System.Drawing.Size(151, 39);
+            this.button2.TabIndex = 24;
+            this.button2.Text = "Show Info";
+            this.button2.UseVisualStyleBackColor = false;
+            // 
+            // panel4
+            // 
+            this.panel4.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(32)))), ((int)(((byte)(41)))), ((int)(((byte)(50)))));
+            this.panel4.Controls.Add(this.richTextBox1);
+            this.panel4.Controls.Add(this.button6);
+            this.panel4.Location = new System.Drawing.Point(497, 15);
+            this.panel4.Margin = new System.Windows.Forms.Padding(4);
+            this.panel4.Name = "panel4";
+            this.panel4.Size = new System.Drawing.Size(459, 482);
+            this.panel4.TabIndex = 6;
+            // 
+            // button6
+            // 
+            this.button6.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(181)))), ((int)(((byte)(41)))), ((int)(((byte)(42)))));
+            this.button6.FlatAppearance.BorderSize = 0;
+            this.button6.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.button6.Font = new System.Drawing.Font("Segoe UI Semilight", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.button6.ForeColor = System.Drawing.Color.White;
+            this.button6.Location = new System.Drawing.Point(22, 9);
+            this.button6.Margin = new System.Windows.Forms.Padding(4);
+            this.button6.Name = "button6";
+            this.button6.Size = new System.Drawing.Size(411, 39);
+            this.button6.TabIndex = 14;
+            this.button6.Text = "System Logs";
+            this.button6.UseVisualStyleBackColor = false;
+            // 
+            // richTextBox1
+            // 
+            this.richTextBox1.Location = new System.Drawing.Point(22, 65);
+            this.richTextBox1.Name = "richTextBox1";
+            this.richTextBox1.Size = new System.Drawing.Size(411, 399);
+            this.richTextBox1.TabIndex = 15;
+            this.richTextBox1.Text = "";
             // 
             // main
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(181)))), ((int)(((byte)(41)))), ((int)(((byte)(42)))));
-            this.ClientSize = new System.Drawing.Size(362, 363);
+            this.ClientSize = new System.Drawing.Size(969, 510);
             this.Controls.Add(this.panel2);
+            this.Controls.Add(this.panel4);
             this.Controls.Add(this.panel1);
+            this.Margin = new System.Windows.Forms.Padding(4);
             this.Name = "main";
             this.Text = "main";
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();
             this.panel2.ResumeLayout(false);
+            this.panel4.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -287,11 +342,14 @@
         internal System.Windows.Forms.Label lblMobileQ;
         internal System.Windows.Forms.Button btnShowQ;
         private System.Windows.Forms.ComboBox comboBox2;
-        private System.Windows.Forms.CheckBox checkBox2;
         private System.Windows.Forms.CheckBox checkBox1;
-        private System.Windows.Forms.ComboBox comboBox1;
         internal System.Windows.Forms.Label label1;
         internal System.Windows.Forms.Button btnExit;
         private System.Windows.Forms.Panel panel2;
+        internal System.Windows.Forms.Button button2;
+        internal System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Panel panel4;
+        private System.Windows.Forms.RichTextBox richTextBox1;
+        internal System.Windows.Forms.Button button6;
     }
 }

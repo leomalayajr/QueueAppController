@@ -16,7 +16,8 @@ namespace a3
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new main());
+            try { Application.Run(new main()); }
+            catch (Exception e) { MessageBox.Show("Error : " + e); }
         }
     }
 }

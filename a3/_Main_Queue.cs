@@ -23,5 +23,18 @@ namespace a3
         public string Queue_Status { get; set; }
         public DateTime Time { get; set; }
 
+        public bool SameObject(object obj)
+        {
+            if (!(obj is _Main_Queue))
+                return false;
+
+            var other = obj as _Main_Queue;
+
+            if (Customer_Queue_Number != other.Customer_Queue_Number || ID != other.ID)
+                return false;
+
+            return true;
+        }
+
     }
 }

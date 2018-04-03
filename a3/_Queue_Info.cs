@@ -14,6 +14,19 @@ namespace a3
         public int Window { get; set; }
         public string Customer_Queue_Number { get; set; }
         public int Avg_Serving_Time { get; set; } = 0;
+        public string Office_Name { get; set; }
+        public bool SameObject(object obj)
+        {
+            if (!(obj is _Queue_Info))
+                return false;
+
+            var other = obj as _Queue_Info;
+
+            if (ID != other.ID)
+                return false;
+
+            return true;
+        }
 
     }
 }

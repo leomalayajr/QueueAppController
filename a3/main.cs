@@ -23,12 +23,13 @@ namespace a3
         private static System.Windows.Forms.Timer timer1;
         private static int counter = 0;
         private static _Main_Queue _mq;
+        private static _Main_Queue _mq_t;
         private static _Queue_Info _qi;
         private static _Queue_Transaction _qt;
         private static _Transfer_Queue _t_q;
         private static _Servicing_Terminal _st;
         private static _Transaction_Type _tt_t;
-
+        private static bool DEBUG_deleteEveryRun = false;
         Stopwatch stopp = new Stopwatch();
         public main()
         {
@@ -50,7 +51,7 @@ namespace a3
             InitSyncTimer();
 
         }
-        public void PROGRAM_Sync_Once()
+        public async void PROGRAM_Sync_Once()
         {
             // Sync items that are default for queuing 
             // Or items need to be inserted and not always updated
@@ -71,6 +72,14 @@ namespace a3
                         MessageBox.Show("Local SQL Database could not be found. This app will now close.");
                         Environment.Exit(0);
                     }
+                    // Clean the online DB first before any sync happens
+                    if(DEBUG_deleteEveryRun)
+                    Parallel.Invoke(
+                        async () => { await fcon.App_Delete_QueueInfoAsync(); },
+                        async () => { await fcon.App_Delete_MainQueueAsync(); },
+                        async () => { await fcon.App_Delete_TransferQueueAsync(); },
+                        async () => { await fcon.App_Delete_ServicingTerminalAsync(); }
+                        );
 
                     SqlDataReader RDR_Transaction;
 
@@ -122,7 +131,7 @@ namespace a3
                 
                 SqlConnection con = new SqlConnection(connection_string);
 
-                String QUERY_Select_QueueInfo = "select Current_Number, Current_Queue, Servicing_Office, Status, Customer_Queue_Number, Window, Avg_Serving_Time from Queue_Info";
+                String QUERY_Select_QueueInfo = "select Current_Number, Current_Queue, Servicing_Office, Status, Customer_Queue_Number, Window, Avg_Serving_Time, id, Office_Name from Queue_Info";
                 String QUERY_Select_MainQueue = "select * from Main_Queue";
                 String QUERY_Select_TransferQueue = "select * from Transfer_Queue";
                 String QUERY_Select_ServicingTerminal = "select * from Servicing_Terminal";
@@ -133,6 +142,26 @@ namespace a3
                 // List<_Queue_Transaction> LIST_QueueTransaction = new List<_Queue_Transaction>();
                 List<_Transfer_Queue> LIST_TransferQueue = new List<_Transfer_Queue>();
                 List<_Servicing_Terminal> LIST_ServicingTerminal = new List<_Servicing_Terminal>();
+
+                List<_Main_Queue> LIST_MainQueue_fromFirebase = new List<_Main_Queue>();
+                List<_Transfer_Queue> LIST_TransferQueue_fromFirebase = new List<_Transfer_Queue>();
+
+                List<string> fromOnline_MainQueue = new List<string>();
+                List<string> fromOnline_TransferQueue = new List<string>();
+                List<string> fromLocal_MainQueue = new List<string>();
+                List<string> fromLocal_TransferQueue = new List<string>();
+
+                List<_Main_Queue> LOCAL_MainQueueList = new List<_Main_Queue>();
+                List<_Transfer_Queue> LOCAL_TransferQueueList = new List<_Transfer_Queue>();
+
+                List<_Main_Queue> ONLINE_MainQueueList = new List<_Main_Queue>();
+                List<_Transfer_Queue> ONLINE_TransferQueueList = new List<_Transfer_Queue>();
+                
+                List<_Queue_Info> temp_QueueInfoList = new List<_Queue_Info>();
+                List<_Servicing_Terminal> temp_ServicingTerminalList = new List<_Servicing_Terminal>();
+
+                List<_Main_Queue> COMBINE_MainQueueList = new List<_Main_Queue>();
+                List<_Transfer_Queue> COMBINE_TransferQueueList = new List<_Transfer_Queue>();
 
                 using (con)
                 {
@@ -156,10 +185,6 @@ namespace a3
                    
                     firebase_Connection fcon = new firebase_Connection();
                     
-                    // clean the firebase db first
-                    //await fcon.App_Delete_MainQueueAsync();
-                    //await fcon.App_Delete_TransferQueueAsync();
-                    //await fcon.App_Delete_QueueInfoAsync();
 
                     Parallel.Invoke(
                         () => {
@@ -181,8 +206,10 @@ namespace a3
                                     Time = (DateTime)RDR_mq_select["Time"],
                                     Student_No = (string)RDR_mq_select["Student_No"]
                                 };
-                                // insert it to temporary list
+                                // insert it to temporary list of _Main_Queue
                                 LIST_MainQueue.Add(_mq);
+                                // insert same list but only Customer_Queue_Number as string
+                                fromLocal_MainQueue.Add((string)RDR_mq_select["Customer_Queue_Number"]);
                             }
                         }, 
                         () => {
@@ -193,14 +220,15 @@ namespace a3
                                 // set the class
                                 _qi = new _Queue_Info
                                 {
-
+                                    ID = (int)RDR_qi_select["id"],
                                     Current_Number = (int)RDR_qi_select["Current_Number"],
                                     Current_Queue = (int)RDR_qi_select["Current_Queue"],
                                     Servicing_Office = (int)RDR_qi_select["Servicing_Office"],
                                     Status = (string)RDR_qi_select["Status"],
                                     Customer_Queue_Number = (string)CheckIfNull(RDR_qi_select, 4),
                                     Window = (int)CheckIfNull(RDR_qi_select, 5),
-                                    Avg_Serving_Time = (int)RDR_qi_select["Avg_Serving_Time"]
+                                    Avg_Serving_Time = (int)RDR_qi_select["Avg_Serving_Time"],
+                                    Office_Name = (string)RDR_qi_select["Office_Name"]
                                 };
                                 // insert it to temporary list
                                 LIST_QueueInfo.Add(_qi);
@@ -212,7 +240,7 @@ namespace a3
                             while (RDR_transfer_q_select.Read())
                             {
                                 // set the class
-                                _t_q = new _Transfer_Queue
+                                _mq_t = new _Main_Queue
                                 {
                                     Queue_Number = (int)RDR_transfer_q_select["Queue_Number"],
                                     Full_Name = (string)RDR_transfer_q_select["Full_Name"],
@@ -225,7 +253,7 @@ namespace a3
                                     Time = (DateTime)RDR_transfer_q_select["Time"],
                                     Student_No = (string)RDR_transfer_q_select["Student_No"]
                                 };
-                                LIST_TransferQueue.Add(_t_q);
+                                LIST_MainQueue.Add(_mq_t);
                             }
                         },
                         () => {
@@ -252,26 +280,69 @@ namespace a3
                         Parallel.Invoke(
                             async () =>
                             {
-                                await fcon.App_Delete_QueueInfoAsync();
+                                // Retrieve from Firebase first
                                 foreach (_Queue_Info a in LIST_QueueInfo)
                                     await fcon.App_Insert_QueueInfoAsync(a);
                             }
                             ,
                             async () =>
                             {
-                                await fcon.App_Delete_MainQueueAsync();
-                                foreach (_Main_Queue b in LIST_MainQueue)
+                                // await fcon.App_Delete_MainQueueAsync(); // April 02, 2018
+                                fromOnline_MainQueue = await fcon.CQN_Retrieve_MainQueueAsync();
+                                LIST_MainQueue_fromFirebase = await fcon.App_Retrieve_MainQueueAsync();
+
+                                // remove everything that is on Local but not online
+                                LOCAL_MainQueueList = LIST_MainQueue
+                                    .Where(w => !fromOnline_MainQueue
+                                    .Contains(w.Customer_Queue_Number))
+                                    .ToList();
+
+                                // remove everything that is at Online but not Local
+                                // these are lists of Customer_Queue_Number
+                                ONLINE_MainQueueList = LIST_MainQueue_fromFirebase
+                                    .Where(w => !fromLocal_MainQueue
+                                    .Contains(w.Customer_Queue_Number))
+                                    .ToList();
+
+                                // update everything that is at Online and Local
+                                HashSet<string> diff_cqn = new HashSet<string>(LIST_MainQueue.Select(s => s.Customer_Queue_Number));
+                                COMBINE_MainQueueList = LIST_MainQueue_fromFirebase.Where(m => diff_cqn.Contains(m.Customer_Queue_Number)).ToList();
+
+                                 Console.WriteLine();
+                                Console.WriteLine("List of items found on local but not online");
+                                foreach (_Main_Queue a in LOCAL_MainQueueList)
                                 {
-                                    if (b.Type == "Guest")
-                                        await fcon.App_Insert_MainQueueAsync(b, true);
+                                    Console.WriteLine("<< {0} >>", a.Customer_Queue_Number);
+                                    // If not on Firebase but exists on Local (new updates) => Insert
+                                    if (a.Type == "Guest")
+                                        await fcon.App_Insert_MainQueueAsync(a, true);
                                     else
-                                        await fcon.App_Insert_MainQueueAsync(b, false);
+                                        await fcon.App_Insert_MainQueueAsync(a, false);
+                                }
+                                Console.WriteLine("Supposed items found online but not local");
+                                foreach (_Main_Queue b in ONLINE_MainQueueList)
+                                {
+                                    Console.WriteLine("## {0} {1} ##", b.Customer_Queue_Number, b.Key);
+                                    // If not on Local but exists on Firebase (outdated) => Delete
+                                    if (b.Type == "Student")
+                                        await fcon.Specific_Delete_MainQueueAsync(b.Student_No);
+                                    else
+                                        await fcon.Specific_Delete_MainQueueAsync(b.Key);
+                                }
+                                Console.WriteLine("List of items found on both");
+                                foreach (_Main_Queue c in COMBINE_MainQueueList)
+                                {
+                                    Console.WriteLine("/- {1} {0}-/", c.Key, c.Customer_Queue_Number);
+                                    if (c.Type == "Student")
+                                        await fcon.App_Insert_MainQueueAsync(c, false);
+                                    else
+                                        await fcon.App_Update_MainQueue(c);
                                 }
 
                             },
                             async () =>
                             {
-                                await fcon.App_Delete_TransferQueueAsync();
+                                // await fcon.App_Delete_TransferQueueAsync(); // April 02, 2018
                                 foreach (_Transfer_Queue c in LIST_TransferQueue)
                                 {
                                     if (c.Type == "Guest")
@@ -283,14 +354,17 @@ namespace a3
                             },
                             async () =>
                             {
-                                await fcon.App_Delete_ServicingTerminalAsync();
+                                // await fcon.App_Delete_ServicingTerminalAsync();
                                 foreach (_Servicing_Terminal d in LIST_ServicingTerminal)
                                     await fcon.App_Insert_ServicingTerminalAsync(d);
                             }
                             );
                     }
-                    catch (Exception e) { Console.WriteLine("Problem when connecting online."); }
-                    finally { Console.WriteLine("Check internet connection."); }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine("Problem when connecting online.");
+                        Console.WriteLine("Check internet connection.");
+                    }
 
                     con.Close();
                     }

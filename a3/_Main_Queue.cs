@@ -15,12 +15,12 @@ namespace a3
         public int Transaction_Type { get; set; }
         // Student_No is stored as string, because of dashes and possible value 'Guest'
         public string Student_No { get; set; }
-        public int Pattern_Current { get; set; }
+        public int Pattern_Current { get; set; } = 1;
         public int Pattern_Max { get; set; }
         public int ID { get; set; }
         public string Customer_Queue_Number { get; set; }
         public string Type { get; set; }
-        public string Queue_Status { get; set; }
+        public string Queue_Status { get; set; } = "Waiting";
         public DateTime Time { get; set; }
 
         public bool SameObject(object obj)

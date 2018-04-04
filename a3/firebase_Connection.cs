@@ -26,6 +26,20 @@ namespace a3
                 });
 
         }
+        public async Task<List<_Pre_Queue>> App_Retrieve_PreQueue()
+        {
+            string node = "Pre_Queue/";
+            var retrieved_objects = await firebase.Child(node).OnceAsync<_Pre_Queue>();
+
+            List<_Pre_Queue> list_from_online = new List<_Pre_Queue>();
+
+            foreach (var a in retrieved_objects)
+            {
+                a.Object.Key = a.Key;
+                list_from_online.Add(a.Object);
+            }
+            return list_from_online;
+        }
         public async Task<List<_Main_Queue>> App_Retrieve_MainQueueAsync()
         {
             string node = "Main_Queue/";
@@ -154,12 +168,19 @@ namespace a3
             try { await firebase.Child(node).Child(key).DeleteAsync(); }
             catch (FirebaseException e) { Console.WriteLine("Error ->" + e.InnerException); }
         }
+        public async Task App_Delete_PreQueueAsync()
+        {
+            string node = "Pre_Queue/";
+            try { await Task.Run(() => firebase.Child(node).DeleteAsync()); }
+            catch (Exception e) { Console.Write("Delete failed ! Error ->" + e); }
+            finally { Console.Write("PreQueue is deleted."); }
+        }
         public async Task App_Delete_MainQueueAsync()
         {
             string node = "Main_Queue/";
             try { await Task.Run(() => firebase.Child(node).DeleteAsync()); }
             catch (Exception e) { Console.Write("Delete failed ! Error ->" + e); }
-            finally { Console.Write("Delete finished."); }
+            finally { Console.Write("MainQueue is deleted."); }
 
         }
         public async Task App_Delete_TransactionTypeAsync()
@@ -174,7 +195,7 @@ namespace a3
             string node = "Queue_Info/";
             try { await Task.Run(() => firebase.Child(node).DeleteAsync()); }
             catch (Exception e) { Console.Write("Delete failed ! Error ->" + e); }
-            finally { Console.Write("Delete finished."); }
+            finally { Console.Write("QueueInfo is deleted."); }
 
         }
         public async Task App_Delete_TransferQueueAsync()
@@ -182,7 +203,7 @@ namespace a3
             string node = "Transfer_Queue/";
             try { await Task.Run(() => firebase.Child(node).DeleteAsync()); }
             catch (Exception e) { Console.Write("Delete failed ! Error ->" + e); }
-            finally { Console.Write("Delete finished."); }
+            finally { Console.Write("TransferQueue is deleted."); }
 
         }
         public async Task App_Delete_ServicingTerminalAsync()
@@ -190,7 +211,7 @@ namespace a3
             string node = "Servicing_Terminal/";
             try { await Task.Run(() => firebase.Child(node).DeleteAsync()); }
             catch (Exception e) { Console.Write("Delete failed ! Error ->" + e); }
-            finally { Console.Write("Delete finished."); }
+            finally { Console.Write("ServicingTerminal is deleted."); }
 
         }
         public async Task App_Delete_QueueTransactionAsync()

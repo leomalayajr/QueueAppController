@@ -24,6 +24,7 @@ namespace a3
         private static int counter = 0;
         private static _Main_Queue _mq;
         private static _Main_Queue _mq_t;
+        private static _Main_Queue _pq_mq;
         private static _Queue_Info _qi;
         private static _Queue_Transaction _qt;
         private static _Transfer_Queue _t_q;
@@ -31,27 +32,195 @@ namespace a3
         private static _Transaction_Type _tt_t;
         private static bool DEBUG_deleteEveryRun = false;
         Stopwatch stopp = new Stopwatch();
+        DataTable table_Servicing_Office;
+        DataTable table_Transactions;
+        DataTable table_Transaction_Table;
         public main()
         {
             InitializeComponent();
 
             // Variable Init
             VARIABLE_Allowed_To_Sync = true;
-            VARIABLE_Priority_Sync_Time = 20000;
+            VARIABLE_Priority_Sync_Time = 60000;
             VARIABLE_System_Sync_Time = 60000;
             stopp.Start();
 
 
             // Function Init
             // Functions that will be run once
+            table_Servicing_Office = getServicingOffice();
+            table_Transactions = getTransactionList();
+            table_Transaction_Table = getTransactionType();
             PROGRAM_Sync_Once();
+            Queue_Info_Update();
 
             // Functions that will be always updated
             PROGRAM_Online_Sync(); //This can be transferred on a button (switch) to manually start. Currently on automatic.
             InitSyncTimer();
 
         }
-        public async void PROGRAM_Sync_Once()
+        private DataTable getTransactionType()
+        {
+            DataTable a = new DataTable();
+            a.Columns.Add("id", typeof(int));
+            a.Columns.Add("Pattern_Max", typeof(int));
+            a.Columns.Add("Transaction_Name", typeof(string));
+            a.Columns.Add("Description", typeof(string));
+            a.Columns.Add("Short_Name", typeof(string));
+            SqlConnection con = new SqlConnection(connection_string);
+            using (con)
+            {
+                con.Open();
+                SqlCommand a_cmd = con.CreateCommand();
+                SqlDataReader a_rdr;
+
+                String a_q = "select * from Transaction_Type";
+                a_cmd = new SqlCommand(a_q, con);
+
+                a_rdr = a_cmd.ExecuteReader();
+                while (a_rdr.Read())
+                {
+                    a.Rows.Add(
+                       (int)a_rdr["id"],
+                       (int)a_rdr["Pattern_Max"],
+                       (string)a_rdr["Transaction_Name"],
+                       (string)a_rdr["Description"],
+                       (string)a_rdr["Short_Name"]);
+                    Console.Write(" write getTransactionType -> Added a row! ");
+                }
+                con.Close();
+            }
+            Console.Write(" \n returning getTransasctionType... \n ");
+            return a;
+        }
+        private DataTable getTransactionList()
+        {
+            DataTable transactionList = new DataTable();
+            transactionList.Columns.Add("Transaction_ID", typeof(int));
+            transactionList.Columns.Add("Servicing_Office", typeof(int));
+            transactionList.Columns.Add("Pattern_No", typeof(int));
+
+            SqlConnection con = new SqlConnection(connection_string);
+            using (con)
+            {
+                con.Open();
+                SqlCommand t_cmd = con.CreateCommand();
+                SqlDataReader t_rdr;
+
+                String t_q = "select * from Transaction_List";
+                t_cmd = new SqlCommand(t_q, con);
+
+                t_rdr = t_cmd.ExecuteReader();
+                while (t_rdr.Read())
+                {
+                    transactionList.Rows.Add(
+                       (int)t_rdr["Transaction_ID"],
+                       (int)t_rdr["Servicing_Office"],
+                       (int)t_rdr["Pattern_No"]);
+                    Console.Write(" getTransactions -> Added a row! ");
+                }
+                con.Close();
+            }
+            Console.Write(" \n returning transactionList... \n ");
+            return transactionList;
+        }
+        private DataTable getServicingOffice()
+        {
+            DataTable b = new DataTable();
+            b.Columns.Add("id", typeof(int));
+            b.Columns.Add("Name", typeof(string));
+            b.Columns.Add("Address", typeof(string));
+            SqlConnection con = new SqlConnection(connection_string);
+            using (con)
+            {
+                con.Open();
+                SqlCommand b_cmd = con.CreateCommand();
+                SqlDataReader b_rdr;
+
+                String b_q = "select * from Servicing_Office";
+                b_cmd = new SqlCommand(b_q, con);
+
+                b_rdr = b_cmd.ExecuteReader();
+                while (b_rdr.Read())
+                {
+                    b.Rows.Add(
+                       (int)b_rdr["id"],
+                       (string)b_rdr["Name"],
+                       (string)b_rdr["Address"]);
+                }
+                con.Close();
+            }
+            return b;
+        }
+        private string getServicingOfficeName(int _so)
+        {
+            string servicing_office_Name = "";
+            foreach (DataRow row in table_Servicing_Office.Rows)
+            {
+                int temp_id = (int)row["id"];
+                if (_so == temp_id)
+                {
+                    servicing_office_Name = (string)row["Name"];
+                    break;
+                }
+            }
+            return servicing_office_Name;
+        }
+        private void Queue_Info_Update()
+        {
+            //Checks whether Queue_Info is available.
+            //Writes default data.
+            //Always executed when a Kiosk have been opened.
+
+            SqlConnection con = new SqlConnection(connection_string);
+            using (con)
+            {
+                con.Open();
+                SqlCommand cmd = con.CreateCommand();
+                SqlCommand cmd2 = con.CreateCommand();
+                SqlCommand cmd3 = con.CreateCommand();
+                cmd.CommandType = CommandType.Text;
+                cmd2.CommandType = CommandType.Text;
+                
+                String query = "select * from Queue_Info";
+                String query2 = "";
+
+                SqlDataReader rdr;
+                cmd = new SqlCommand(query,con);
+
+                rdr = cmd.ExecuteReader();
+                int rowCount = 0;
+                while (rdr.Read())
+                { rowCount++; { if (rowCount > 0) { break; } } }
+                if (rowCount > 0)
+                {
+                    //MessageBox.Show(Status+" already");
+                }
+                else
+                {
+                    foreach (DataRow a in table_Servicing_Office.Rows)
+                    {
+                        int _so = (int)a["id"];
+                        query2 = "insert into Queue_Info (Current_Number,Current_Queue,Servicing_Office,Mode,Status,Counter,Office_Name) values (@cn,@cq,@so,@m,@sn,@c,@o_n)";
+                        cmd2 = new SqlCommand(query2, con);
+                        cmd2.Parameters.AddWithValue("@cn", 0);
+                        cmd2.Parameters.AddWithValue("@cq", 1);
+                        cmd2.Parameters.AddWithValue("@so", _so);
+                        cmd2.Parameters.AddWithValue("@m", 1);
+                        cmd2.Parameters.AddWithValue("@sn", "Online");
+                        cmd2.Parameters.AddWithValue("@c", "0");
+                        cmd2.Parameters.AddWithValue("@o_n", getServicingOfficeName(_so));
+                        int result = cmd2.ExecuteNonQuery();
+                        Console.WriteLine("Queue info inserting something...");
+                        // Inserting data to firebase
+                        // FirebaseFunction: Kiosk_Insert_QueueInfo(_so);
+                    }
+                }
+
+            }
+            con.Close();
+        }
+        public void PROGRAM_Sync_Once()
         {
             // Sync items that are default for queuing 
             // Or items need to be inserted and not always updated
@@ -163,6 +332,8 @@ namespace a3
                 List<_Main_Queue> COMBINE_MainQueueList = new List<_Main_Queue>();
                 List<_Transfer_Queue> COMBINE_TransferQueueList = new List<_Transfer_Queue>();
 
+                List<_Main_Queue> PREQUEUE_TO_MAINQUEUE = new List<_Main_Queue>();
+                List<_Pre_Queue> PREQUEUE_LIST = new List<_Pre_Queue>();
                 using (con)
                 {
                     try { con.Open(); }
@@ -280,7 +451,6 @@ namespace a3
                         Parallel.Invoke(
                             async () =>
                             {
-                                // Retrieve from Firebase first
                                 foreach (_Queue_Info a in LIST_QueueInfo)
                                     await fcon.App_Insert_QueueInfoAsync(a);
                             }
@@ -342,7 +512,6 @@ namespace a3
                             },
                             async () =>
                             {
-                                // await fcon.App_Delete_TransferQueueAsync(); // April 02, 2018
                                 foreach (_Transfer_Queue c in LIST_TransferQueue)
                                 {
                                     if (c.Type == "Guest")
@@ -354,11 +523,69 @@ namespace a3
                             },
                             async () =>
                             {
-                                // await fcon.App_Delete_ServicingTerminalAsync();
                                 foreach (_Servicing_Terminal d in LIST_ServicingTerminal)
                                     await fcon.App_Insert_ServicingTerminalAsync(d);
+                            },
+                            async () => 
+                            {
+                                PREQUEUE_LIST = await fcon.App_Retrieve_PreQueue();
+                                foreach (_Pre_Queue e in PREQUEUE_LIST)
+                                {
+                                    int firstServicingOffice = getFirstServicingOffice(e.Transaction_Type);
+                                    int newQueueNumber = getQueueNumber(firstServicingOffice);
+                                    _pq_mq = new _Main_Queue
+                                    {
+                                        Queue_Number = newQueueNumber,
+                                        Servicing_Office = firstServicingOffice,
+                                        Pattern_Max = retrievePatternMax(e.Transaction_Type),
+                                        Customer_Queue_Number = generateQueueShortName(e.Transaction_Type,newQueueNumber),
+                                        Full_Name = e.Full_Name,
+                                        Student_No = e.Student_No,
+                                        Transaction_Type = e.Transaction_Type,
+                                        Time =  UnixTimeStampToDateTime(e.timestamp_date),
+                                        Pattern_Current = 1,
+                                        Queue_Status = "Waiting"
+                                    };
+                                    PREQUEUE_TO_MAINQUEUE.Add(_pq_mq);
+                                }
+
+                                string QUERY_Add_PreQueue_To_MainQueue = "insert into Main_Queue " +
+                                "(Queue_Number,Full_Name,Servicing_Office,Student_No," +
+                                "Transaction_Type,Type,Time,Pattern_Current,Pattern_Max," +
+                                "Customer_Queue_Number,Queue_Status) " +
+                                " values (@q_qn,@q_fn,@q_so,@q_sn,@q_tt,1,GETDATE(),@q_pc,@q_pm,@q_cqn,@q_qs)";
+                                SqlConnection temp_con = new SqlConnection(connection_string);
+                                SqlCommand cmdPreQueue = new SqlCommand(QUERY_Add_PreQueue_To_MainQueue, temp_con);
+                                using (temp_con)
+                                {
+                                    temp_con.Open();
+                                    foreach (_Main_Queue f in PREQUEUE_TO_MAINQUEUE)
+                                    {
+
+                                        Console.WriteLine("=== {0} ===", f.Customer_Queue_Number);
+                                        // Add to local DB -> MainQueue
+                                        cmdPreQueue.Parameters.AddWithValue("@q_qn", f.Queue_Number);
+                                        cmdPreQueue.Parameters.AddWithValue("@q_fn", f.Full_Name);
+                                        cmdPreQueue.Parameters.AddWithValue("@q_so", f.Servicing_Office);
+                                        cmdPreQueue.Parameters.AddWithValue("@q_sn", f.Student_No);
+                                        cmdPreQueue.Parameters.AddWithValue("@q_tt", f.Transaction_Type);
+                                        cmdPreQueue.Parameters.AddWithValue("@q_pc", f.Pattern_Current);
+                                        cmdPreQueue.Parameters.AddWithValue("@q_pm", f.Pattern_Max);
+                                        cmdPreQueue.Parameters.AddWithValue("@q_cqn", f.Customer_Queue_Number);
+                                        cmdPreQueue.Parameters.AddWithValue("@q_qs", f.Queue_Status);
+                                        cmdPreQueue.ExecuteNonQuery();
+                                        cmdPreQueue.Parameters.Clear();
+
+                                    }
+                                    temp_con.Close();
+                                }
+                                // Delete after retrieving all PreQueue and inserting them to MainQueue
+                                
+                                 await fcon.App_Delete_PreQueueAsync();
                             }
                             );
+                        Console.WriteLine("Last work for synching finished. /n /n /n ");
+                        Console.WriteLine("------------------------------------------");
                     }
                     catch (Exception e)
                     {
@@ -378,21 +605,108 @@ namespace a3
             }
             else
             {
-                //SqlConnection con = new SqlConnection(connection_string);
-                //using (con)
-                //{
-                //    con.Open();
-                //    string query = "select * from Queue_Info";
-                //    SqlCommand cmd = new SqlCommand(query, con);
-                //    SqlDataReader rdr;
-                //    rdr = cmd.ExecuteReader();
-                //    while (rdr.Read()) { string c = rdr.GetString(8); Console.WriteLine(c); }
-                //    con.Close();
-                //}
-                    
                 Console.WriteLine("Sync is not allowed.");
             }
                 
+        }
+        /**** LIST OF FUNCTIONS FROM KIOSK as of April 04, 2018 ****/
+        private void incrementQueueNumber(int q_so)
+        {
+            SqlConnection con = new SqlConnection(connection_string);
+            using (con)
+            {
+                con.Open();
+                int b = 0;
+                // increment queue number 
+                SqlCommand cmd4;
+                String query2 = "update Queue_Info set Current_Queue = Current_Queue+1 OUTPUT Inserted.Current_Queue where Servicing_Office = @Servicing_Office";
+                cmd4 = new SqlCommand(query2, con);
+                cmd4.Parameters.AddWithValue("@Servicing_Office", q_so);
+                b = (int)cmd4.ExecuteScalar();
+                con.Close();
+
+            }
+            
+        }
+        private int getQueueNumber(int q_so)
+        {
+            SqlConnection con = new SqlConnection(connection_string);
+            // retrieves queue number
+            int res = 0;
+            using (con)
+            {
+                con.Open();
+                SqlCommand cmd3;
+                String query = "select Current_Queue from Queue_Info where Servicing_Office = @Servicing_Office";
+                cmd3 = new SqlCommand(query, con);
+                cmd3.Parameters.AddWithValue("@Servicing_Office", q_so);
+                SqlDataReader rdr2;
+                rdr2 = cmd3.ExecuteReader();
+                while (rdr2.Read()) { res = (int)rdr2["Current_Queue"]; }
+                con.Close();
+            }
+            incrementQueueNumber(q_so);
+
+            return res;
+        }
+        private int getFirstServicingOffice(int q_tt)
+        {
+            int a = 0;
+            int temp_pattern_no = 0;
+            int temp_transaction_id = 0;
+            foreach (DataRow row in table_Transactions.Rows)
+            {
+                temp_pattern_no = (int)row["Pattern_No"];
+                temp_transaction_id = (int)row["Transaction_ID"];
+                if (q_tt == temp_transaction_id && temp_pattern_no == 1)
+                {
+                    a = (int)row["Servicing_Office"];
+                    break;
+                }
+            }
+            return a;
+        }
+        private int retrievePatternMax(int Transaction_Type)
+        {
+            int a = 0, id = 0;
+            foreach (DataRow row in table_Transaction_Table.Rows)
+            {
+                id = (int)row["id"];
+                Console.Write(" RetrievePatternMax -> searching for the respective pattern number ");
+                if (id == Transaction_Type)
+                {
+                    a = (int)row["Pattern_Max"];
+                    break;
+                }
+            }
+            return a;
+        }
+        private string generateQueueShortName(int Transaction_Type, int queueNumber)
+        {
+            string short_name = "";
+            int id = 0;
+            foreach (DataRow row in table_Transaction_Table.Rows)
+            {
+                id = (int)row["id"];
+                Console.Write(" generateQueueShortName - > searching for short name");
+                if (id == Transaction_Type)
+                {
+                    short_name = (string)row["Short_Name"];
+
+                    break;
+                }
+
+            }
+            short_name += queueNumber;
+            return short_name;
+        }
+        /**** LIST OF FUNCTIONS END                             ****/
+        public static DateTime UnixTimeStampToDateTime(double unixTimeStamp)
+        {
+            // Unix timestamp is seconds past epoch
+            DateTime dtDateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, System.DateTimeKind.Utc);
+            dtDateTime = dtDateTime.AddSeconds(unixTimeStamp).ToLocalTime();
+            return dtDateTime;
         }
         public void InitSyncTimer()
         {

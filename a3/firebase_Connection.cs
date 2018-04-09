@@ -3,6 +3,7 @@ using Firebase.Database.Query;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace a3
@@ -26,108 +27,143 @@ namespace a3
                 });
 
         }
-        public async Task<List<_Pre_Queue>> App_Retrieve_PreQueue()
+        public async Task<List<_Pre_Queue>> App_Retrieve_PreQueue(CancellationToken cts)
         {
             string node = "Pre_Queue/";
-            var retrieved_objects = await firebase.Child(node).OnceAsync<_Pre_Queue>();
-
             List<_Pre_Queue> list_from_online = new List<_Pre_Queue>();
-
-            foreach (var a in retrieved_objects)
+            try
             {
-                a.Object.Key = a.Key;
-                list_from_online.Add(a.Object);
+                cts.ThrowIfCancellationRequested();
+                var retrieved_objects = await firebase.Child(node).OnceAsync<_Pre_Queue>();
+                foreach (var a in retrieved_objects)
+                {
+                    a.Object.Key = a.Key;
+                    list_from_online.Add(a.Object);
+                }
             }
+            catch (FirebaseException e)
+            {
+                Console.WriteLine("Problem -> Method: Retrieve PreQueue");
+                throw;
+            }
+
+            catch (OperationCanceledException e) { Console.WriteLine("Cancelled -> Method: Retrieve PreQueue"); }
             return list_from_online;
+
         }
-        public async Task<List<_Main_Queue>> App_Retrieve_MainQueueAsync()
+        public async Task<List<_Main_Queue>> App_Retrieve_MainQueueAsync(CancellationToken cts)
         {
             string node = "Main_Queue/";
-            var retrieved_objects = await firebase.Child(node).OnceAsync<_Main_Queue>();
-
             List<_Main_Queue> list_from_online = new List<_Main_Queue>();
-
-            foreach (var a in retrieved_objects)
-            {
-                a.Object.Key = a.Key;
-                list_from_online.Add(a.Object);
+            try {
+                cts.ThrowIfCancellationRequested();
+                var retrieved_objects = await firebase.Child(node).OnceAsync<_Main_Queue>();
+                foreach (var a in retrieved_objects)
+                {
+                    a.Object.Key = a.Key;
+                    list_from_online.Add(a.Object);
+                }
             }
+            catch (FirebaseException e) { Console.WriteLine("Problem -> Method: Retrieve MainQueue"); throw; }
+            catch (OperationCanceledException e) { Console.WriteLine("Cancelled -> Method: Retrieve MainQueue"); }
             return list_from_online;
         }
-        public async Task<List<string>> CQN_Retrieve_MainQueueAsync()
+        public async Task<List<string>> CQN_Retrieve_MainQueueAsync(CancellationToken cts)
         {
             string node = "Main_Queue/";
-            var retrieved_objects = await firebase.Child(node).OnceAsync<_Main_Queue>();
-
             List<string> list_from_online = new List<string>();
-
-            foreach (var a in retrieved_objects)
+            try
             {
-                a.Object.Key = a.Key;
-                list_from_online.Add(a.Object.Customer_Queue_Number);
+                cts.ThrowIfCancellationRequested();
+                var retrieved_objects = await firebase.Child(node).OnceAsync<_Main_Queue>();
+                foreach (var a in retrieved_objects)
+                {
+                    a.Object.Key = a.Key;
+                    list_from_online.Add(a.Object.Customer_Queue_Number);
+                }
             }
+            catch (FirebaseException e) { Console.WriteLine("Problem -> Method: Retrieve CQN MainQueue"); throw; }
+            catch (OperationCanceledException e) { Console.WriteLine("Cancelled -> Method: Retrieve CQN MainQueue"); }
             return list_from_online;
         }
-        public async Task<List<_Queue_Info>> App_Retrieve_QueueInfoAsync()
+        public async Task<List<_Queue_Info>> App_Retrieve_QueueInfoAsync(CancellationToken cts)
         {
             string node = "Queue_Info/";
-            var retrieved_objects = await firebase.Child(node).OnceAsync<_Queue_Info>();
-
             List<_Queue_Info> list_from_online = new List<_Queue_Info>();
-
-            foreach (var a in retrieved_objects)
+            try
             {
-                list_from_online.Add(a.Object);
+                cts.ThrowIfCancellationRequested();
+                var retrieved_objects = await firebase.Child(node).OnceAsync<_Queue_Info>();
+                foreach (var a in retrieved_objects)
+                {
+                    list_from_online.Add(a.Object);
+                }
             }
+            catch (FirebaseException e) { Console.WriteLine("Problem -> Method: Retrieve QueueInfo"); }
+            catch (OperationCanceledException e) { Console.WriteLine("Cancelled -> Method: Retrieve QueueInfo"); }
             return list_from_online;
         }
-        public async Task<List<_Transfer_Queue>> App_Retrieve_TransferQueueAsync()
+        public async Task<List<_Transfer_Queue>> App_Retrieve_TransferQueueAsync(CancellationToken cts)
         {
             string node = "Transfer_Queue/";
-            var retrieved_objects = await firebase.Child(node).OnceAsync<_Transfer_Queue>();
-
             List<_Transfer_Queue> list_from_online = new List<_Transfer_Queue>();
-
-            foreach (var a in retrieved_objects)
+            try
             {
-                list_from_online.Add(a.Object);
+                cts.ThrowIfCancellationRequested();
+                var retrieved_objects = await firebase.Child(node).OnceAsync<_Transfer_Queue>();
+                foreach (var a in retrieved_objects)
+                {
+                    list_from_online.Add(a.Object);
+                }
             }
+            catch (OperationCanceledException e) { Console.WriteLine("Cancelled -> Method: Insert MainQueue"); }
+            catch (FirebaseException e) { Console.WriteLine("Problem -> Method: Insert MainQueue"); }
             return list_from_online;
         }
-        public async Task<List<_Servicing_Terminal>> App_Retrieve_ServicingTerminalAsync()
+        public async Task<List<_Servicing_Terminal>> App_Retrieve_ServicingTerminalAsync(CancellationToken cts)
         {
             string node = "Servicing_Terminal/";
-            var retrieved_objects = await firebase.Child(node).OnceAsync<_Servicing_Terminal>();
-
             List<_Servicing_Terminal> list_from_online = new List<_Servicing_Terminal>();
-
-            foreach (var a in retrieved_objects)
+            try
             {
-                list_from_online.Add(a.Object);
+                cts.ThrowIfCancellationRequested();
+                var retrieved_objects = await firebase.Child(node).OnceAsync<_Servicing_Terminal>();
+                foreach (var a in retrieved_objects)
+                {
+                    list_from_online.Add(a.Object);
+                }
             }
+            catch (FirebaseException e) { Console.WriteLine("Problem -> Method: Retrieve ServicingTerminal"); }
+            catch (OperationCanceledException e) { Console.WriteLine("Cancelled -> Method: Retrieve ServicingTerminal"); }
+
             return list_from_online;
         }
-        public async Task App_Insert_MainQueueAsync(_Main_Queue mq, bool Guest)
+        public async Task App_Insert_MainQueueAsync(_Main_Queue mq, bool Guest, CancellationToken cts)
         {
             try
             {
-            //Guest is True, Student is False
-            if (Guest)
-                await Task.Run(() => firebase.Child("Main_Queue/").PostAsync<_Main_Queue>(mq));
-            else
-                await Task.Run(() => firebase.Child("Main_Queue/").Child(mq.Student_No).PutAsync<_Main_Queue>(mq));
+                cts.ThrowIfCancellationRequested();
+                //Guest is True, Student is False
+                if (Guest)
+                    await Task.Run(() => firebase.Child("Main_Queue/").PostAsync<_Main_Queue>(mq));
+                else
+                    await Task.Run(() => firebase.Child("Main_Queue/").Child(mq.Student_No).PutAsync<_Main_Queue>(mq));
             }
-            catch (FirebaseException e) { Console.WriteLine("Error ->" + e.InnerException); }
+            catch (FirebaseException e) { Console.WriteLine("Problem -> Method: Insert MainQueue"); throw; }
+            catch (OperationCanceledException e) { Console.WriteLine("Cancelled -> Method: Insert MainQueue"); }
         }
-        public async Task App_Insert_QueueInfoAsync(_Queue_Info qi)
+        public async Task App_Insert_QueueInfoAsync(_Queue_Info qi, CancellationToken cts)
         {
             string ChildRowName = qi.Servicing_Office.ToString();
             try
             {
+                cts.ThrowIfCancellationRequested();
                 await Task.Run(() => firebase.Child("Queue_Info/").Child(ChildRowName).PutAsync<_Queue_Info>(qi));
             }
-            catch (FirebaseException e) { Console.WriteLine("Error ->" + e.InnerException); }
-            
+            catch (FirebaseException e) { Console.WriteLine("Problem -> Method: Insert QueueInfo"); throw; }
+            catch (OperationCanceledException e) { Console.WriteLine("Cancelled -> Method: Insert QueueInfo"); }
+
+
         }
         public async Task App_Insert_TransactionTypeAsync(_Transaction_Type _tt_t)
         {
@@ -136,65 +172,74 @@ namespace a3
             {
                 await Task.Run(() => firebase.Child("Transaction_Type/").Child(ChildName).PutAsync<_Transaction_Type>(_tt_t));
             }
-            catch (FirebaseException e) { Console.WriteLine("Error ->" + e.InnerException); }
+            catch (FirebaseException e) { Console.WriteLine("Problem -> Method: Insert TransactionType"); throw; }
+
         }
-        public async Task App_Insert_TransferQueueAsync(_Transfer_Queue _t_q, bool Guest)
+        public async Task App_Insert_TransferQueueAsync(_Transfer_Queue _t_q, bool Guest,CancellationToken cts)
         {
             try
             {
+                cts.ThrowIfCancellationRequested();
             // Guest is True, Student is False
             if (Guest)
                 await Task.Run(() => firebase.Child("Transfer_Queue/").PostAsync<_Transfer_Queue>(_t_q));
             else
                 await Task.Run(() => firebase.Child("Transfer_Queue/").Child(_t_q.Student_No).PutAsync<_Transfer_Queue >(_t_q));
             }
-            catch (FirebaseException e) { Console.WriteLine("Error ->" + e.InnerException); }
+            catch (FirebaseException e) { Console.WriteLine("Problem -> Method: Insert TransferQueue"); }
+            catch (OperationCanceledException e) { Console.WriteLine("Cancelled -> Method: Insert TransferQueue"); }
+
         }
-        public async Task App_Insert_ServicingTerminalAsync(_Servicing_Terminal _st)
+        public async Task App_Insert_ServicingTerminalAsync(_Servicing_Terminal _st,CancellationToken cts)
         {
             
             string atServicingOffice = _st.Servicing_Office.ToString();
             string atWindow = _st.Window.ToString();
             try
             {
+                cts.ThrowIfCancellationRequested();
                 await Task.Run(() => firebase.Child("Servicing_Terminal/").Child(atServicingOffice).Child(atWindow).PutAsync<_Servicing_Terminal>(_st));
             }
-            catch (FirebaseException e) { Console.WriteLine("Error ->" + e.InnerException); }
-            
+            catch (FirebaseException e) { Console.WriteLine("Problem -> Method: Insert ServicingTerminal"); throw; }
+            catch (OperationCanceledException e) { Console.WriteLine("Cancelled -> Method: Insert ServicingTerminal"); }
+
+
         }
-        public async Task Specific_Delete_MainQueueAsync(string key)
+        public async Task Specific_Delete_MainQueueAsync(string key, CancellationToken cts)
         {
             string node = "Main_Queue/";
-            try { await firebase.Child(node).Child(key).DeleteAsync(); }
-            catch (FirebaseException e) { Console.WriteLine("Error ->" + e.InnerException); }
+            try { cts.ThrowIfCancellationRequested(); await firebase.Child(node).Child(key).DeleteAsync(); }
+            catch (FirebaseException e) { Console.WriteLine("Problem -> Method: (Specific Delete) MainQueue"); throw; }
+            catch (OperationCanceledException e) { Console.WriteLine("Cancelled -> Method: (Specific Delete) MainQueue"); }
+
         }
-        public async Task App_Delete_PreQueueAsync()
+        public async Task App_Delete_PreQueueAsync(CancellationToken cts)
         {
             string node = "Pre_Queue/";
-            try { await Task.Run(() => firebase.Child(node).DeleteAsync()); }
-            catch (Exception e) { Console.Write("Delete failed ! Error ->" + e); }
-            finally { Console.Write("PreQueue is deleted."); }
+            try { cts.ThrowIfCancellationRequested(); await Task.Run(() => firebase.Child(node).DeleteAsync()); }
+            catch (FirebaseException e) { Console.Write("Problem -> Method: Delete PreQueue"); throw; }
+            catch (OperationCanceledException e) { Console.WriteLine("Cancelled -> Method: Insert MainQueue"); }
+
         }
         public async Task App_Delete_MainQueueAsync()
         {
             string node = "Main_Queue/";
             try { await Task.Run(() => firebase.Child(node).DeleteAsync()); }
-            catch (Exception e) { Console.Write("Delete failed ! Error ->" + e); }
+            catch (FirebaseException e) { Console.Write("Problem -> Method: Delete MainQueue"); }
             finally { Console.Write("MainQueue is deleted."); }
-
         }
         public async Task App_Delete_TransactionTypeAsync()
         {
             string node = "Transaction_Type/";
             try { await Task.Run(() => firebase.Child(node).DeleteAsync()); }
-            catch (Exception e) { Console.Write("Delete failed ! Error ->" + e); }
+            catch (FirebaseException e) { Console.Write("Problem -> Method: Delete TransactionType"); }
             finally { Console.Write("Delete finished."); }
         }
         public async Task App_Delete_QueueInfoAsync()
         {
             string node = "Queue_Info/";
             try { await Task.Run(() => firebase.Child(node).DeleteAsync()); }
-            catch (Exception e) { Console.Write("Delete failed ! Error ->" + e); }
+            catch (FirebaseException e) { Console.Write("Problem -> Method: Delete QueueInfo"); }
             finally { Console.Write("QueueInfo is deleted."); }
 
         }
@@ -202,7 +247,7 @@ namespace a3
         {
             string node = "Transfer_Queue/";
             try { await Task.Run(() => firebase.Child(node).DeleteAsync()); }
-            catch (Exception e) { Console.Write("Delete failed ! Error ->" + e); }
+            catch (FirebaseException e) { Console.Write("Problem -> Method: Delete TransferQueue"); }
             finally { Console.Write("TransferQueue is deleted."); }
 
         }
@@ -210,7 +255,7 @@ namespace a3
         {
             string node = "Servicing_Terminal/";
             try { await Task.Run(() => firebase.Child(node).DeleteAsync()); }
-            catch (Exception e) { Console.Write("Delete failed ! Error ->" + e); }
+            catch (FirebaseException e) { Console.Write("Problem -> Method: Delete ServicingTerminal"); }
             finally { Console.Write("ServicingTerminal is deleted."); }
 
         }
@@ -224,8 +269,9 @@ namespace a3
         public async Task App_Update_MainQueue(_Main_Queue mq)
         {
             string node = "Main_Queue/";
-            await firebase.Child(node).Child(mq.Key).PutAsync<_Main_Queue>(mq);
-
+            try { await firebase.Child(node).Child(mq.Key).PutAsync<_Main_Queue>(mq); }
+            catch (FirebaseException e) { Console.WriteLine("Problem -> Method: Update MainQueue"); throw; }
+            
         }
         public async Task InsertMultiple()
         {
@@ -259,18 +305,6 @@ namespace a3
             finally { Console.Write("Update finished."); }
 
         }
-        //public async void Update(string key, _Queue_Info q_info)
-        //{
-        //    Console.WriteLine("Opening Update...");
-        //    //>await firebase.Child(node).Child(key).PatchAsync<_Queue_Info>(q_info);
-        //    //>Console.WriteLine(node + key);
-        //}
-        //public async Task Insert(_Queue_Info q_info)
-        //{
-        //    Console.Write("running...");
-        //    //>await firebase.Child(node).PostAsync<_Queue_Info>(q_info);
-        //    Console.Write("done?");
-        //}
 
     }
 }

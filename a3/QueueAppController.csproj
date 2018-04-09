@@ -79,6 +79,7 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="_Log.cs" />
     <Compile Include="_Pre_Queue.cs" />
     <Compile Include="_Transaction_Type.cs" />
     <Compile Include="_Servicing_Terminal.cs" />

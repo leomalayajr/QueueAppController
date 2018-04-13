@@ -34,7 +34,6 @@ namespace a3
         private static _Main_Queue _mq_t;
         private static _Main_Queue _pq_mq;
         private static _Queue_Info _qi;
-        private static _Queue_Transaction _qt;
         private static _Transfer_Queue _t_q;
         private static _Servicing_Terminal _st;
         private static _Transaction_Type _tt_t;
@@ -233,12 +232,12 @@ namespace a3
                 SqlCommand cmd3 = con.CreateCommand();
                 cmd.CommandType = CommandType.Text;
                 cmd2.CommandType = CommandType.Text;
-                
+
                 String query = "select * from Queue_Info";
                 String query2 = "";
 
                 SqlDataReader rdr;
-                cmd = new SqlCommand(query,con);
+                cmd = new SqlCommand(query, con);
 
                 rdr = cmd.ExecuteReader();
                 int rowCount = 0;
@@ -278,14 +277,15 @@ namespace a3
         {
             // Sync items that are default for queuing 
             // Or items need to be inserted and not always updated
-            await Task.Run(async () => { 
-            if (VARIABLE_Allowed_To_Sync)
+            await Task.Run(async () =>
             {
-                SqlConnection con = new SqlConnection(connection_string);
-                firebase_Connection fcon = new firebase_Connection();
-                string QUERY_InsertTransactions = "select * from Transaction_Type";
+                if (VARIABLE_Allowed_To_Sync)
+                {
+                    SqlConnection con = new SqlConnection(connection_string);
+                    firebase_Connection fcon = new firebase_Connection();
+                    string QUERY_InsertTransactions = "select * from Transaction_Type";
 
-                SqlCommand COMMAND_syncOnce = new SqlCommand(QUERY_InsertTransactions, con);
+                    SqlCommand COMMAND_syncOnce = new SqlCommand(QUERY_InsertTransactions, con);
 
                     using (con)
                     {
@@ -323,35 +323,36 @@ namespace a3
                                 };
                                 LIST_Transaction_Type.Add(_tt_t);
                             }
-                            
-                                await Task.Run(
-                                async () =>
-                                {
-                                    await fcon.App_Delete_TransactionTypeAsync();
-                                    foreach (_Transaction_Type a in LIST_Transaction_Type)
-                                        await fcon.App_Insert_TransactionTypeAsync(a);
 
-                                }
-                                );
+                            await Task.Run(
+                            async () =>
+                            {
+                                await fcon.App_Delete_TransactionTypeAsync();
+                                foreach (_Transaction_Type a in LIST_Transaction_Type)
+                                    await fcon.App_Insert_TransactionTypeAsync(a);
+
+                            }
+                            );
 
                             logWrite("Program", "Items to work on first sync done.");
                         }
-                        catch (FirebaseException) {
+                        catch (FirebaseException)
+                        {
                             logWrite("Error -> Online", "Can't connect to the database.");
                             MessageBox.Show("Can't connect online.");
                             Environment.Exit(0);
                         }
-                        
-                        }
 
-            }
+                    }
+
+                }
                 toggleSync.Invoke(new Action(() => toggleSync.Enabled = true));
             });
-            
+
             Console.WriteLine("SyncOnce() finished.");
         }
         #endregion
-        
+
         #region MAIN SYNC FUNCTION
         private async Task PROGRAM_Online_Sync(CancellationToken cancelToken)
         {
@@ -361,7 +362,7 @@ namespace a3
             WebRequest request = WebRequest.Create("http://firebase.google.com");
             try
             {
-                HttpWebResponse response =  (HttpWebResponse)request.GetResponse();
+                HttpWebResponse response = (HttpWebResponse)request.GetResponse();
                 if (response == null || response.StatusCode != HttpStatusCode.OK)
                 {
                     logWrite("Online", "Internet is OK but can't reach Google Firebase.");
@@ -393,9 +394,10 @@ namespace a3
             // Refresh values on the UI
             RefreshUI();
             //This function fetches data from the local database, then uploads it online.
-            await Task.Run(async ()=> { 
-            if (VARIABLE_Allowed_To_Sync)
+            await Task.Run(async () =>
             {
+                if (VARIABLE_Allowed_To_Sync)
+                {
 
                     if (VARIABLE_FIREBASE_IsOnline)
                     {
@@ -405,11 +407,9 @@ namespace a3
                         String QUERY_Select_MainQueue = "select * from Main_Queue";
                         String QUERY_Select_TransferQueue = "select * from Transfer_Queue";
                         String QUERY_Select_ServicingTerminal = "select * from Servicing_Terminal";
-                        // String QUERY_Select_TransactionQueue = "select * from Queue_Transaction";
 
                         List<_Main_Queue> LIST_MainQueue = new List<_Main_Queue>();
                         List<_Queue_Info> LIST_QueueInfo = new List<_Queue_Info>();
-                        // List<_Queue_Transaction> LIST_QueueTransaction = new List<_Queue_Transaction>();
                         List<_Transfer_Queue> LIST_TransferQueue = new List<_Transfer_Queue>();
                         List<_Servicing_Terminal> LIST_ServicingTerminal = new List<_Servicing_Terminal>();
 
@@ -446,7 +446,7 @@ namespace a3
                                 Environment.Exit(0);
                             }
 
-                            
+
 
                             SqlCommand CMD_select_MainQueue = new SqlCommand(QUERY_Select_MainQueue, con);
                             SqlCommand CMD_select_QueueInfo = new SqlCommand(QUERY_Select_QueueInfo, con);
@@ -462,15 +462,15 @@ namespace a3
 
 
                             firebase_Connection fcon = new firebase_Connection();
-                            
+
                             var t1 = Task.Run(() =>
                                 {
                                     RDR_mq_select = CMD_select_MainQueue.ExecuteReader();
 
                                     while (RDR_mq_select.Read())
                                     {
-                                // set the class
-                                _mq = new _Main_Queue
+                                        // set the class
+                                        _mq = new _Main_Queue
                                         {
                                             Queue_Number = (int)RDR_mq_select["Queue_Number"],
                                             Full_Name = (string)RDR_mq_select["Full_Name"],
@@ -483,10 +483,10 @@ namespace a3
                                             Time = (DateTime)RDR_mq_select["Time"],
                                             Student_No = (string)RDR_mq_select["Student_No"]
                                         };
-                                // insert it to temporary list of _Main_Queue
-                                LIST_MainQueue.Add(_mq);
-                                // insert same list but only Customer_Queue_Number as string
-                                fromLocal_MainQueue.Add((string)RDR_mq_select["Customer_Queue_Number"]);
+                                        // insert it to temporary list of _Main_Queue
+                                        LIST_MainQueue.Add(_mq);
+                                        // insert same list but only Customer_Queue_Number as string
+                                        fromLocal_MainQueue.Add((string)RDR_mq_select["Customer_Queue_Number"]);
                                     }
                                 });
                             var t2 = Task.Run(() =>
@@ -541,8 +541,8 @@ namespace a3
 
                                     while (RDR_st_select.Read())
                                     {
-                                // set the class
-                                _st = new _Servicing_Terminal
+                                        // set the class
+                                        _st = new _Servicing_Terminal
                                         {
                                             Customer_Queue_Number = (string)RDR_st_select["Customer_Queue_Number"],
                                             Servicing_Office = (int)RDR_st_select["Servicing_Office"],
@@ -597,10 +597,10 @@ namespace a3
                                             Console.WriteLine("<< {0} >>", a.Customer_Queue_Number);
                                             logWrite("Local", a.Customer_Queue_Number);
                                             // If not on Firebase but exists on Local (new updates) => Insert
-                                                if (a.Type == "Guest")
-                                                    await fcon.App_Insert_MainQueueAsync(a, true, cancelToken);
-                                                else
-                                                    await fcon.App_Insert_MainQueueAsync(a, false, cancelToken);
+                                            if (a.Type == "Guest")
+                                                await fcon.App_Insert_MainQueueAsync(a, true, cancelToken);
+                                            else
+                                                await fcon.App_Insert_MainQueueAsync(a, false, cancelToken);
                                         }
                                         logWrite("Program", "List of new mobile customers");
                                         foreach (_Main_Queue b in ONLINE_MainQueueList)
@@ -715,10 +715,10 @@ namespace a3
                             {
                                 logWrite("Online", "Can't connect!");
                             }
-                                
-                                Console.WriteLine("Last work for synching finished. /n /n /n ");
-                                Console.WriteLine("------------------------------------------");
-                            
+
+                            Console.WriteLine("Last work for synching finished. /n /n /n ");
+                            Console.WriteLine("------------------------------------------");
+
 
                             con.Close();
                         }
@@ -729,14 +729,14 @@ namespace a3
                         Console.WriteLine("Seconds at " + stopp.Elapsed.Seconds);
                         Console.WriteLine("TotalSeconds at " + stopp.Elapsed.TotalSeconds);
                     }
-            }
-            else
-            {
-                Console.WriteLine("Sync is not allowed.");
-            }
+                }
+                else
+                {
+                    Console.WriteLine("Sync is not allowed.");
+                }
 
-        });
-                
+            });
+
         }
         #endregion
         #region FUNCTIONS COPIED FROM KIOSK
@@ -757,7 +757,7 @@ namespace a3
                 con.Close();
 
             }
-            
+
         }
         private int getQueueNumber(int q_so)
         {
@@ -864,124 +864,125 @@ namespace a3
             // the assignment.
             // Async so you can wait easily when the
             // delay comes.
-                block = new ActionBlock<DateTimeOffset>(async now =>
-                {
+            block = new ActionBlock<DateTimeOffset>(async now =>
+            {
                     // Perform the action.  Wait on the result.
                     try
-                    {
-                        await action(now, cancellationToken).
-                        // Doing this here because synchronization context more than
-                        // likely *doesn't* need to be captured for the continuation
-                        // here.  As a matter of fact, that would be downright
-                        // dangerous.
-                        ConfigureAwait(false);
+                {
+                    await action(now, cancellationToken).
+                    // Doing this here because synchronization context more than
+                    // likely *doesn't* need to be captured for the continuation
+                    // here.  As a matter of fact, that would be downright
+                    // dangerous.
+                    ConfigureAwait(false);
 
                         // Wait.
                         await Task.Delay(TimeSpan.FromSeconds(5), cancellationToken).
-                        // Same as above.
-                        ConfigureAwait(false);
-                    }
-                    catch (TaskCanceledException)
-                    {
-                        logWrite("Online", "Online sync is turned off.");
-                    }
-                    catch (OperationCanceledException)
-                    {
-                        logWrite("Online", "Online sync is turned off.");
-                    }
+                    // Same as above.
+                    ConfigureAwait(false);
+                }
+                catch (TaskCanceledException)
+                {
+                    logWrite("Online", "Online sync is turned off.");
+                }
+                catch (OperationCanceledException)
+                {
+                    logWrite("Online", "Online sync is turned off.");
+                }
                     // Post the action back to the block.
                     block.Post(DateTimeOffset.Now);
-                }, new ExecutionDataflowBlockOptions
-                {
-                    CancellationToken = cancellationToken
-                });
+            }, new ExecutionDataflowBlockOptions
+            {
+                CancellationToken = cancellationToken
+            });
 
-                // Return the block.
-                return block;
+            // Return the block.
+            return block;
         }
         private async Task wew(CancellationToken ct)
         {
             HttpClient client = new HttpClient();
-                
-                Console.WriteLine("async is starting");
-                firebase_Connection fcon = new firebase_Connection();
-                SqlConnection con = new SqlConnection(connection_string);
-                con.Open();
-                string query = "select * from Main_Queue";
-                SqlCommand cmd = new SqlCommand(query,con);
-                SqlDataReader rdr;
-                _Main_Queue mq;
-                rdr = cmd.ExecuteReader();
-                await Task.Run(async () => {
-                    while (rdr.Read())
-                {
-                        
-                            mq = new _Main_Queue
-                            {
-                                Customer_Queue_Number = (string)rdr["Customer_Queue_Number"],
-                                Full_Name = (string)rdr["Full_Name"],
-                                ID = (int)rdr["ID"],
-                                Pattern_Current = (int)rdr["Pattern_Current"],
-                                Pattern_Max = (int)rdr["Pattern_Max"],
-                                Queue_Number = (int)rdr["Queue_Number"],
-                                Queue_Status = (string)rdr["Queue_Status"],
-                                Servicing_Office = (int)rdr["Servicing_Office"],
-                                Student_No = (string)rdr["Student_No"],
-                                Time = (DateTime)rdr["Time"],
-                                Transaction_Type = (int)rdr["Transaction_Type"],
-                                Type = "Guest"
-                            };
-                        try { await fcon.App_Insert_MainQueueAsync(mq, true, ct); }
-                        catch (FirebaseException) { Console.WriteLine("Disconnected!!!"); }
-                        catch (OperationCanceledException) { Console.WriteLine("cancelled"); return; }
-                        Console.WriteLine("{0} -> {1}", mq.Customer_Queue_Number, mq.Key);
-                            logWrite("debug", mq.Customer_Queue_Number);
-                        
-                        
 
-                    }
-                }, ct);
-                con.Close();
-            
-           
+            Console.WriteLine("async is starting");
+            firebase_Connection fcon = new firebase_Connection();
+            SqlConnection con = new SqlConnection(connection_string);
+            con.Open();
+            string query = "select * from Main_Queue";
+            SqlCommand cmd = new SqlCommand(query, con);
+            SqlDataReader rdr;
+            _Main_Queue mq;
+            rdr = cmd.ExecuteReader();
+            await Task.Run(async () =>
+            {
+                while (rdr.Read())
+                {
+
+                    mq = new _Main_Queue
+                    {
+                        Customer_Queue_Number = (string)rdr["Customer_Queue_Number"],
+                        Full_Name = (string)rdr["Full_Name"],
+                        ID = (int)rdr["ID"],
+                        Pattern_Current = (int)rdr["Pattern_Current"],
+                        Pattern_Max = (int)rdr["Pattern_Max"],
+                        Queue_Number = (int)rdr["Queue_Number"],
+                        Queue_Status = (string)rdr["Queue_Status"],
+                        Servicing_Office = (int)rdr["Servicing_Office"],
+                        Student_No = (string)rdr["Student_No"],
+                        Time = (DateTime)rdr["Time"],
+                        Transaction_Type = (int)rdr["Transaction_Type"],
+                        Type = "Guest"
+                    };
+                    try { await fcon.App_Insert_MainQueueAsync(mq, true, ct); }
+                    catch (FirebaseException) { Console.WriteLine("Disconnected!!!"); }
+                    catch (OperationCanceledException) { Console.WriteLine("cancelled"); return; }
+                    Console.WriteLine("{0} -> {1}", mq.Customer_Queue_Number, mq.Key);
+                    logWrite("debug", mq.Customer_Queue_Number);
+
+
+
+                }
+            }, ct);
+            con.Close();
+
+
         }
         private Task DoWork(CancellationToken ct) { return Task.Run(() => { Console.WriteLine("Hello Task library!"); }); }
         private void StartWork()
         {
             // Create the token source.
-                wtoken = new CancellationTokenSource();
+            wtoken = new CancellationTokenSource();
 
-                // Set the task.
-                wtask = CreateNeverEndingTask((now, ct) => PROGRAM_Online_Sync(ct), wtoken.Token);
+            // Set the task.
+            wtask = CreateNeverEndingTask((now, ct) => PROGRAM_Online_Sync(ct), wtoken.Token);
 
-                // Start the task.  Post the time.
-                wtask.Post(DateTimeOffset.Now);
-            
+            // Start the task.  Post the time.
+            wtask.Post(DateTimeOffset.Now);
+
         }
         private void StopWork()
         {
             // CancellationTokenSource implements IDisposable.
-                using (wtoken)
-                {
-                    // Cancel.  This will cancel the task.
-                    wtoken.Cancel();
-                }
+            using (wtoken)
+            {
+                // Cancel.  This will cancel the task.
+                wtoken.Cancel();
+            }
 
-                // Set everything to null, since the references
-                // are on the class level and keeping them around
-                // is holding onto invalid state.
-                wtoken = null;
-                wtask = null;
+            // Set everything to null, since the references
+            // are on the class level and keeping them around
+            // is holding onto invalid state.
+            wtoken = null;
+            wtask = null;
 
             // Not a part of StopWork
-            
-                txtOnlineStatus.Invoke(new Action(() => txtOnlineStatus.Text = ""));
-                txtLocalStatus.Invoke(new Action(() => txtLocalStatus.Text = ""));
+
+            txtOnlineStatus.Invoke(new Action(() => txtOnlineStatus.Text = ""));
+            txtLocalStatus.Invoke(new Action(() => txtLocalStatus.Text = ""));
         }
         private void run_EveryTick(object sender, EventArgs e)
         {
             //PROGRAM_Online_Sync();
-            
+
         }
         void btnDisable_Tick(object sender, System.EventArgs e)
         {

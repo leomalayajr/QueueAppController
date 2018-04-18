@@ -405,27 +405,27 @@ namespace a3
 
                         String QUERY_Select_QueueInfo = "select Current_Number, Current_Queue, Servicing_Office, Status, Customer_Queue_Number, Window, Avg_Serving_Time, id, Office_Name from Queue_Info";
                         String QUERY_Select_MainQueue = "select * from Main_Queue";
-                        String QUERY_Select_TransferQueue = "select * from Transfer_Queue";
+                        //String QUERY_Select_TransferQueue = "select * from Transfer_Queue";
                         String QUERY_Select_ServicingTerminal = "select * from Servicing_Terminal";
 
                         List<_Main_Queue> LIST_MainQueue = new List<_Main_Queue>();
                         List<_Queue_Info> LIST_QueueInfo = new List<_Queue_Info>();
-                        List<_Transfer_Queue> LIST_TransferQueue = new List<_Transfer_Queue>();
+                        List<_Queue_Request> LIST_QueueRequest = new List<_Queue_Request>();
                         List<_Servicing_Terminal> LIST_ServicingTerminal = new List<_Servicing_Terminal>();
 
                         List<_Main_Queue> LIST_MainQueue_fromFirebase = new List<_Main_Queue>();
-                        List<_Transfer_Queue> LIST_TransferQueue_fromFirebase = new List<_Transfer_Queue>();
+                        //List<_Transfer_Queue> LIST_TransferQueue_fromFirebase = new List<_Transfer_Queue>();
 
                         List<string> fromOnline_MainQueue = new List<string>();
-                        List<string> fromOnline_TransferQueue = new List<string>();
+                        //List<string> fromOnline_TransferQueue = new List<string>();
                         List<string> fromLocal_MainQueue = new List<string>();
-                        List<string> fromLocal_TransferQueue = new List<string>();
+                        //List<string> fromLocal_TransferQueue = new List<string>();
 
                         List<_Main_Queue> LOCAL_MainQueueList = new List<_Main_Queue>();
-                        List<_Transfer_Queue> LOCAL_TransferQueueList = new List<_Transfer_Queue>();
+                       //List<_Transfer_Queue> LOCAL_TransferQueueList = new List<_Transfer_Queue>();
 
                         List<_Main_Queue> ONLINE_MainQueueList = new List<_Main_Queue>();
-                        List<_Transfer_Queue> ONLINE_TransferQueueList = new List<_Transfer_Queue>();
+                       //List<_Transfer_Queue> ONLINE_TransferQueueList = new List<_Transfer_Queue>();
 
                         List<_Queue_Info> temp_QueueInfoList = new List<_Queue_Info>();
                         List<_Servicing_Terminal> temp_ServicingTerminalList = new List<_Servicing_Terminal>();
@@ -450,7 +450,7 @@ namespace a3
 
                             SqlCommand CMD_select_MainQueue = new SqlCommand(QUERY_Select_MainQueue, con);
                             SqlCommand CMD_select_QueueInfo = new SqlCommand(QUERY_Select_QueueInfo, con);
-                            SqlCommand CMD_select_TransferQueue = new SqlCommand(QUERY_Select_TransferQueue, con);
+                            //SqlCommand CMD_select_TransferQueue = new SqlCommand(QUERY_Select_TransferQueue, con);
                             // SqlCommand CMD_select_TransactionQueue = new SqlCommand(QUERY_Select_TransactionQueue, con);
                             SqlCommand CMD_select_ServicingTerminal = new SqlCommand(QUERY_Select_ServicingTerminal, con);
 
@@ -512,29 +512,29 @@ namespace a3
                                         LIST_QueueInfo.Add(_qi);
                                     }
                                 });
-                            var t3 = Task.Run(() =>
-                                {
-                                    RDR_transfer_q_select = CMD_select_TransferQueue.ExecuteReader();
+                            //var t3 = Task.Run(() =>
+                            //    {
+                            //        RDR_transfer_q_select = CMD_select_TransferQueue.ExecuteReader();
 
-                                    while (RDR_transfer_q_select.Read())
-                                    {
-                                        // set the class
-                                        _mq_t = new _Main_Queue
-                                        {
-                                            Queue_Number = (int)RDR_transfer_q_select["Queue_Number"],
-                                            Full_Name = (string)RDR_transfer_q_select["Full_Name"],
-                                            Servicing_Office = (int)RDR_transfer_q_select["Servicing_Office"],
-                                            Transaction_Type = (int)RDR_transfer_q_select["Transaction_Type"],
-                                            Type = ((Boolean)RDR_transfer_q_select["Type"] == false) ? "Student" : "Guest",
-                                            Customer_Queue_Number = (string)RDR_transfer_q_select["Customer_Queue_Number"],
-                                            ID = (int)RDR_transfer_q_select["id"],
-                                            Pattern_Current = (int)RDR_transfer_q_select["Pattern_Current"],
-                                            Time = (DateTime)RDR_transfer_q_select["Time"],
-                                            Student_No = (string)RDR_transfer_q_select["Student_No"]
-                                        };
-                                        LIST_MainQueue.Add(_mq_t);
-                                    }
-                                });
+                            //        while (RDR_transfer_q_select.Read())
+                            //        {
+                            //            // set the class
+                            //            _mq_t = new _Main_Queue
+                            //            {
+                            //                Queue_Number = (int)RDR_transfer_q_select["Queue_Number"],
+                            //                Full_Name = (string)RDR_transfer_q_select["Full_Name"],
+                            //                Servicing_Office = (int)RDR_transfer_q_select["Servicing_Office"],
+                            //                Transaction_Type = (int)RDR_transfer_q_select["Transaction_Type"],
+                            //                Type = ((Boolean)RDR_transfer_q_select["Type"] == false) ? "Student" : "Guest",
+                            //                Customer_Queue_Number = (string)RDR_transfer_q_select["Customer_Queue_Number"],
+                            //                ID = (int)RDR_transfer_q_select["id"],
+                            //                Pattern_Current = (int)RDR_transfer_q_select["Pattern_Current"],
+                            //                Time = (DateTime)RDR_transfer_q_select["Time"],
+                            //                Student_No = (string)RDR_transfer_q_select["Student_No"]
+                            //            };
+                            //            LIST_MainQueue.Add(_mq_t);
+                            //        }
+                            //    });
                             var t4 = Task.Run(() =>
                                 {
                                     RDR_st_select = CMD_select_ServicingTerminal.ExecuteReader();
@@ -555,7 +555,7 @@ namespace a3
 
                                 );
 
-                            await Task.WhenAll(t1, t2, t3, t4);
+                            await Task.WhenAll(t1, t2, t4);
                             logWrite("Local", "Preparing lists for sync done.");
 
                             Console.WriteLine("Initializing lists finished.");
@@ -590,51 +590,107 @@ namespace a3
                                         HashSet<string> diff_cqn = new HashSet<string>(LIST_MainQueue.Select(s => s.Customer_Queue_Number));
                                         COMBINE_MainQueueList = LIST_MainQueue_fromFirebase.Where(m => diff_cqn.Contains(m.Customer_Queue_Number)).ToList();
 
-                                        logWrite("Program", "List of new customers on queue");
+                                       Console.WriteLine("List of new customers on queue");
                                         foreach (_Main_Queue a in LOCAL_MainQueueList)
                                         {
                                             cancelToken.ThrowIfCancellationRequested();
-                                            Console.WriteLine("<< {0} >>", a.Customer_Queue_Number);
-                                            logWrite("Local", a.Customer_Queue_Number);
+                                            Console.WriteLine(a.Customer_Queue_Number);
                                             // If not on Firebase but exists on Local (new updates) => Insert
                                             if (a.Type == "Guest")
-                                                await fcon.App_Insert_MainQueueAsync(a, true, cancelToken);
+                                                 fcon.App_Insert_MainQueueAsync(a, true, cancelToken);
                                             else
-                                                await fcon.App_Insert_MainQueueAsync(a, false, cancelToken);
+                                                 fcon.App_Insert_MainQueueAsync(a, false, cancelToken);
                                         }
-                                        logWrite("Program", "List of new mobile customers");
+                                        Console.WriteLine("List of new mobile customers");
                                         foreach (_Main_Queue b in ONLINE_MainQueueList)
                                         {
                                             cancelToken.ThrowIfCancellationRequested();
-                                            logWrite("Online", b.Customer_Queue_Number);
+                                            Console.WriteLine(b.Customer_Queue_Number);
                                             // If not on Local but exists on Firebase (outdated) => Delete
                                             if (b.Type == "Student")
-                                                await fcon.Specific_Delete_MainQueueAsync(b.Student_No, cancelToken);
+                                                 fcon.Specific_Delete_MainQueueAsync(b.Student_No, cancelToken);
                                             else
-                                                await fcon.Specific_Delete_MainQueueAsync(b.Key, cancelToken);
+                                                 fcon.Specific_Delete_MainQueueAsync(b.Key, cancelToken);
                                         }
-                                        logWrite("Program", "List of customers to be updated");
+                                        Console.WriteLine("List of customers to be updated");
                                         foreach (_Main_Queue c in COMBINE_MainQueueList)
                                         {
                                             cancelToken.ThrowIfCancellationRequested();
-                                            logWrite("System", c.Customer_Queue_Number);
+                                            Console.WriteLine(c.Customer_Queue_Number);
                                             if (c.Type == "Student")
-                                                await fcon.App_Insert_MainQueueAsync(c, false, cancelToken);
+                                                 fcon.App_Insert_MainQueueAsync(c, false, cancelToken);
                                             else
-                                                await fcon.App_Update_MainQueue(c);
+                                                 fcon.App_Update_MainQueue(c);
                                         }
 
                                     });
                                 var i3 = Task.Run(async () =>
                                     {
-                                        foreach (_Transfer_Queue c in LIST_TransferQueue)
+                                        LIST_QueueRequest = await fcon.App_Retrieve_QueueRequest(cancelToken);
+                                        foreach (_Queue_Request c in LIST_QueueRequest)
                                         {
-                                            if (c.Type == "Guest")
-                                                await fcon.App_Insert_TransferQueueAsync(c, true, cancelToken);
-                                            else
-                                                await fcon.App_Insert_TransferQueueAsync(c, false, cancelToken);
-                                        }
+                                            SqlConnection _temp_connection = new SqlConnection(connection_string);
+                                            _temp_connection.Open();
+                                            //Check what type of Request
+                                            switch (c.Action)
+                                            {
+                                                case "Drop":
+                                                    Console.WriteLine();
+                                                    Console.WriteLine("DROP REQUEST ID OF " + c.ID);
+                                                    string _query = "DELETE FROM Main_Queue where id = @param1";
+                                                    SqlCommand _cmd = new SqlCommand(_query, _temp_connection);
+                                                    _cmd.Parameters.AddWithValue("@param1", c.ID);
+                                                    _cmd.ExecuteNonQuery();
+                                                    break;
+                                                case "Move":
+                                                    // Check if it can allow move
+                                                    string _check_turns = "SELECT COUNT(id) from Main_Queue where Queue_Number between @param1 and @param2 and Servicing_Office = @param3";
+                                                    SqlCommand _check_cmd = new SqlCommand(_check_turns, _temp_connection);
+                                                    int _new_QueueNumber = c.Queue_ID+c.Value;
+                                                    _check_cmd.Parameters.AddWithValue("@param1", (c.Queue_ID+1));
+                                                    _check_cmd.Parameters.AddWithValue("@param2", _new_QueueNumber);
+                                                    _check_cmd.Parameters.AddWithValue("@param3", c.Servicing_Office);
+                                                    int _customers = (int)_check_cmd.ExecuteScalar();
+                                                    Console.WriteLine();
+                                                    Console.WriteLine("Customer with id of {0} wanted to move {1} turns.",c.Queue_ID,c.Value);
+                                                    Console.WriteLine(" BETWEEN {0} and {1} at {2}", (c.Queue_ID + 1), _new_QueueNumber,c.Servicing_Office);
+                                                    Console.WriteLine("There are {0} customers.", _customers);
+                                                    Console.WriteLine("Checking if {0} >= 5 and {0} <= 20", _customers);
+                                                    if (_customers >= 5 && _customers <= 20)
+                                                    {
+                                                        // Increment all values on between
+                                                        Console.WriteLine("SET QUEUE_NUMBER - 1 BETWEEN {0} and {1}", (c.Queue_ID + 1), _new_QueueNumber);
+                                                        string _update_query = "";
+                                                        SqlCommand _update_cmd = new SqlCommand(_update_query, _temp_connection);
+                                                        _update_query = "UPDATE Main_Queue set Queue_Number = Queue_Number - 1 where Queue_Number between @param1 and @param2";
+                                                        _update_cmd.CommandText = _update_query;
+                                                        _update_cmd.Parameters.AddWithValue("@param1", (c.Queue_ID + 1));
+                                                        _update_cmd.Parameters.AddWithValue("@param2", _new_QueueNumber);
+                                                        _update_cmd.ExecuteNonQuery();
+                                                        Console.WriteLine("SET QUEUE_NUMBER = {0} where id = {1}", _new_QueueNumber, c.ID);
+                                                        _update_query = "UPDATE Main_Queue set Queue_Number = @param1 where id = @param2";
+                                                        _update_cmd.CommandText = _update_query;
+                                                        _update_cmd.Parameters.AddWithValue("@param1", _new_QueueNumber);
+                                                        _update_cmd.Parameters.AddWithValue("@param2", c.ID);
 
+                                                        _update_cmd.ExecuteNonQuery();
+
+                                                        // Call a function to send a successful change request
+
+                                                        /**/
+                                                    }
+                                                    else
+                                                    {
+                                                        // Call a function to send a notification denying request
+                                                        /**/
+                                                    }
+                                                    break;
+                                                default:
+                                                    break;
+                                            }
+                                            _temp_connection.Close();
+                                        }
+                                        await fcon.App_Delete_QueueRequest(cancelToken);
                                     });
                                 var i4 = Task.Run(async () =>
                                     {
@@ -659,7 +715,8 @@ namespace a3
                                                 Transaction_Type = e.Transaction_Type,
                                                 Time = UnixTimeStampToDateTime(e.timestamp_date),
                                                 Pattern_Current = 1,
-                                                Queue_Status = "Waiting"
+                                                Queue_Status = "Waiting",
+                                                Type = "Student"
                                             };
                                             PREQUEUE_TO_MAINQUEUE.Add(_pq_mq);
                                         }
@@ -701,10 +758,10 @@ namespace a3
                                     );
 
 
-                                logWrite("Online", "Synching online");
+                                logWrite("Online", "-----");
 
                                 await Task.WhenAll(i1, i2, i3, i4, i5);
-                                logWrite("Online", "Sync successful!");
+                                logWrite("Online", "Sync successful at "+DateTime.Now+" !");
                             }
                             catch (OperationCanceledException)
                             {
@@ -877,7 +934,7 @@ namespace a3
                     ConfigureAwait(false);
 
                         // Wait.
-                        await Task.Delay(TimeSpan.FromSeconds(5), cancellationToken).
+                        await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken).
                     // Same as above.
                     ConfigureAwait(false);
                 }
@@ -996,7 +1053,6 @@ namespace a3
             timer2.Tick += new EventHandler(btnDisable_Tick);
             timer2.Interval = 5000; // here time in milliseconds
             timer2.Start();
-            toggleSync.Enabled = false;
 
             if (STATE_toggleSync)
             {

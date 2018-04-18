@@ -27,6 +27,38 @@ namespace a3
                 });
 
         }
+        public async Task<List<_Queue_Request>> App_Retrieve_QueueRequest(CancellationToken cts)
+        {
+            string node = "Queue_Request/";
+            List<_Queue_Request> list_from_online = new List<_Queue_Request>();
+            try
+            {
+                cts.ThrowIfCancellationRequested();
+                var retrieved_objects = await firebase.Child(node).OnceAsync<_Queue_Request_String>();
+                foreach (var a in retrieved_objects)
+                {
+                    int val;
+                    _Queue_Request b = new _Queue_Request
+                    {
+                        Action = a.Object.Action,
+                        ID = Int32.Parse(a.Object.ID),
+                        Queue_ID = Int32.Parse(a.Object.Queue_ID),
+                        Servicing_Office = Int32.Parse(a.Object.Servicing_Office),
+                        Value = Int32.TryParse(a.Object.Value, out val) ? val : 0
+                    };
+                    list_from_online.Add(b);
+                }
+            }
+            catch (FirebaseException e)
+            {
+                Console.WriteLine("Problem -> Method: Retrieve QueueRequest"+e.Message);
+                throw;
+            }
+
+            catch (OperationCanceledException e) { Console.WriteLine("Cancelled -> Method: Retrieve QueueRequest"); }
+            return list_from_online;
+
+        }
         public async Task<List<_Pre_Queue>> App_Retrieve_PreQueue(CancellationToken cts)
         {
             string node = "Pre_Queue/";
@@ -213,12 +245,20 @@ namespace a3
             catch (OperationCanceledException e) { Console.WriteLine("Cancelled -> Method: (Specific Delete) MainQueue"); }
 
         }
+        public async Task App_Delete_QueueRequest(CancellationToken cts)
+        {
+            string node = "Queue_Request/";
+            try { cts.ThrowIfCancellationRequested(); await Task.Run(() => firebase.Child(node).DeleteAsync()); }
+            catch (FirebaseException e) { Console.Write("Problem -> Method: Delete QueueRequest"); throw; }
+            catch (OperationCanceledException e) { Console.WriteLine("Cancelled -> Method: Delete QueueRequest"); }
+
+        }
         public async Task App_Delete_PreQueueAsync(CancellationToken cts)
         {
             string node = "Pre_Queue/";
             try { cts.ThrowIfCancellationRequested(); await Task.Run(() => firebase.Child(node).DeleteAsync()); }
             catch (FirebaseException e) { Console.Write("Problem -> Method: Delete PreQueue"); throw; }
-            catch (OperationCanceledException e) { Console.WriteLine("Cancelled -> Method: Insert MainQueue"); }
+            catch (OperationCanceledException e) { Console.WriteLine("Cancelled -> Method: Delete PreQueue"); }
 
         }
         public async Task App_Delete_MainQueueAsync()

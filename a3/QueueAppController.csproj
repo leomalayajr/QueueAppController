@@ -81,6 +81,8 @@
   <ItemGroup>
     <Compile Include="_Log.cs" />
     <Compile Include="_Pre_Queue.cs" />
+    <Compile Include="_Queue_Request.cs" />
+    <Compile Include="_Queue_Request_String.cs" />
     <Compile Include="_Transaction_Type.cs" />
     <Compile Include="_Servicing_Terminal.cs" />
     <Compile Include="_Transfer_Queue.cs" />

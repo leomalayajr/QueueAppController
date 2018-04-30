@@ -18,7 +18,7 @@ namespace a3
             Application.SetCompatibleTextRenderingDefault(false);
             //try { Application.Run(new main()); }
             //catch (Exception e) { MessageBox.Show("Error : " + e); }
-            Application.Run(new main());
+            Application.Run(new Login());
         }
     }
 }

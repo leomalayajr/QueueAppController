@@ -20,6 +20,7 @@ namespace a3
         public int ID { get; set; }
         public string Customer_Queue_Number { get; set; }
         public string Type { get; set; }
+        public string Customer_From { get; set; }
         public string Queue_Status { get; set; } = "Waiting";
         public DateTime Time { get; set; }
 

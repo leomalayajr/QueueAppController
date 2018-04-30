@@ -79,10 +79,48 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="addServicingOffice.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="addServicingOffice.designer.cs">
+      <DependentUpon>addServicingOffice.cs</DependentUpon>
+    </Compile>
+    <Compile Include="addTransactionType.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="addTransactionType.designer.cs">
+      <DependentUpon>addTransactionType.cs</DependentUpon>
+    </Compile>
+    <Compile Include="createAccount.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="createAccount.designer.cs">
+      <DependentUpon>createAccount.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Cryptography.cs" />
+    <Compile Include="EditWindows.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="EditWindows.Designer.cs">
+      <DependentUpon>EditWindows.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Login.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Login.designer.cs">
+      <DependentUpon>Login.cs</DependentUpon>
+    </Compile>
+    <Compile Include="settingsForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="settingsForm.Designer.cs">
+      <DependentUpon>settingsForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="_Log.cs" />
     <Compile Include="_Pre_Queue.cs" />
     <Compile Include="_Queue_Request.cs" />
     <Compile Include="_Queue_Request_String.cs" />
+    <Compile Include="_Servicing_Office.cs" />
     <Compile Include="_Transaction_Type.cs" />
     <Compile Include="_Servicing_Terminal.cs" />
     <Compile Include="_Transfer_Queue.cs" />
@@ -90,12 +128,6 @@
     <Compile Include="_Queue_Transaction.cs" />
     <Compile Include="firebase_Connection.cs" />
     <Compile Include="_Main_Queue.cs" />
-    <Compile Include="login.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="login.Designer.cs">
-      <DependentUpon>login.cs</DependentUpon>
-    </Compile>
     <Compile Include="main.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -110,8 +142,21 @@
     <Compile Include="Queue Information.Designer.cs">
       <DependentUpon>Queue Information.cs</DependentUpon>
     </Compile>
-    <EmbeddedResource Include="login.resx">
-      <DependentUpon>login.cs</DependentUpon>
+    <Compile Include="_Users.cs" />
+    <EmbeddedResource Include="addServicingOffice.resx">
+      <DependentUpon>addServicingOffice.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="addTransactionType.resx">
+      <DependentUpon>addTransactionType.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="createAccount.resx">
+      <DependentUpon>createAccount.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="EditWindows.resx">
+      <DependentUpon>EditWindows.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Login.resx">
+      <DependentUpon>Login.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="main.resx">
       <DependentUpon>main.cs</DependentUpon>
@@ -124,9 +169,13 @@
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
     </Compile>
     <EmbeddedResource Include="Queue Information.resx">
       <DependentUpon>Queue Information.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="settingsForm.resx">
+      <DependentUpon>settingsForm.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
@@ -141,6 +190,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Password-.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\lock-512.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -29,6 +29,8 @@
         private void InitializeComponent()
         {
             this.panel1 = new System.Windows.Forms.Panel();
+            this.btnWindows = new System.Windows.Forms.Button();
+            this.label3 = new System.Windows.Forms.Label();
             this.btnInfo = new System.Windows.Forms.Button();
             this.label2 = new System.Windows.Forms.Label();
             this.btnSettings = new System.Windows.Forms.Button();
@@ -45,8 +47,6 @@
             this.panel4 = new System.Windows.Forms.Panel();
             this.txtLog = new System.Windows.Forms.TextBox();
             this.button6 = new System.Windows.Forms.Button();
-            this.label3 = new System.Windows.Forms.Label();
-            this.btnWindows = new System.Windows.Forms.Button();
             this.panel1.SuspendLayout();
             this.panel2.SuspendLayout();
             this.panel4.SuspendLayout();
@@ -73,6 +73,34 @@
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(513, 406);
             this.panel1.TabIndex = 0;
+            // 
+            // btnWindows
+            // 
+            this.btnWindows.BackColor = System.Drawing.Color.DarkSlateGray;
+            this.btnWindows.FlatAppearance.BorderSize = 0;
+            this.btnWindows.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnWindows.Font = new System.Drawing.Font("Segoe UI Semilight", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnWindows.ForeColor = System.Drawing.Color.White;
+            this.btnWindows.Location = new System.Drawing.Point(361, 338);
+            this.btnWindows.Margin = new System.Windows.Forms.Padding(4);
+            this.btnWindows.Name = "btnWindows";
+            this.btnWindows.Size = new System.Drawing.Size(123, 52);
+            this.btnWindows.TabIndex = 31;
+            this.btnWindows.Text = "Set up";
+            this.btnWindows.UseVisualStyleBackColor = false;
+            this.btnWindows.Click += new System.EventHandler(this.btnWindows_Click);
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Font = new System.Drawing.Font("Calibri", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label3.ForeColor = System.Drawing.Color.White;
+            this.label3.Location = new System.Drawing.Point(221, 352);
+            this.label3.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(89, 24);
+            this.label3.TabIndex = 30;
+            this.label3.Text = "Windows";
             // 
             // btnInfo
             // 
@@ -114,7 +142,7 @@
             this.btnSettings.Name = "btnSettings";
             this.btnSettings.Size = new System.Drawing.Size(123, 52);
             this.btnSettings.TabIndex = 27;
-            this.btnSettings.Text = "Edit";
+            this.btnSettings.Text = "Open";
             this.btnSettings.UseVisualStyleBackColor = false;
             this.btnSettings.Click += new System.EventHandler(this.btnSettings_Click);
             // 
@@ -230,10 +258,10 @@
             this.btnExit.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnExit.Font = new System.Drawing.Font("Segoe UI Semilight", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnExit.ForeColor = System.Drawing.Color.White;
-            this.btnExit.Location = new System.Drawing.Point(188, 8);
+            this.btnExit.Location = new System.Drawing.Point(184, 14);
             this.btnExit.Margin = new System.Windows.Forms.Padding(4);
             this.btnExit.Name = "btnExit";
-            this.btnExit.Size = new System.Drawing.Size(151, 51);
+            this.btnExit.Size = new System.Drawing.Size(151, 36);
             this.btnExit.TabIndex = 5;
             this.btnExit.Text = "Exit";
             this.btnExit.UseVisualStyleBackColor = false;
@@ -289,34 +317,6 @@
             this.button6.TabIndex = 14;
             this.button6.Text = "System Logs";
             this.button6.UseVisualStyleBackColor = false;
-            // 
-            // label3
-            // 
-            this.label3.AutoSize = true;
-            this.label3.Font = new System.Drawing.Font("Calibri", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label3.ForeColor = System.Drawing.Color.White;
-            this.label3.Location = new System.Drawing.Point(221, 352);
-            this.label3.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(89, 24);
-            this.label3.TabIndex = 30;
-            this.label3.Text = "Windows";
-            // 
-            // btnWindows
-            // 
-            this.btnWindows.BackColor = System.Drawing.Color.DarkSlateGray;
-            this.btnWindows.FlatAppearance.BorderSize = 0;
-            this.btnWindows.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnWindows.Font = new System.Drawing.Font("Segoe UI Semilight", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnWindows.ForeColor = System.Drawing.Color.White;
-            this.btnWindows.Location = new System.Drawing.Point(361, 338);
-            this.btnWindows.Margin = new System.Windows.Forms.Padding(4);
-            this.btnWindows.Name = "btnWindows";
-            this.btnWindows.Size = new System.Drawing.Size(123, 52);
-            this.btnWindows.TabIndex = 31;
-            this.btnWindows.Text = "Set up";
-            this.btnWindows.UseVisualStyleBackColor = false;
-            this.btnWindows.Click += new System.EventHandler(this.btnWindows_Click);
             // 
             // main
             // 

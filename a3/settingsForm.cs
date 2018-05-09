@@ -8,7 +8,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-
+using Firebase.Database;
+using Firebase.Auth;
 namespace a3
 {
     public partial class settingsForm : Form
@@ -368,5 +369,58 @@ namespace a3
             }
         }
 
+        private async void btn_Import_Click(object sender, EventArgs e)
+        {
+            using (OpenFileDialog dialog = new OpenFileDialog() { Filter = "Excel Workbook|*.xlsx", ValidateNames = true })
+            {
+                if (dialog.ShowDialog() == DialogResult.OK)
+                {
+
+                    firebase_Connection fcon = new firebase_Connection();
+                    MessageBox.Show("Prepare...");
+                    string path = dialog.FileName;
+                    Excel excel = new Excel(path, 1);
+                    try
+                    {
+                        List<_App_User> results = excel.ReadCell();
+
+                        //cleanup
+                        GC.Collect();
+                        GC.WaitForPendingFinalizers();
+                        excel.cleanCOMobjects();
+
+                        progressBar1.Maximum = excel._userCount;
+                        foreach (_App_User b in results)
+                        {
+                            //upload to the Firebase DB
+                            await fcon.Controller_ImportUsers(b);
+                            await fcon.Controller_RegisterThisUser(b);
+                            progressBar1.Increment(1);
+                        }
+                        MessageBox.Show("Import finished. You may check the online database now.", "Success!");
+                        progressBar1.Value = 0;
+                    }
+                    catch (FormatException)
+                    {
+                        progressBar1.Value = 0;
+                        MessageBox.Show("Make sure all the ID contains numbers only.", "Format error");
+                    }
+                    catch (FirebaseAuthException exd)
+                    {
+                        progressBar1.Value = 0;
+                        MessageBox.Show("Make sure all of the Student_No contains no spaces and special characters. Error Code: "+exd.Reason,"Online Database error!");
+                    }
+                    catch (FirebaseException)
+                    {
+                        progressBar1.Value = 0;
+                        MessageBox.Show("Please check your internet connection. Error Code:", "Connection error");
+                    }
+                }
+            }
+        }
+
+        private void pictureBox4_Click(object sender, EventArgs e)
+        {
+        }
     }
 }

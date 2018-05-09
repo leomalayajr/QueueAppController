@@ -14,7 +14,6 @@ using System.Windows.Forms;
 using System.Threading.Tasks.Dataflow;
 using System.Net;
 using System.Net.Http;
-
 namespace a3
 {
     public partial class main : Form
@@ -78,6 +77,43 @@ namespace a3
 
         }
         #region BASIC METHODS
+        private void btnSettings_Click(object sender, EventArgs e)
+        {
+            if (frmSettings != null)
+            {
+                // Define the border style of the form to a dialog box.
+                frmSettings.FormBorderStyle = FormBorderStyle.FixedDialog;
+
+                // Set the MaximizeBox to false to remove the maximize box.
+                frmSettings.MaximizeBox = false;
+
+                // Set the MinimizeBox to false to remove the minimize box.
+                frmSettings.MinimizeBox = false;
+
+                // Set the start position of the form to the center of the screen.
+                frmSettings.StartPosition = FormStartPosition.CenterScreen;
+
+                frmSettings.Show();
+            }
+
+        }
+
+        private void btnInfo_Click(object sender, EventArgs e)
+        {
+            if (frmQueueInfo != null)
+            {
+                frmQueueInfo.InitTimer();
+                frmQueueInfo.Show();
+            }
+        }
+
+        private void btnWindows_Click(object sender, EventArgs e)
+        {
+            if (frmWindows.IsDisposed)
+                frmWindows = new EditWindows();
+
+            frmWindows.Show();
+        }
         public Object CheckIfNull(SqlDataReader reader, int colIndex)
         {
             if (reader.GetFieldType(colIndex) == typeof(int))
@@ -1125,28 +1161,6 @@ namespace a3
         }
         #endregion
 
-        private void btnSettings_Click(object sender, EventArgs e)
-        {
-            if (frmSettings != null)
-                frmSettings.Show();
 
-        }
-
-        private void btnInfo_Click(object sender, EventArgs e)
-        {
-            if (frmQueueInfo != null)
-            {
-                frmQueueInfo.InitTimer();
-                frmQueueInfo.Show();
-            }
-        }
-
-        private void btnWindows_Click(object sender, EventArgs e)
-        {
-            if (frmWindows.IsDisposed)
-                frmWindows = new EditWindows();
-
-            frmWindows.Show();
-        }
     }
 }

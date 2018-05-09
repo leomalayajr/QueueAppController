@@ -1,5 +1,6 @@
 ﻿using Firebase.Database;
 using Firebase.Database.Query;
+using Firebase.Auth;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,10 +13,11 @@ namespace a3
     {
         private const String databaseUrl = "https://usep-queue-app.firebaseio.com/";
         private const String databaseSecret = "xMkY2DmLnRefSl34kYlp8PWUzDwNmyJAvxLPygQ1";
+        private const String databaseKey = "AIzaSyDL4e41J9HTl-OCktBodhqY6l9yDuNrkaU";
         private int run = 0;
         //private const String node = "Queue_Info/";
         private FirebaseClient firebase;
-
+        private FirebaseAuthProvider ap;
         public firebase_Connection()
         {
 
@@ -25,7 +27,30 @@ namespace a3
                 {
                     AuthTokenAsyncFactory = () => Task.FromResult(databaseSecret)
                 });
+            this.ap = new FirebaseAuthProvider(new FirebaseConfig(databaseKey));
 
+        }
+        public async Task Controller_RegisterThisUser(_App_User _new_user)
+        {
+            try
+            {
+                // sort items first
+                string email = _new_user.accountNumber + "@usep.edu.ph"; // username
+                string password = _new_user.password;
+                string displayName = _new_user.lastName + "," + _new_user.firstName + _new_user.middleName;
+                var c = await ap.CreateUserWithEmailAndPasswordAsync(
+                email, password, displayName, false
+                );
+            }
+            catch (FirebaseAuthException e)
+            {
+                throw new FirebaseAuthException(e.RequestUrl,e.ResponseData,e.ResponseData,e.InnerException,e.Reason);
+            }
+            catch (FirebaseException e)
+            {
+                Console.WriteLine("Problem -> Method: Controller RegisterThisUser" + e.Message);
+                throw;
+            }
         }
         public async Task<List<_Queue_Request>> App_Retrieve_QueueRequest(CancellationToken cts)
         {
@@ -323,7 +348,17 @@ namespace a3
             }
 
         }
-
+        public async Task Controller_ImportUsers(_App_User _au)
+        {
+            string Student_No = "unknown";
+            try
+            {
+                Student_No = _au.accountNumber;
+                await Task.Run(() => firebase.Child("AccountsTest/").Child(Student_No).PutAsync<_App_User>(_au));
+            }
+            catch (FirebaseException e) { Console.WriteLine("Problem -> Method: Controller ImportUsers"); throw; }
+            
+        }
         public async Task Delete(_Queue_Info q_info)
         {
             //>await firebase.Child(node).Child(q_info.Key).DeleteAsync();

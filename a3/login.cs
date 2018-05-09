@@ -111,7 +111,7 @@ namespace a3
             try
             {
                 con.Open();
-                SqlCommand cmd = new SqlCommand("SELECT * FROM users WHERE Username = @Username", con);
+                SqlCommand cmd = new SqlCommand("SELECT * FROM users WHERE Username = @Username and Status = 0", con);
                 cmd.Parameters.AddWithValue("@Username", textBox1.Text);
 
                 SqlDataReader reader;

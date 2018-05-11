@@ -19,7 +19,7 @@ namespace a3
         public Queue_Information()
         {
             InitializeComponent();
-
+            Queue_Information_onLoad();
             refreshTerminalList();
 
             
@@ -48,6 +48,45 @@ namespace a3
         {
             refreshTerminalList();
         }
+        private void Queue_Information_onLoad()
+        {
+            comboBox1.Items.Clear();
+            comboBox1.DataSource = LIST_getServicingOffices();
+            comboBox1.DisplayMember = "Name";
+            comboBox1.ValueMember = "id";
+        }
+        private List<_Servicing_Office> LIST_getServicingOffices()
+        {
+
+            List<_Servicing_Office> dataSource = new List<_Servicing_Office>();
+            // List possible Servicing Offices
+            SqlConnection con = new SqlConnection(connection_string);
+            string retrieve_servicing_offices = "select * from Servicing_Office";
+            SqlDataReader _rdr;
+            SqlCommand __cmd = new SqlCommand(retrieve_servicing_offices, con);
+
+            try
+            {
+                con.Open();
+                _rdr = __cmd.ExecuteReader();
+                while (_rdr.Read())
+                {
+                    dataSource.Add(new _Servicing_Office()
+                    {
+                        Name = (string)_rdr["Name"],
+                        Address = (string)_rdr["Address"],
+                        id = (int)_rdr["ID"]
+                    });
+                }
+                con.Close();
+            }
+            catch (SqlException)
+            {
+                MessageBox.Show("Can't connect to local DB!");
+                Environment.Exit(0);
+            }
+            return dataSource;
+        }
         private void refreshTerminalList()
         {
             ListView1.Items.Clear();
@@ -68,12 +107,10 @@ namespace a3
                 Customer_Queue_Number = (rdr1["Customer_Queue_Number"] != null && rdr1["Customer_Queue_Number"] != DBNull.Value) ? (string)rdr1["Customer_Queue_Number"] : "N/A";
                 Office_Name = (string)rdr1["Office_Name"];
                 Avg_Serving_Time = ((int)rdr1["Avg_Serving_Time"]).ToString();
-                Window = (rdr1["Window"] != null && rdr1["Window"] != DBNull.Value) ? ((int)rdr1["Window"]).ToString(): "Offline";
+                Window = (rdr1["Window"] != null && rdr1["Window"] != DBNull.Value) ? ((int)rdr1["Window"]).ToString(): "No one serving";
                 
                 string[] row = { Office_Name, Window, Customer_Queue_Number, Avg_Serving_Time };
                 
-                string[] b = { "a" , "b" , "c" , "d"};
-
                 var lvi = new ListViewItem(row);
                 ListView1.Items.Add(lvi);
                 Console.WriteLine("add {0}", Customer_Queue_Number);
@@ -91,5 +128,6 @@ namespace a3
                 Hide();
             }
         }
+
     }
 }

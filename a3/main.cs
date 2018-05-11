@@ -79,6 +79,7 @@ namespace a3
         #region BASIC METHODS
         private void btnSettings_Click(object sender, EventArgs e)
         {
+            frmSettings.generateDeleteItems();
             if (frmSettings != null)
             {
                 // Define the border style of the form to a dialog box.
@@ -92,7 +93,6 @@ namespace a3
 
                 // Set the start position of the form to the center of the screen.
                 frmSettings.StartPosition = FormStartPosition.CenterScreen;
-
                 frmSettings.Show();
             }
 
@@ -100,6 +100,10 @@ namespace a3
 
         private void btnInfo_Click(object sender, EventArgs e)
         {
+            if (frmQueueInfo.IsDisposed)
+            {
+                frmQueueInfo = new Queue_Information();
+            }
             if (frmQueueInfo != null)
             {
                 frmQueueInfo.InitTimer();
@@ -145,10 +149,10 @@ namespace a3
             if (e.CloseReason == CloseReason.UserClosing)
             {
                 if (e.CloseReason == CloseReason.UserClosing)
-                    e.Cancel = MessageBox.Show(@"Do you really want to close the form?",
+                    e.Cancel = MessageBox.Show(@"Do you really want to close the Controller?",
                                                "Controller",
                                                MessageBoxButtons.YesNo) == DialogResult.No;
-                if (!e.Cancel) { new Login().Show();}
+                if (!e.Cancel) { Application.Exit(); }
                 Console.WriteLine("!!! e.Cancel ="+e.Cancel);
             }
         }
@@ -333,6 +337,7 @@ namespace a3
             {
                 if (VARIABLE_Allowed_To_Sync)
                 {
+
                     SqlConnection con = new SqlConnection(connection_string);
                     firebase_Connection fcon = new firebase_Connection();
                     string QUERY_InsertTransactions = "select * from Transaction_Type";
@@ -379,9 +384,9 @@ namespace a3
                             await Task.Run(
                             async () =>
                             {
-                                await fcon.App_Delete_TransactionTypeAsync();
+                                 fcon.App_Delete_TransactionTypeAsync();
                                 foreach (_Transaction_Type a in LIST_Transaction_Type)
-                                    await fcon.App_Insert_TransactionTypeAsync(a);
+                                     fcon.App_Insert_TransactionTypeAsync(a);
                             }
                             );
 
@@ -463,6 +468,7 @@ namespace a3
                         List<_Queue_Info> LIST_QueueInfo = new List<_Queue_Info>();
                         List<_Queue_Request> LIST_QueueRequest = new List<_Queue_Request>();
                         List<_Servicing_Terminal> LIST_ServicingTerminal = new List<_Servicing_Terminal>();
+                        List<_Transaction_Type> LIST_TransactionTypes = new List<_Transaction_Type>();
 
                         List<_Main_Queue> LIST_MainQueue_fromFirebase = new List<_Main_Queue>();
                         //List<_Transfer_Queue> LIST_TransferQueue_fromFirebase = new List<_Transfer_Queue>();
@@ -533,7 +539,8 @@ namespace a3
                                             ID = (int)RDR_mq_select["id"],
                                             Pattern_Current = (int)RDR_mq_select["Pattern_Current"],
                                             Time = (DateTime)RDR_mq_select["Time"],
-                                            Student_No = (string)RDR_mq_select["Student_No"]
+                                            Student_No = (string)RDR_mq_select["Student_No"],
+                                            Pattern_Max = (int)RDR_mq_select["Pattern_Max"]
                                         };
                                         // insert it to temporary list of _Main_Queue
                                         LIST_MainQueue.Add(_mq);
@@ -566,29 +573,24 @@ namespace a3
                                     }
                                     CMD_select_QueueInfo.Dispose();
                                 });
-                            //var t3 = Task.Run(() =>
-                            //    {
-                            //        RDR_transfer_q_select = CMD_select_TransferQueue.ExecuteReader();
-
-                            //        while (RDR_transfer_q_select.Read())
-                            //        {
-                            //            // set the class
-                            //            _mq_t = new _Main_Queue
-                            //            {
-                            //                Queue_Number = (int)RDR_transfer_q_select["Queue_Number"],
-                            //                Full_Name = (string)RDR_transfer_q_select["Full_Name"],
-                            //                Servicing_Office = (int)RDR_transfer_q_select["Servicing_Office"],
-                            //                Transaction_Type = (int)RDR_transfer_q_select["Transaction_Type"],
-                            //                Type = ((Boolean)RDR_transfer_q_select["Type"] == false) ? "Student" : "Guest",
-                            //                Customer_Queue_Number = (string)RDR_transfer_q_select["Customer_Queue_Number"],
-                            //                ID = (int)RDR_transfer_q_select["id"],
-                            //                Pattern_Current = (int)RDR_transfer_q_select["Pattern_Current"],
-                            //                Time = (DateTime)RDR_transfer_q_select["Time"],
-                            //                Student_No = (string)RDR_transfer_q_select["Student_No"]
-                            //            };
-                            //            LIST_MainQueue.Add(_mq_t);
-                            //        }
-                            //    });
+                            var t3 = Task.Run(() =>
+                                {
+                                    string QUERY_RetrieveTransactions = "select * from Transaction_Type";
+                                    SqlDataReader RDR_transactions;
+                                    SqlCommand COMMAND_RetrieveTransactions = new SqlCommand(QUERY_RetrieveTransactions, con);
+                                    RDR_transactions = COMMAND_RetrieveTransactions.ExecuteReader();
+                                    while (RDR_transactions.Read())
+                                    {
+                                        // set the class
+                                        _tt_t = new _Transaction_Type
+                                        {
+                                            id = (int)RDR_transactions["id"],
+                                            Transaction_Name = (string)RDR_transactions["Transaction_Name"],
+                                            Description = (string)RDR_transactions["Description"]
+                                        };
+                                        LIST_TransactionTypes.Add(_tt_t);
+                                    }
+                                });
                             var t4 = Task.Run(() =>
                                 {
                                     RDR_st_select = CMD_select_ServicingTerminal.ExecuteReader();
@@ -610,7 +612,7 @@ namespace a3
 
                                 );
 
-                            await Task.WhenAll(t1, t2, t4);
+                            await Task.WhenAll(t1, t2, t3, t4);
                             logWrite("Local", "Preparing lists for sync done.");
 
                             Console.WriteLine("Initializing lists finished.");
@@ -646,24 +648,25 @@ namespace a3
                                         COMBINE_MainQueueList = LIST_MainQueue_fromFirebase.Where(m => diff_cqn.Contains(m.Customer_Queue_Number)).ToList();
 
                                         var __result = (from mq_fire in LIST_MainQueue
-                                                       join mq_allLocal in COMBINE_MainQueueList on mq_fire.ID equals mq_allLocal.ID
-                                                       into mq_update
-                                                       select new _Main_Queue
-                                                       {
-                                                           Full_Name = mq_fire.Full_Name,
-                                                           Queue_Number = mq_fire.Queue_Number,
-                                                           Queue_Status = mq_fire.Queue_Status,
-                                                           Servicing_Office = mq_fire.Servicing_Office,
-                                                           Student_No = mq_fire.Student_No,
-                                                           Transaction_Type = mq_fire.Transaction_Type,
-                                                           Type = mq_fire.Type,
-                                                           Customer_From = mq_fire.Customer_From,
-                                                           Customer_Queue_Number = mq_fire.Customer_Queue_Number,
-                                                           ID = mq_fire.ID,
-                                                           Pattern_Current = mq_fire.Pattern_Current,
-                                                           Time = mq_fire.Time,
-                                                           Key = mq_update.Any() ? mq_update.First().Key : "Unknown Key"
-                                                       });
+                                                        join mq_allLocal in COMBINE_MainQueueList on mq_fire.ID equals mq_allLocal.ID
+                                                        into mq_update
+                                                        select new _Main_Queue
+                                                        {
+                                                            Full_Name = mq_fire.Full_Name,
+                                                            Queue_Number = mq_fire.Queue_Number,
+                                                            Queue_Status = mq_fire.Queue_Status,
+                                                            Servicing_Office = mq_fire.Servicing_Office,
+                                                            Student_No = mq_fire.Student_No,
+                                                            Transaction_Type = mq_fire.Transaction_Type,
+                                                            Type = mq_fire.Type,
+                                                            Customer_From = mq_fire.Customer_From,
+                                                            Customer_Queue_Number = mq_fire.Customer_Queue_Number,
+                                                            ID = mq_fire.ID,
+                                                            Pattern_Current = mq_fire.Pattern_Current,
+                                                            Time = mq_fire.Time,
+                                                            Key = mq_update.Any() ? mq_update.First().Key : "Unknown Key",
+                                                            Pattern_Max = mq_fire.Pattern_Max
+                                                        });
 
                                         List<_Main_Queue> LIST_MainQueue_withKeys = __result.ToList();
 
@@ -674,9 +677,9 @@ namespace a3
                                             Console.WriteLine(a.Customer_Queue_Number);
                                             // If not on Firebase but exists on Local (new updates) => Insert
                                             if (a.Type == "Guest")
-                                                 fcon.App_Insert_MainQueueAsync(a, true, cancelToken);
+                                                fcon.App_Insert_MainQueueAsync(a, true, cancelToken);
                                             else
-                                                 fcon.App_Insert_MainQueueAsync(a, false, cancelToken);
+                                                fcon.App_Insert_MainQueueAsync(a, false, cancelToken);
                                         }
                                         Console.WriteLine("List of new customers ONLINE");
                                         foreach (_Main_Queue b in ONLINE_MainQueueList)
@@ -685,22 +688,22 @@ namespace a3
                                             Console.WriteLine(b.Customer_Queue_Number);
                                             // If not on Local but exists on Firebase (outdated) => Delete
                                             if (b.Type == "Student")
-                                                 fcon.Specific_Delete_MainQueueAsync(b.Student_No, cancelToken);
+                                                fcon.Specific_Delete_MainQueueAsync(b.Student_No, cancelToken);
                                             else
-                                                 fcon.Specific_Delete_MainQueueAsync(b.Key, cancelToken);
+                                                fcon.Specific_Delete_MainQueueAsync(b.Key, cancelToken);
                                         }
                                         Console.WriteLine("List of customers to be updated");
                                         foreach (_Main_Queue c in LIST_MainQueue_withKeys)
                                         {
                                             cancelToken.ThrowIfCancellationRequested();
-                                            Console.WriteLine(c.Customer_Queue_Number);
-                                                Console.WriteLine(c.Full_Name);
-                                            Console.WriteLine(c.Key);
+                                            //Console.WriteLine(c.Customer_Queue_Number);
+                                            //    Console.WriteLine(c.Full_Name);
+                                            //Console.WriteLine(c.Key);
                                             if (c.Key != "Unknown Key")
-                                                 fcon.App_Update_MainQueue(c);
+                                                fcon.App_Update_MainQueue(c);
                                             else
-                                                Console.WriteLine(c.Customer_Queue_Number+" -> key not known, ignored.");
-                                            
+                                                Console.WriteLine(c.Customer_Queue_Number + " -> key not known, ignored.");
+
                                         }
 
                                     });
@@ -721,19 +724,20 @@ namespace a3
                                                     SqlCommand _cmd = new SqlCommand(_query, _temp_connection);
                                                     _cmd.Parameters.AddWithValue("@param1", c.ID);
                                                     _cmd.ExecuteNonQuery();
+                                                    Console.WriteLine(c.ID + " is now deleted");
                                                     break;
                                                 case "Move":
                                                     // Check if it can allow move
                                                     string _check_turns = "SELECT COUNT(id) from Main_Queue where Queue_Number between @param1 and @param2 and Servicing_Office = @param3";
                                                     SqlCommand _check_cmd = new SqlCommand(_check_turns, _temp_connection);
-                                                    int _new_QueueNumber = c.Queue_ID+c.Value;
-                                                    _check_cmd.Parameters.AddWithValue("@param1", (c.Queue_ID+1));
+                                                    int _new_QueueNumber = c.Queue_ID + c.Value;
+                                                    _check_cmd.Parameters.AddWithValue("@param1", (c.Queue_ID + 1));
                                                     _check_cmd.Parameters.AddWithValue("@param2", _new_QueueNumber);
                                                     _check_cmd.Parameters.AddWithValue("@param3", c.Servicing_Office);
                                                     int _customers = (int)_check_cmd.ExecuteScalar();
                                                     Console.WriteLine();
-                                                    Console.WriteLine("Customer with id of {0} wanted to move {1} turns.",c.Queue_ID,c.Value);
-                                                    Console.WriteLine(" BETWEEN {0} and {1} at {2}", (c.Queue_ID + 1), _new_QueueNumber,c.Servicing_Office);
+                                                    Console.WriteLine("Customer with id of {0} wanted to move {1} turns.", c.Queue_ID, c.Value);
+                                                    Console.WriteLine(" BETWEEN {0} and {1} at {2}", (c.Queue_ID + 1), _new_QueueNumber, c.Servicing_Office);
                                                     Console.WriteLine("There are {0} customers.", _customers);
                                                     Console.WriteLine("Checking if {0} >= 5 and {0} <= 20", _customers);
                                                     if (_customers >= 5 && _customers <= 20)
@@ -777,11 +781,17 @@ namespace a3
                                         foreach (_Servicing_Terminal d in LIST_ServicingTerminal)
                                             await fcon.App_Insert_ServicingTerminalAsync(d, cancelToken);
                                     });
+                                var i6 = Task.Run(async () => 
+                                {
+                                    foreach (_Transaction_Type g in LIST_TransactionTypes)
+                                        await fcon.App_Insert_TransactionTypeAsync(g);
+                                });
                                 var i5 = Task.Run(async () =>
                                     {
                                         PREQUEUE_LIST = await fcon.App_Retrieve_PreQueue(cancelToken);
                                         foreach (_Pre_Queue e in PREQUEUE_LIST)
                                         {
+                                            Console.WriteLine("WE -> " + e.Transaction_Type);
                                             int firstServicingOffice = getFirstServicingOffice(e.Transaction_Type);
                                             int newQueueNumber = getQueueNumber(firstServicingOffice);
                                             _pq_mq = new _Main_Queue
@@ -815,7 +825,7 @@ namespace a3
                                             foreach (_Main_Queue f in PREQUEUE_TO_MAINQUEUE)
                                             {
 
-                                                Console.WriteLine("=== {0} ===", f.Customer_Queue_Number);
+                                                Console.WriteLine("PREQUEUE {0} ==", f.Customer_Queue_Number);
                                                 // Add to local DB -> MainQueue
                                                 cmdPreQueue.Parameters.AddWithValue("@q_qn", f.Queue_Number);
                                                 cmdPreQueue.Parameters.AddWithValue("@q_fn", f.Full_Name);
@@ -842,9 +852,12 @@ namespace a3
 
 
                                 logWrite("Online", "-----");
-
-                                await Task.WhenAll(i1, i2, i3, i4, i5);
-                                logWrite("Online", "Sync successful at "+DateTime.Now+" !");
+                                await Task.WhenAll(i6);
+                                await Task.WhenAll(i1);
+                                await Task.WhenAll(i3, i5);
+                                //await Task.WhenAll(i1, i2, i3, i4, i5);
+                                await Task.WhenAll(i2, i4);
+                                logWrite("Online", "Sync successful at " + DateTime.Now + " !");
                             }
                             catch (OperationCanceledException)
                             {
@@ -854,6 +867,10 @@ namespace a3
                             catch (FirebaseException)
                             {
                                 logWrite("Online", "Can't connect!");
+                            }
+                            catch (NullReferenceException b)
+                            {
+                                Console.WriteLine(b);
                             }
 
                             Console.WriteLine("Last work for synching finished. /n /n /n ");
@@ -876,7 +893,7 @@ namespace a3
                 }
 
             });
-
+            GC.Collect();
         }
         #endregion
         #region FUNCTIONS COPIED FROM KIOSK
@@ -959,7 +976,7 @@ namespace a3
             foreach (DataRow row in table_Transaction_Table.Rows)
             {
                 id = (int)row["id"];
-                Console.Write(" generateQueueShortName - > searching for short name");
+                Console.WriteLine(" generateQueueShortName - > searching for short name");
                 if (id == Transaction_Type)
                 {
                     short_name = (string)row["Short_Name"];
@@ -1084,8 +1101,6 @@ namespace a3
                 }
             }, ct);
             con.Close();
-
-
         }
         private Task DoWork(CancellationToken ct) { return Task.Run(() => { Console.WriteLine("Hello Task library!"); }); }
         private void StartWork()

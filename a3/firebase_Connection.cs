@@ -52,6 +52,26 @@ namespace a3
                 throw;
             }
         }
+        public async Task Truncate_Firebase()
+        {
+            await firebase.Child("Main_Queue/").DeleteAsync();
+            await firebase.Child("Queue_Info/").DeleteAsync();
+
+            
+        }
+        public async Task Controller_InsertQueueStatus(string _Student_No)
+        {
+            try
+            {
+                await Task.Run(() => firebase.Child("Queue_Status/").Child(_Student_No).PutAsync<string>("Inactive"));
+            }
+            catch (FirebaseException e) {
+                Console.WriteLine(e.Message);
+                Console.WriteLine(e.RequestData);
+                Console.WriteLine(e.RequestUrl);
+                Console.WriteLine(e.ResponseData);
+                Console.WriteLine("Problem -> Method: Controller InsertQueueStatus"); throw; }
+        }
         public async Task<List<_Queue_Request>> App_Retrieve_QueueRequest(CancellationToken cts)
         {
             string node = "Queue_Request/";

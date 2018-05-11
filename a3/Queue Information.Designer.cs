@@ -28,21 +28,20 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.ListViewGroup listViewGroup2 = new System.Windows.Forms.ListViewGroup("ListViewGroup", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup6 = new System.Windows.Forms.ListViewGroup("ListViewGroup", System.Windows.Forms.HorizontalAlignment.Left);
             this.ListView1 = new System.Windows.Forms.ListView();
             this.ColumnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.ColumnHeader2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.ColumnHeader3 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader5 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.panel1 = new System.Windows.Forms.Panel();
-            this.txtSyncStatus = new System.Windows.Forms.TextBox();
             this.txtLastSync = new System.Windows.Forms.TextBox();
             this.lblLastSync = new System.Windows.Forms.Label();
-            this.lblSyncStatus = new System.Windows.Forms.Label();
-            this.panel2 = new System.Windows.Forms.Panel();
-            this.btnExit = new System.Windows.Forms.Button();
+            this.label1 = new System.Windows.Forms.Label();
+            this.comboBox1 = new System.Windows.Forms.ComboBox();
+            this.button1 = new System.Windows.Forms.Button();
+            this.button2 = new System.Windows.Forms.Button();
             this.panel1.SuspendLayout();
-            this.panel2.SuspendLayout();
             this.SuspendLayout();
             // 
             // ListView1
@@ -54,17 +53,17 @@
             this.columnHeader5});
             this.ListView1.Font = new System.Drawing.Font("Calibri", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.ListView1.FullRowSelect = true;
-            listViewGroup2.Header = "ListViewGroup";
-            listViewGroup2.Name = "listViewGroup1";
-            listViewGroup2.Tag = "sdfdsf";
+            listViewGroup6.Header = "ListViewGroup";
+            listViewGroup6.Name = "listViewGroup1";
+            listViewGroup6.Tag = "sdfdsf";
             this.ListView1.Groups.AddRange(new System.Windows.Forms.ListViewGroup[] {
-            listViewGroup2});
+            listViewGroup6});
             this.ListView1.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.Nonclickable;
             this.ListView1.Location = new System.Drawing.Point(6, 4);
             this.ListView1.Margin = new System.Windows.Forms.Padding(4);
             this.ListView1.Name = "ListView1";
             this.ListView1.ShowGroups = false;
-            this.ListView1.Size = new System.Drawing.Size(683, 522);
+            this.ListView1.Size = new System.Drawing.Size(962, 522);
             this.ListView1.TabIndex = 18;
             this.ListView1.UseCompatibleStateImageBehavior = false;
             this.ListView1.View = System.Windows.Forms.View.Details;
@@ -95,40 +94,30 @@
             // panel1
             // 
             this.panel1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(32)))), ((int)(((byte)(41)))), ((int)(((byte)(50)))));
-            this.panel1.Controls.Add(this.txtSyncStatus);
+            this.panel1.Controls.Add(this.button2);
+            this.panel1.Controls.Add(this.button1);
+            this.panel1.Controls.Add(this.comboBox1);
+            this.panel1.Controls.Add(this.label1);
             this.panel1.Controls.Add(this.txtLastSync);
             this.panel1.Controls.Add(this.lblLastSync);
-            this.panel1.Controls.Add(this.lblSyncStatus);
             this.panel1.Controls.Add(this.ListView1);
             this.panel1.Location = new System.Drawing.Point(7, 11);
             this.panel1.Margin = new System.Windows.Forms.Padding(4);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(693, 642);
+            this.panel1.Size = new System.Drawing.Size(976, 642);
             this.panel1.TabIndex = 19;
-            // 
-            // txtSyncStatus
-            // 
-            this.txtSyncStatus.BackColor = System.Drawing.Color.White;
-            this.txtSyncStatus.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.txtSyncStatus.Font = new System.Drawing.Font("Segoe UI Semilight", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.txtSyncStatus.ForeColor = System.Drawing.Color.Black;
-            this.txtSyncStatus.Location = new System.Drawing.Point(196, 555);
-            this.txtSyncStatus.Margin = new System.Windows.Forms.Padding(4);
-            this.txtSyncStatus.Name = "txtSyncStatus";
-            this.txtSyncStatus.Size = new System.Drawing.Size(293, 27);
-            this.txtSyncStatus.TabIndex = 22;
-            this.txtSyncStatus.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // txtLastSync
             // 
             this.txtLastSync.BackColor = System.Drawing.Color.White;
             this.txtLastSync.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.txtLastSync.Enabled = false;
             this.txtLastSync.Font = new System.Drawing.Font("Segoe UI Semilight", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.txtLastSync.ForeColor = System.Drawing.Color.Black;
-            this.txtLastSync.Location = new System.Drawing.Point(196, 594);
+            this.txtLastSync.Location = new System.Drawing.Point(605, 544);
             this.txtLastSync.Margin = new System.Windows.Forms.Padding(4);
             this.txtLastSync.Name = "txtLastSync";
-            this.txtLastSync.Size = new System.Drawing.Size(293, 27);
+            this.txtLastSync.Size = new System.Drawing.Size(363, 27);
             this.txtLastSync.TabIndex = 21;
             this.txtLastSync.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
@@ -137,57 +126,63 @@
             this.lblLastSync.AutoSize = true;
             this.lblLastSync.Font = new System.Drawing.Font("Calibri", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblLastSync.ForeColor = System.Drawing.Color.White;
-            this.lblLastSync.Location = new System.Drawing.Point(9, 597);
+            this.lblLastSync.Location = new System.Drawing.Point(506, 544);
             this.lblLastSync.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.lblLastSync.Name = "lblLastSync";
             this.lblLastSync.Size = new System.Drawing.Size(91, 24);
             this.lblLastSync.TabIndex = 20;
             this.lblLastSync.Text = "Last Sync:";
             // 
-            // lblSyncStatus
+            // label1
             // 
-            this.lblSyncStatus.AutoSize = true;
-            this.lblSyncStatus.Font = new System.Drawing.Font("Calibri", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblSyncStatus.ForeColor = System.Drawing.Color.White;
-            this.lblSyncStatus.Location = new System.Drawing.Point(9, 558);
-            this.lblSyncStatus.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.lblSyncStatus.Name = "lblSyncStatus";
-            this.lblSyncStatus.Size = new System.Drawing.Size(161, 24);
-            this.lblSyncStatus.TabIndex = 19;
-            this.lblSyncStatus.Text = "Show Sync Status:";
+            this.label1.AutoSize = true;
+            this.label1.Font = new System.Drawing.Font("Calibri", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label1.ForeColor = System.Drawing.Color.White;
+            this.label1.Location = new System.Drawing.Point(17, 541);
+            this.label1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(189, 24);
+            this.label1.TabIndex = 22;
+            this.label1.Text = "Change Office Status:";
             // 
-            // panel2
+            // comboBox1
             // 
-            this.panel2.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(32)))), ((int)(((byte)(41)))), ((int)(((byte)(50)))));
-            this.panel2.Controls.Add(this.btnExit);
-            this.panel2.Location = new System.Drawing.Point(7, 661);
-            this.panel2.Margin = new System.Windows.Forms.Padding(4);
-            this.panel2.Name = "panel2";
-            this.panel2.Size = new System.Drawing.Size(816, 62);
-            this.panel2.TabIndex = 20;
+            this.comboBox1.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboBox1.FormattingEnabled = true;
+            this.comboBox1.Location = new System.Drawing.Point(226, 544);
+            this.comboBox1.Name = "comboBox1";
+            this.comboBox1.Size = new System.Drawing.Size(210, 24);
+            this.comboBox1.TabIndex = 23;
             // 
-            // btnExit
+            // button1
             // 
-            this.btnExit.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(181)))), ((int)(((byte)(41)))), ((int)(((byte)(42)))));
-            this.btnExit.FlatAppearance.BorderSize = 0;
-            this.btnExit.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnExit.Font = new System.Drawing.Font("Segoe UI Semilight", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnExit.ForeColor = System.Drawing.Color.White;
-            this.btnExit.Location = new System.Drawing.Point(332, 11);
-            this.btnExit.Margin = new System.Windows.Forms.Padding(4);
-            this.btnExit.Name = "btnExit";
-            this.btnExit.Size = new System.Drawing.Size(151, 39);
-            this.btnExit.TabIndex = 5;
-            this.btnExit.Text = "Exit";
-            this.btnExit.UseVisualStyleBackColor = false;
+            this.button1.BackColor = System.Drawing.Color.MediumSpringGreen;
+            this.button1.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.button1.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
+            this.button1.Location = new System.Drawing.Point(226, 580);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(102, 39);
+            this.button1.TabIndex = 24;
+            this.button1.Text = "Online";
+            this.button1.UseVisualStyleBackColor = false;
+            // 
+            // button2
+            // 
+            this.button2.BackColor = System.Drawing.Color.Tomato;
+            this.button2.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.button2.Location = new System.Drawing.Point(334, 580);
+            this.button2.Name = "button2";
+            this.button2.Size = new System.Drawing.Size(102, 39);
+            this.button2.TabIndex = 25;
+            this.button2.Text = "Offline";
+            this.button2.UseVisualStyleBackColor = false;
             // 
             // Queue_Information
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(181)))), ((int)(((byte)(41)))), ((int)(((byte)(42)))));
-            this.ClientSize = new System.Drawing.Size(713, 730);
-            this.Controls.Add(this.panel2);
+            this.ClientSize = new System.Drawing.Size(988, 658);
             this.Controls.Add(this.panel1);
             this.Margin = new System.Windows.Forms.Padding(4);
             this.Name = "Queue_Information";
@@ -196,7 +191,6 @@
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.Form1_FormClosed);
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();
-            this.panel2.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -210,10 +204,10 @@
         private System.Windows.Forms.ColumnHeader columnHeader5;
         private System.Windows.Forms.Panel panel1;
         internal System.Windows.Forms.Label lblLastSync;
-        internal System.Windows.Forms.Label lblSyncStatus;
-        internal System.Windows.Forms.TextBox txtSyncStatus;
         internal System.Windows.Forms.TextBox txtLastSync;
-        private System.Windows.Forms.Panel panel2;
-        internal System.Windows.Forms.Button btnExit;
+        internal System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Button button2;
+        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.ComboBox comboBox1;
     }
 }

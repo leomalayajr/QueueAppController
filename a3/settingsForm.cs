@@ -136,11 +136,10 @@ namespace a3
         {
             // Save changes
             // Check textBoxes length if OK
+
+            Console.WriteLine("wat items");
             if (OkFieldLength())
             {
-
-                if (mainForm != null)
-                {
                     SqlConnection con = new SqlConnection(connection_string);
 
                     // Check if password is correct
@@ -149,7 +148,7 @@ namespace a3
                     _check_cmd.Parameters.AddWithValue("@param_st", 0);
                     SqlDataReader reader;
                     string Password = "";
-
+                    Console.WriteLine("Running items");
                     try
                     {
                         con.Open();
@@ -164,19 +163,19 @@ namespace a3
                             SqlCommand _cmd = new SqlCommand();
 
                             _cmd.Connection = con;
-                            
+
                             if (!(string.IsNullOrEmpty(textBox4.Text)))
                             {
                                 query += " Password = @param2";
                                 _cmd.Parameters.AddWithValue("@param2", Cryptography.Encrypt(textBox4.Text.ToString()));
                             }
-                            
+
 
                             query += " where status = @param_st";
                             _cmd.Parameters.AddWithValue("@param_st", 0);
                             _cmd.CommandText = query;
                             _cmd.ExecuteNonQuery();
-                            
+
                             textBox4.Clear();
                             textBox6.Clear();
 
@@ -188,61 +187,68 @@ namespace a3
                             MessageBox.Show("Please enter the valid credentials.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Information);
                         }
                         con.Close();
+                    
                     }
                     catch (SqlException ex)
                     {
                         MessageBox.Show("DB error! {0}", ex.Message);
                     }
-                }
+                
 
             }
 
         }
         private bool OkFieldLength()
         {
-                if (textBox4.TextLength < 7 && textBox4.TextLength > 50)
+                if (textBox4.TextLength > 7 && textBox4.TextLength < 50)
                 { MessageBox.Show("New password should be 8 - 50 characters."); return false; }
-                if (textBox6.TextLength < 7 && textBox6.TextLength > 50)
+                if (textBox6.TextLength > 7 && textBox6.TextLength < 50)
                 { MessageBox.Show("Old password should be 8 - 50 characters."); return false; }
             return true;
         }
 
         private void button2_Click(object sender, EventArgs e)
         {
-                    if (textBox1.TextLength < 100 && textBox1.TextLength >= 2 && textBox2.TextLength < 100)
-                    {
-                        var confirmResult = MessageBox.Show("Are you sure to add "+textBox1.Text+"?",
-                                             "Confirm Delete",
-                                             MessageBoxButtons.YesNo);
+            if (textBox1.TextLength < 100 && textBox1.TextLength >= 2 && textBox2.TextLength < 100)
+            {
+                var confirmResult = MessageBox.Show("Are you sure to add " + textBox1.Text + "?",
+                                     "Confirm Delete",
+                                     MessageBoxButtons.YesNo);
                 if (confirmResult == DialogResult.Yes)
                 {
                     // Add to database
                     SqlConnection con = new SqlConnection(connection_string);
-                    string _query = "insert into Servicing_Office (Name,Address) " +
-                        "values (@param1,@param2)";
+                    string _query = "insert into Servicing_Office (Name,Address) OUTPUT Inserted.id values (@param1,@param2)";
                     SqlCommand _cmd = new SqlCommand(_query, con);
+                    string _b = "insert into Queue_Info (Current_Number,Current_Queue,Servicing_Office,Counter," +
+                        "Mode,Status,Avg_Serving_Time,Office_Name) values " +
+                        "(0,1,@param_newID,0,1,@param_online,0,@param_newName)";
+                    SqlCommand _cmd2 = new SqlCommand(_b, con);
                     try
                     {
                         con.Open();
                         _cmd.Parameters.AddWithValue("@param1", textBox1.Text);
                         _cmd.Parameters.AddWithValue("@param2", textBox2.Text);
-                        _cmd.ExecuteNonQuery();
+                        int a = (int)_cmd.ExecuteScalar();
                         _cmd.Parameters.Clear();
-                        con.Close();
+                        _cmd2.Parameters.AddWithValue("@param_newID", a);
+                        _cmd2.Parameters.AddWithValue("@param_newName", textBox1.Text);
+                        _cmd2.Parameters.AddWithValue("@param_online", "Online");
+                        _cmd2.ExecuteNonQuery();
                         generateDeleteItems();
-                        MessageBox.Show(textBox1.Text+" added on Servicing Offices!", "Success!");
+                        MessageBox.Show(textBox1.Text + " added on Servicing Offices!", "Success!");
                     }
-                    catch (SqlException ex)
+                    catch (SqlException ea)
                     {
-                        MessageBox.Show("Database error. {0}" + ex.Message);
+                        MessageBox.Show("Database error. -> " + ea.Message);
                     }
                 }
-                    }
-                    else
-                    {
-                        MessageBox.Show("Name or address length exceeds the limit!");
-                    }
-                
+            }
+            else
+            {
+                MessageBox.Show("Name or address length exceeds the limit!");
+            }
+
 
         }
 
@@ -261,71 +267,74 @@ namespace a3
 
         private void button4_Click(object sender, EventArgs e)
         {
-                
-                    SqlConnection con = new SqlConnection(connection_string);
-                    string SERVICINGOFFICE_Delete = "delete from Servicing_Office where id = @param1";
-                    SqlCommand _cmd = new SqlCommand(SERVICINGOFFICE_Delete, con);
+            SqlConnection con = new SqlConnection(connection_string);
+            string SERVICINGOFFICE_Delete = "delete from Servicing_Office where id = @param1";
+            string QUEUEINFO_Delete = "delete from Queue_Info where Servicing_Office = @param1";
+            SqlCommand _cmd = new SqlCommand(SERVICINGOFFICE_Delete, con);
+            SqlCommand __cmd = new SqlCommand(QUEUEINFO_Delete, con);
+            var confirmResult = MessageBox.Show("Are you sure to delete this?",
+                                     "Confirm Delete",
+                                     MessageBoxButtons.YesNo);
+            if (confirmResult == DialogResult.Yes)
+            {
+                // If 'Yes', do something here.
+                try
+                {
+                    con.Open();
+                    int _id = (int)comboBox1.SelectedValue;
+                    _cmd.Parameters.AddWithValue("@param1", _id);
+                    _cmd.ExecuteNonQuery();
+                    __cmd.Parameters.AddWithValue("@param1", _id);
+                    __cmd.ExecuteNonQuery();
+                    con.Close();
+                }
+                catch (SqlException ex)
+                {
+                    MessageBox.Show("Error ->" + ex.Message);
+                }
+            }
+            else
+            {
+                // If 'No', do something here.
+            }
+            generateDeleteItems();
 
-                    var confirmResult = MessageBox.Show("Are you sure to delete this?",
-                                             "Confirm Delete",
-                                             MessageBoxButtons.YesNo);
-                    if (confirmResult == DialogResult.Yes)
-                    {
-                        // If 'Yes', do something here.
-                        try
-                        {
-                            con.Open();
-                            _cmd.Parameters.AddWithValue("@param1", comboBox1.SelectedValue);
-                            _cmd.ExecuteNonQuery();
-                            con.Close();
-                        }
-                        catch (SqlException ex)
-                        {
-                            MessageBox.Show("Error ->" + ex.Message);
-                        }
-                    }
-                    else
-                    {
-                        // If 'No', do something here.
-                    }
-                    generateDeleteItems();
-                
 
         }
 
         private void button5_Click(object sender, EventArgs e)
         {
-            
-                    SqlConnection con = new SqlConnection(connection_string);
-                    string TRANSACTION_Delete = "delete from Transaction_Type where id = @param1";
-                    SqlCommand _cmd = new SqlCommand(TRANSACTION_Delete, con);
+            SqlConnection con = new SqlConnection(connection_string);
+            string TRANSACTION_Delete = "delete from Transaction_Type where id = @param1";
+            string TRANSACTION_Delete_List = "delete from Transaction_List where Transaction_ID = @param1";
+            SqlCommand _cmd = new SqlCommand(TRANSACTION_Delete, con);
 
-                    var confirmResult = MessageBox.Show("Are you sure to delete this?",
-                                             "Confirm Delete",
-                                             MessageBoxButtons.YesNo);
-                    if (confirmResult == DialogResult.Yes)
-                    {
-                        // If 'Yes', do something here.
-                        try
-                        {
-                            con.Open();
-                            _cmd.Parameters.AddWithValue("@param1", comboBox2.SelectedValue);
-                            _cmd.ExecuteNonQuery();
-                            con.Close();
-                        }
-                        catch (SqlException ex)
-                        {
-                            MessageBox.Show("Error ->" + ex.Message);
-                        }
-                    }
-                    else
-                    {
-                        // If 'No', do something here.
-                    }
-                    generateDeleteItems();
-
-                
-
+            var confirmResult = MessageBox.Show("Are you sure to delete this?",
+                                     "Confirm Delete",
+                                     MessageBoxButtons.YesNo);
+            if (confirmResult == DialogResult.Yes)
+            {
+                // If 'Yes', do something here.
+                try
+                {
+                    int a = (int)comboBox2.SelectedValue;
+                    con.Open();
+                    _cmd.Parameters.AddWithValue("@param1", a);
+                    _cmd.ExecuteNonQuery();
+                    _cmd.CommandText = TRANSACTION_Delete_List;
+                    _cmd.ExecuteNonQuery();
+                    con.Close();
+                }
+                catch (SqlException ex)
+                {
+                    MessageBox.Show("Error ->" + ex.Message);
+                }
+            }
+            else
+            {
+                // If 'No', do something here.
+            }
+            generateDeleteItems();
         }
 
         private void button6_Click(object sender, EventArgs e)
@@ -375,7 +384,7 @@ namespace a3
             {
                 if (dialog.ShowDialog() == DialogResult.OK)
                 {
-
+                    Enabled = false;
                     firebase_Connection fcon = new firebase_Connection();
                     MessageBox.Show("Prepare...");
                     string path = dialog.FileName;
@@ -395,6 +404,7 @@ namespace a3
                             //upload to the Firebase DB
                             await fcon.Controller_ImportUsers(b);
                             await fcon.Controller_RegisterThisUser(b);
+                            await fcon.Controller_InsertQueueStatus(b.accountNumber);
                             progressBar1.Increment(1);
                         }
                         MessageBox.Show("Import finished. You may check the online database now.", "Success!");
@@ -415,12 +425,45 @@ namespace a3
                         progressBar1.Value = 0;
                         MessageBox.Show("Please check your internet connection. Error Code:", "Connection error");
                     }
+                    Enabled = true;
                 }
             }
         }
 
         private void pictureBox4_Click(object sender, EventArgs e)
         {
+            if (textBox6.Enabled == false)
+            { textBox6.Enabled = true; textBox4.Enabled = true; textBox6.Clear(); textBox4.Clear(); }
+            else
+            { textBox6.Enabled = false; textBox4.Enabled = false; textBox6.Clear(); textBox4.Clear(); }
+        }
+        
+
+        private async void button7_Click(object sender, EventArgs e)
+        {
+            Enabled = false;
+            var confirmResult = MessageBox.Show("Are you sure to restart the queuing system? " + textBox1.Text + "?",
+                                     "Confirm Delete",
+                                     MessageBoxButtons.YesNo);
+            if (confirmResult == DialogResult.Yes)
+            {
+                progressBar1.Maximum = 2;
+                SqlConnection con = new SqlConnection(connection_string);
+                con.Open();
+                String query0 = "TRUNCATE TABLE Main_Queue; TRUNCATE TABLE Queue_Info; TRUNCATE TABLE Serving_Time; TRUNCATE TABLE Servicing_Terminal;";
+                SqlCommand cmd0 = new SqlCommand(query0, con);
+                cmd0.ExecuteNonQuery();
+                progressBar1.Increment(1);
+                con.Close();
+                // Doing the work on firebase too
+                firebase_Connection fcon = new firebase_Connection();
+                await fcon.Truncate_Firebase();
+                progressBar1.Increment(1);
+                MessageBox.Show("All queue at the system and information about it have been cleared.");
+                progressBar1.Value = 0;
+            }
+                
+            Enabled = true;
         }
     }
 }

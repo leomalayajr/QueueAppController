@@ -63,6 +63,7 @@
             // 
             // info_ServicingOffice
             // 
+            this.info_ServicingOffice.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.info_ServicingOffice.FormattingEnabled = true;
             this.info_ServicingOffice.Location = new System.Drawing.Point(118, 21);
             this.info_ServicingOffice.Name = "info_ServicingOffice";
@@ -130,6 +131,7 @@
             // 
             // info_Windows
             // 
+            this.info_Windows.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.info_Windows.FormattingEnabled = true;
             this.info_Windows.Location = new System.Drawing.Point(118, 67);
             this.info_Windows.Name = "info_Windows";

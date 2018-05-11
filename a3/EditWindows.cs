@@ -124,19 +124,22 @@ namespace a3
             try { ID = Convert.ToInt32(dataGridView1.Rows[e.RowIndex].Cells[0].Value.ToString()); }
             catch (FormatException) { }
             info_MAC.Text = dataGridView1.Rows[e.RowIndex].Cells[4].Value.ToString();
-            info_ServicingOffice.SelectedIndex = info_ServicingOffice.Items.IndexOf(dataGridView1.Rows[e.RowIndex].Cells[2].Value);
+            info_ServicingOffice.SelectedValue = (dataGridView1.Rows[e.RowIndex].Cells[2].Value);
             info_Windows.SelectedIndex = info_Windows.Items.IndexOf(dataGridView1.Rows[e.RowIndex].Cells[3].Value);
+
         }
         //Update Record  
         private void btn_Update_Click(object sender, EventArgs e)
         {
+            MessageBox.Show("ID is " + ID);
             if (info_MAC.Text != "")
             {
-                cmd = new SqlCommand("update Set_Windows set Servicing_Office_ID=@param1,Window=@param2 where ID=@param0", con);
+                cmd = new SqlCommand("update Set_Windows set Name=@param3,Servicing_Office_ID=@param1,Window=@param2 where ID=@param0", con);
                 con.Open();
                 cmd.Parameters.AddWithValue("@param0", ID);
                 cmd.Parameters.AddWithValue("@param1", info_ServicingOffice.SelectedValue);
                 cmd.Parameters.AddWithValue("@param2", info_Windows.SelectedValue);
+                cmd.Parameters.AddWithValue("@param3", info_ServicingOffice.Text);
                 cmd.ExecuteNonQuery();
                 MessageBox.Show("Record Updated Successfully");
                 con.Close();

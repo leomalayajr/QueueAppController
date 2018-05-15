@@ -65,7 +65,7 @@
             // 
             this.info_ServicingOffice.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.info_ServicingOffice.FormattingEnabled = true;
-            this.info_ServicingOffice.Location = new System.Drawing.Point(118, 21);
+            this.info_ServicingOffice.Location = new System.Drawing.Point(136, 21);
             this.info_ServicingOffice.Name = "info_ServicingOffice";
             this.info_ServicingOffice.Size = new System.Drawing.Size(121, 24);
             this.info_ServicingOffice.TabIndex = 2;
@@ -77,9 +77,9 @@
             this.label2.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label2.Location = new System.Drawing.Point(12, 67);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(83, 25);
+            this.label2.Size = new System.Drawing.Size(118, 25);
             this.label2.TabIndex = 3;
-            this.label2.Text = "Window";
+            this.label2.Text = "Window Isle";
             // 
             // label3
             // 
@@ -133,7 +133,7 @@
             // 
             this.info_Windows.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.info_Windows.FormattingEnabled = true;
-            this.info_Windows.Location = new System.Drawing.Point(118, 67);
+            this.info_Windows.Location = new System.Drawing.Point(136, 67);
             this.info_Windows.Name = "info_Windows";
             this.info_Windows.Size = new System.Drawing.Size(121, 24);
             this.info_Windows.TabIndex = 10;

@@ -277,7 +277,7 @@
             this.tabPage2.Padding = new System.Windows.Forms.Padding(4);
             this.tabPage2.Size = new System.Drawing.Size(466, 403);
             this.tabPage2.TabIndex = 1;
-            this.tabPage2.Text = "Delete Items";
+            this.tabPage2.Text = "Delete";
             this.tabPage2.UseVisualStyleBackColor = true;
             // 
             // label10
@@ -370,7 +370,7 @@
             this.tabPage1.Padding = new System.Windows.Forms.Padding(4);
             this.tabPage1.Size = new System.Drawing.Size(466, 403);
             this.tabPage1.TabIndex = 0;
-            this.tabPage1.Text = "Add Items";
+            this.tabPage1.Text = "New Office / Transaction";
             this.tabPage1.UseVisualStyleBackColor = true;
             // 
             // tabControl1

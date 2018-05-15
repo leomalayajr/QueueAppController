@@ -50,6 +50,8 @@ namespace a3
         Queue_Information frmQueueInfo = new Queue_Information();
         EditWindows frmWindows = new EditWindows();
         Evaluation evalForm = new Evaluation();
+        settingsForm settings_Form_Quick = (settingsForm)Application.OpenForms["settingsForm"];
+        ViewOfficeTransaction frmViewOT = new ViewOfficeTransaction();
         #endregion
         public main()
         {
@@ -82,6 +84,80 @@ namespace a3
 
         }
         #region BASIC METHODS
+        private async void cleanDB()
+        {
+            Enabled = false;
+            var confirmResult = MessageBox.Show("Are you sure to restart the queuing system? ",
+                                     "Clean queue confirmation",
+                                     MessageBoxButtons.YesNo);
+            if (confirmResult == DialogResult.Yes)
+            {
+                SqlConnection con = new SqlConnection(connection_string);
+                con.Open();
+                SqlTransaction tran = con.BeginTransaction();
+                try
+                {
+                    String getRating = "select * from Rating_Office";
+                    String saveRating = "insert into Feedbacks (Servicing_Office,Score,Transaction_ID,Date_Of_Feedback,isStudent) values " +
+                        " (@param_so,@param_score,@param_tt_ID,@param_date,@param_isStudent)";
+                    SqlCommand cmd_getRating = new SqlCommand(getRating, con);
+                    SqlCommand cmd_saveRating = new SqlCommand(saveRating, con);
+                    cmd_getRating.Transaction = tran;
+                    cmd_saveRating.Transaction = tran;
+                    SqlDataReader rdr_rating;
+                    List<_Rating_Office> evaluationForToday = new List<_Rating_Office>();
+                    String query0 = "TRUNCATE TABLE Main_Queue; TRUNCATE TABLE Queue_Info; TRUNCATE TABLE Serving_Time; TRUNCATE TABLE Servicing_Terminal; TRUNCATE TABLE Rating_Office;";
+                    // retrieve the evaluations first 
+                    rdr_rating = cmd_getRating.ExecuteReader();
+                    while (rdr_rating.Read())
+                    {
+                        _Rating_Office a = new _Rating_Office
+                        {
+                            Customer_Queue_Number = (string)rdr_rating["Customer_Queue_Number"],
+                            isStudent = (bool)rdr_rating["isStudent"],
+                            score = (int)rdr_rating["Score"],
+                            Servicing_OFfice = (int)rdr_rating["Servicing_Office"],
+                            Transaction_ID = (int)rdr_rating["Transaction_ID"]
+                        };
+                        evaluationForToday.Add(a);
+                    }
+                    // save the evaluations
+                    DateTime today = DateTime.Today;
+                    foreach (_Rating_Office b in evaluationForToday)
+                    {
+                        cmd_saveRating.Parameters.AddWithValue("@param_so", b.Servicing_OFfice);
+                        cmd_saveRating.Parameters.AddWithValue("@param_score", b.score);
+                        cmd_saveRating.Parameters.AddWithValue("@param_tt_ID", b.Transaction_ID);
+                        cmd_saveRating.Parameters.AddWithValue("@param_date", today);
+                        cmd_saveRating.Parameters.AddWithValue("@param_isStudent", b.isStudent);
+                        cmd_saveRating.ExecuteNonQuery();
+                        cmd_saveRating.Parameters.Clear();
+                    }
+                    // clean all
+                    SqlCommand cmd0 = new SqlCommand(query0, con);
+                    cmd0.Transaction = tran;
+                    cmd0.ExecuteNonQuery();
+                    // Doing the work on firebase too
+                    firebase_Connection fcon = new firebase_Connection();
+                    await fcon.Truncate_Firebase();
+                    tran.Commit();
+                    MessageBox.Show("All queue at the system and information about it have been cleared.", "Clean Success!");
+                    
+                }
+                catch (FirebaseException exd)
+                {
+                    try { tran.Rollback(); } catch (Exception exRollback) { MessageBox.Show("Error at -> " + exRollback.Message); }
+                    MessageBox.Show("An error occured while connecting to firebase DB. Error ->" + exd.Message, "Database error");
+                }
+                catch (SqlException eb)
+                {
+                    try { tran.Rollback(); } catch (Exception exRollback) { MessageBox.Show("Error at -> " + exRollback.Message); }
+                    MessageBox.Show("An error occured while connecting to local DB. Error -> " + eb.Message, "Databse error");
+                }
+                con.Close();
+            }
+            
+        }
         private void btnSettings_Click(object sender, EventArgs e)
         {
             frmSettings.generateDeleteItems();
@@ -417,6 +493,7 @@ namespace a3
         #region MAIN SYNC FUNCTION
         private async Task PROGRAM_Online_Sync(CancellationToken cancelToken)
         {
+            Queue_Info_Update();
             VARIABLE_FIREBASE_IsOnline = true;
             VARIABLE_SQL_IsOnline = true;
             // Check if the app can connect to online DB
@@ -444,6 +521,10 @@ namespace a3
                 SqlCommand TEST_CMD = new SqlCommand("select top 1 id from Users", localSQLcheck);
                 int q = (int)TEST_CMD.ExecuteScalar();
                 localSQLcheck.Close();
+                var src = System.DateTime.Now.Hour;
+                var srcm = System.DateTime.Now.Minute;
+                if (src == 0 && srcm == 0)
+                    cleanDB();
             }
             catch (SqlException)
             {
@@ -619,12 +700,13 @@ namespace a3
 
                             await Task.WhenAll(t1, t2, t3, t4);
                             logWrite("Local", "Preparing lists for sync done.");
-
+                            
                             Console.WriteLine("Initializing lists finished.");
                             try
                             {
                                 var i1 = Task.Run(async () =>
                                         {
+                                            
                                             foreach (_Queue_Info a in LIST_QueueInfo)
                                                 try { await fcon.App_Insert_QueueInfoAsync(a, cancelToken); }
                                                 catch (FirebaseException) { throw; }
@@ -1188,6 +1270,13 @@ namespace a3
                 evalForm = new Evaluation();
 
             evalForm.Show(); 
+        }
+
+        private void button1_Click_1(object sender, EventArgs e)
+        {
+            if (frmViewOT.IsDisposed)
+                frmViewOT = new ViewOfficeTransaction();
+            frmViewOT.Show();
         }
     }
 }

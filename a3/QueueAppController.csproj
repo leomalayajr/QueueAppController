@@ -132,6 +132,12 @@
     <Compile Include="settingsForm.Designer.cs">
       <DependentUpon>settingsForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="ViewOfficeTransaction.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ViewOfficeTransaction.Designer.cs">
+      <DependentUpon>ViewOfficeTransaction.cs</DependentUpon>
+    </Compile>
     <Compile Include="_App_User.cs" />
     <Compile Include="_Log.cs" />
     <Compile Include="_Pre_Queue.cs" />
@@ -139,6 +145,7 @@
     <Compile Include="_Queue_Request_String.cs" />
     <Compile Include="_Rating_Office.cs" />
     <Compile Include="_Servicing_Office.cs" />
+    <Compile Include="_Transaction_List.cs" />
     <Compile Include="_Transaction_Type.cs" />
     <Compile Include="_Servicing_Terminal.cs" />
     <Compile Include="_Transfer_Queue.cs" />
@@ -200,6 +207,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="settingsForm.resx">
       <DependentUpon>settingsForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ViewOfficeTransaction.resx">
+      <DependentUpon>ViewOfficeTransaction.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">

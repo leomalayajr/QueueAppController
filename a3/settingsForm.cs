@@ -21,6 +21,7 @@ namespace a3
         public settingsForm()
         {
             InitializeComponent();
+            StartPosition = FormStartPosition.CenterParent;
             generateDeleteItems();
         }
         private List<_Servicing_Office> LIST_getServicingOffices()
@@ -91,7 +92,7 @@ namespace a3
             List<_Users> dataSource = new List<_Users>();
             // List possible Servicing Offices
             SqlConnection con = new SqlConnection(connection_string);
-            string retrieve_servicing_offices = "select * from Users";
+            string retrieve_servicing_offices = "select * from Users where Status = 1";
             SqlDataReader _rdr;
             SqlCommand __cmd = new SqlCommand(retrieve_servicing_offices, con);
             
@@ -104,7 +105,8 @@ namespace a3
                             dataSource.Add(new _Users()
                             {
                                 FullName = (string)_rdr["FullName"],
-                                id = (int)_rdr["ID"]
+                                id = (int)_rdr["ID"],
+                                usernameAndFullName = (string)_rdr["Username"] + " / " + (string)_rdr["FullName"]
                             });
                         }
                         con.Close();
@@ -123,10 +125,11 @@ namespace a3
             comboBox1.DisplayMember = "Name";
             comboBox1.ValueMember = "id";
             comboBox2.DataSource = LIST_getTransactionType();
-            comboBox3.DataSource = LIST_getUsers();
             comboBox2.DisplayMember = "Transaction_Name";
             comboBox2.ValueMember = "id";
-            comboBox3.DisplayMember = "FullName";
+            //comboBox3.Items.AddRange(LIST_getUsers().OrderBy(c => c.usernameAndFullName).ToArray());
+            comboBox3.DataSource = LIST_getUsers().OrderBy(c => c.FullName).ToArray();
+            comboBox3.DisplayMember = "usernameAndFullName";
             comboBox3.ValueMember = "id";
 
         }
@@ -386,7 +389,12 @@ namespace a3
                 {
                     Enabled = false;
                     firebase_Connection fcon = new firebase_Connection();
-                    MessageBox.Show("Prepare...");
+                    SqlConnection con = new SqlConnection(connection_string);
+                    string query = "insert into vw_es_students (Full_Name,Student_No,College,Course,Status,Year,Password) " +
+                        " values (@param_fn,@param_sn,@param_cl,@param_cs,@param_s,@param_y,@param_p)";
+                    string truncate_query = "TRUNCATE TABLE vw_es_students";
+                    SqlCommand cmd = new SqlCommand(query,con);
+                    SqlCommand truncate_cmd = new SqlCommand(truncate_query, con);
                     string path = dialog.FileName;
                     Excel excel = new Excel(path, 1);
                     try
@@ -398,16 +406,35 @@ namespace a3
                         GC.WaitForPendingFinalizers();
                         excel.cleanCOMobjects();
 
-                        progressBar1.Maximum = excel._userCount;
+                        con.Open();
+                        truncate_cmd.ExecuteNonQuery();
+                        progressBar1.Maximum = excel._userCount*4;
                         foreach (_App_User b in results)
                         {
+                            string password = Cryptography.Encrypt(b.password.ToString());
+                            //upload to local db
+                            
+                            cmd.Parameters.AddWithValue("@param_fn", b.lastName.ToUpper() + "," + b.firstName + " " + b.middleName);
+                            cmd.Parameters.AddWithValue("@param_sn", b.accountNumber);
+                            cmd.Parameters.AddWithValue("@param_cl", b.college);
+                            cmd.Parameters.AddWithValue("@param_cs", b.course);
+                            cmd.Parameters.AddWithValue("@param_s", b.status);
+                            cmd.Parameters.AddWithValue("@param_y", b.year);
+                            cmd.Parameters.AddWithValue("@param_p", password);
+                            cmd.ExecuteNonQuery();
+                            cmd.Parameters.Clear();
+                            
+                            progressBar1.Increment(1);
                             //upload to the Firebase DB
                             await fcon.Controller_ImportUsers(b);
+                            progressBar1.Increment(1);
                             await fcon.Controller_RegisterThisUser(b);
+                            progressBar1.Increment(1);
                             await fcon.Controller_InsertQueueStatus(b.accountNumber);
                             progressBar1.Increment(1);
                         }
-                        MessageBox.Show("Import finished. You may check the online database now.", "Success!");
+                        con.Close();
+                        MessageBox.Show("Import finished!", "Success!");
                         progressBar1.Value = 0;
                     }
                     catch (FormatException)

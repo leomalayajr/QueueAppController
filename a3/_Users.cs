@@ -10,5 +10,6 @@ namespace a3
     {
         public string FullName { get; set; }
         public int id { get; set; }
+        public string usernameAndFullName { get; set; }
     }
 }

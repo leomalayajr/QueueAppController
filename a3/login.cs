@@ -22,6 +22,7 @@ namespace a3
 
             InitializeComponent();
             linkLabel2.LinkBehavior = System.Windows.Forms.LinkBehavior.NeverUnderline;
+            
         }
 
         private void textBox_enter(object sender, EventArgs e)

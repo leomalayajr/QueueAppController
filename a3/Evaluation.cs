@@ -18,6 +18,7 @@ namespace a3
         public Evaluation()
         {
             InitializeComponent();
+            StartPosition = FormStartPosition.CenterParent;
         }
         private List<_Servicing_Office> LIST_getServicingOffices()
         {

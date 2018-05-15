@@ -131,15 +131,16 @@ namespace a3
         //Update Record  
         private void btn_Update_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("ID is " + ID);
+            Console.WriteLine("ID is " + ID);
             if (info_MAC.Text != "")
             {
-                cmd = new SqlCommand("update Set_Windows set Name=@param3,Servicing_Office_ID=@param1,Window=@param2 where ID=@param0", con);
+                cmd = new SqlCommand("update Set_Windows set Name=@param3,Servicing_Office_ID=@param1,Window=@param2,MAC_Address=@param6 where ID=@param0", con);
                 con.Open();
                 cmd.Parameters.AddWithValue("@param0", ID);
-                cmd.Parameters.AddWithValue("@param1", info_ServicingOffice.SelectedValue);
-                cmd.Parameters.AddWithValue("@param2", info_Windows.SelectedValue);
+                cmd.Parameters.AddWithValue("@param1", (int)info_ServicingOffice.SelectedValue);
+                cmd.Parameters.AddWithValue("@param2", (int)info_Windows.SelectedValue);
                 cmd.Parameters.AddWithValue("@param3", info_ServicingOffice.Text);
+                cmd.Parameters.AddWithValue("@param6", info_MAC.Text);
                 cmd.ExecuteNonQuery();
                 MessageBox.Show("Record Updated Successfully");
                 con.Close();

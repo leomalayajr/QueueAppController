@@ -125,7 +125,22 @@ namespace a3
             flowLayoutPanel1.Height = 0;
             addTransactionType.ActiveForm.Height = 260;
         }
-
+        private string getServicingOfficeName(int _so)
+        {
+            SqlConnection con = new SqlConnection(connection_string);
+            string office = "";
+            string query = "select Name from Servicing_Office where id = @param1";
+            SqlCommand cmd = new SqlCommand(query, con);
+            cmd.Parameters.AddWithValue("@param1", _so);
+            con.Open();
+            try
+            {
+                office = (string)cmd.ExecuteScalar();
+            }
+            catch (Exception) { }
+            con.Close();
+            return office;
+        }
         private void button3_Click(object sender, EventArgs e)
         {
             // Finish Button
@@ -160,8 +175,8 @@ namespace a3
                 new_id = (int)_cmd.ExecuteScalar();
 
                 // Write to Transaction_List
-                string __query = "insert into Transaction_List (Transaction_ID,Servicing_Office,Pattern_No) " +
-                    "values (@param5,@param6,@param7)";
+                string __query = "insert into Transaction_List (Transaction_ID,Servicing_Office,Pattern_No,Servicing_Office_Name) " +
+                    "values (@param5,@param6,@param7,@param8)";
                 _cmd.CommandText = __query;
                 foreach (FlowLayoutPanel a in flowLayoutPanel1.Controls.OfType<FlowLayoutPanel>())
                     foreach (ComboBox b in a.Controls.OfType<ComboBox>())
@@ -169,6 +184,7 @@ namespace a3
                         _cmd.Parameters.AddWithValue("@param5", new_id);
                         _cmd.Parameters.AddWithValue("@param6", b.SelectedValue);
                         _cmd.Parameters.AddWithValue("@param7", Pattern_Current);
+                        _cmd.Parameters.AddWithValue("@param8", getServicingOfficeName((int)b.SelectedValue));
                         Pattern_Current++;
                         _cmd.ExecuteNonQuery();
                         _cmd.Parameters.Clear();

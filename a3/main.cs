@@ -49,12 +49,17 @@ namespace a3
         settingsForm frmSettings = new settingsForm();
         Queue_Information frmQueueInfo = new Queue_Information();
         EditWindows frmWindows = new EditWindows();
+        Evaluation evalForm = new Evaluation();
         #endregion
         public main()
         {
             #region MAIN CONSTRUCTOR
             InitializeComponent();
 
+            FormBorderStyle = FormBorderStyle.FixedDialog;
+            MaximizeBox = false;
+            MinimizeBox = false;
+            StartPosition = FormStartPosition.CenterScreen;
             // Variable Init
             VARIABLE_Allowed_To_Sync = true;
             VARIABLE_Priority_Sync_Time = 60000;
@@ -1174,8 +1179,15 @@ namespace a3
             new Login().Show();
             this.Close();
         }
+
         #endregion
 
+        private void button1_Click(object sender, EventArgs e)
+        {
+            if (evalForm.IsDisposed)
+                evalForm = new Evaluation();
 
+            evalForm.Show(); 
+        }
     }
 }

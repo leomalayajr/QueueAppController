@@ -120,10 +120,10 @@ namespace a3
         {
 
             comboBox1.DataSource = LIST_getServicingOffices();
-            comboBox2.DataSource = LIST_getTransactionType();
-            comboBox3.DataSource = LIST_getUsers();
             comboBox1.DisplayMember = "Name";
             comboBox1.ValueMember = "id";
+            comboBox2.DataSource = LIST_getTransactionType();
+            comboBox3.DataSource = LIST_getUsers();
             comboBox2.DisplayMember = "Transaction_Name";
             comboBox2.ValueMember = "id";
             comboBox3.DisplayMember = "FullName";
@@ -212,7 +212,7 @@ namespace a3
             if (textBox1.TextLength < 100 && textBox1.TextLength >= 2 && textBox2.TextLength < 100)
             {
                 var confirmResult = MessageBox.Show("Are you sure to add " + textBox1.Text + "?",
-                                     "Confirm Delete",
+                                     "Confirm Add",
                                      MessageBoxButtons.YesNo);
                 if (confirmResult == DialogResult.Yes)
                 {
@@ -442,25 +442,78 @@ namespace a3
         private async void button7_Click(object sender, EventArgs e)
         {
             Enabled = false;
-            var confirmResult = MessageBox.Show("Are you sure to restart the queuing system? " + textBox1.Text + "?",
-                                     "Confirm Delete",
+            var confirmResult = MessageBox.Show("Are you sure to restart the queuing system? " + textBox1.Text,
+                                     "Clean queue confirmation",
                                      MessageBoxButtons.YesNo);
             if (confirmResult == DialogResult.Yes)
             {
-                progressBar1.Maximum = 2;
                 SqlConnection con = new SqlConnection(connection_string);
                 con.Open();
-                String query0 = "TRUNCATE TABLE Main_Queue; TRUNCATE TABLE Queue_Info; TRUNCATE TABLE Serving_Time; TRUNCATE TABLE Servicing_Terminal;";
-                SqlCommand cmd0 = new SqlCommand(query0, con);
-                cmd0.ExecuteNonQuery();
-                progressBar1.Increment(1);
+                SqlTransaction tran = con.BeginTransaction();
+                try
+                {
+                    String getRating = "select * from Rating_Office";
+                    String saveRating = "insert into Feedbacks (Servicing_Office,Score,Transaction_ID,Date_Of_Feedback,isStudent) values " +
+                        " (@param_so,@param_score,@param_tt_ID,@param_date,@param_isStudent)";
+                    SqlCommand cmd_getRating = new SqlCommand(getRating, con);
+                    SqlCommand cmd_saveRating = new SqlCommand(saveRating, con);
+                    cmd_getRating.Transaction = tran;
+                    cmd_saveRating.Transaction = tran;
+                    SqlDataReader rdr_rating;
+                    List<_Rating_Office> evaluationForToday = new List<_Rating_Office>();
+                    String query0 = "TRUNCATE TABLE Main_Queue; TRUNCATE TABLE Queue_Info; TRUNCATE TABLE Serving_Time; TRUNCATE TABLE Servicing_Terminal; TRUNCATE TABLE Rating_Office;";
+                    // retrieve the evaluations first 
+                    rdr_rating = cmd_getRating.ExecuteReader();
+                    while (rdr_rating.Read())
+                    {
+                        _Rating_Office a = new _Rating_Office
+                        {
+                            Customer_Queue_Number = (string)rdr_rating["Customer_Queue_Number"],
+                            isStudent = (bool)rdr_rating["isStudent"],
+                            score = (int)rdr_rating["Score"],
+                            Servicing_OFfice = (int)rdr_rating["Servicing_Office"],
+                            Transaction_ID = (int)rdr_rating["Transaction_ID"]
+                        };
+                        evaluationForToday.Add(a);
+                    }
+                    // save the evaluations
+                    DateTime today = DateTime.Today;
+                    progressBar1.Maximum = 2 + evaluationForToday.Count;
+                    foreach (_Rating_Office b in evaluationForToday)
+                    {
+                        cmd_saveRating.Parameters.AddWithValue("@param_so", b.Servicing_OFfice);
+                        cmd_saveRating.Parameters.AddWithValue("@param_score", b.score);
+                        cmd_saveRating.Parameters.AddWithValue("@param_tt_ID", b.Transaction_ID);
+                        cmd_saveRating.Parameters.AddWithValue("@param_date", today);
+                        cmd_saveRating.Parameters.AddWithValue("@param_isStudent", b.isStudent);
+                        cmd_saveRating.ExecuteNonQuery();
+                        cmd_saveRating.Parameters.Clear();
+                        progressBar1.Increment(1);
+                    }
+                    // clean all
+                    SqlCommand cmd0 = new SqlCommand(query0, con);
+                    cmd0.Transaction = tran;
+                    cmd0.ExecuteNonQuery();
+                    progressBar1.Increment(1);
+                    // Doing the work on firebase too
+                    firebase_Connection fcon = new firebase_Connection();
+                    await fcon.Truncate_Firebase();
+                    progressBar1.Increment(1);
+                    tran.Commit();
+                    MessageBox.Show("All queue at the system and information about it have been cleared.","Clean Success!");
+                    progressBar1.Value = 0;
+                }
+                catch (FirebaseException exd)
+                {
+                    try { tran.Rollback(); } catch (Exception exRollback) { MessageBox.Show("Error at -> " + exRollback.Message); }
+                    MessageBox.Show("An error occured while connecting to firebase DB. Error ->" + exd.Message, "Database error");
+                }
+                catch (SqlException eb)
+                {
+                    try { tran.Rollback(); } catch (Exception exRollback) { MessageBox.Show("Error at -> " + exRollback.Message); }
+                    MessageBox.Show("An error occured while connecting to local DB. Error -> " + eb.Message, "Databse error");
+                }
                 con.Close();
-                // Doing the work on firebase too
-                firebase_Connection fcon = new firebase_Connection();
-                await fcon.Truncate_Firebase();
-                progressBar1.Increment(1);
-                MessageBox.Show("All queue at the system and information about it have been cleared.");
-                progressBar1.Value = 0;
             }
                 
             Enabled = true;

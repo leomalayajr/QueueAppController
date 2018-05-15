@@ -19,10 +19,9 @@ namespace a3
         private int _user_id = 0;
         public Login()
         {
+
             InitializeComponent();
-            linkLabel1.LinkBehavior = System.Windows.Forms.LinkBehavior.NeverUnderline;
             linkLabel2.LinkBehavior = System.Windows.Forms.LinkBehavior.NeverUnderline;
-            linkLabel3.LinkBehavior = System.Windows.Forms.LinkBehavior.NeverUnderline;
         }
 
         private void textBox_enter(object sender, EventArgs e)

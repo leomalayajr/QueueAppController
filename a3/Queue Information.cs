@@ -18,6 +18,10 @@ namespace a3
         private Timer timer1;
         public Queue_Information()
         {
+            FormBorderStyle = FormBorderStyle.FixedDialog;
+            MaximizeBox = false;
+            MinimizeBox = false;
+            StartPosition = FormStartPosition.CenterScreen;
             InitializeComponent();
             Queue_Information_onLoad();
             refreshTerminalList();
@@ -97,7 +101,7 @@ namespace a3
             string Avg_Serving_Time = " ";
             string Window = " ";
             SqlConnection con = new SqlConnection(connection_string);
-            string query = "select * from Queue_Info";
+            string query = "select * from Servicing_Terminal";
             SqlCommand cmd1 = new SqlCommand(query, con);
             SqlDataReader rdr1;
             con.Open();
@@ -105,8 +109,7 @@ namespace a3
             while (rdr1.Read())
             {
                 Customer_Queue_Number = (rdr1["Customer_Queue_Number"] != null && rdr1["Customer_Queue_Number"] != DBNull.Value) ? (string)rdr1["Customer_Queue_Number"] : "N/A";
-                Office_Name = (string)rdr1["Office_Name"];
-                Avg_Serving_Time = ((int)rdr1["Avg_Serving_Time"]).ToString();
+                Office_Name = (string)rdr1["Name"];
                 Window = (rdr1["Window"] != null && rdr1["Window"] != DBNull.Value) ? ((int)rdr1["Window"]).ToString(): "No one serving";
                 
                 string[] row = { Office_Name, Window, Customer_Queue_Number, Avg_Serving_Time };

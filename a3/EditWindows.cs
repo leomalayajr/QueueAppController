@@ -104,19 +104,27 @@ namespace a3
         }
         private void DisplayData()
         {
-            con.Open();
-            DataTable dt = new DataTable();
-            adapt = new SqlDataAdapter("select * from Set_Windows", con);
-            adapt.Fill(dt);
-            dataGridView1.DataSource = dt;
-            con.Close();
+            try
+            {
+                con.Open();
+                DataTable dt = new DataTable();
+                adapt = new SqlDataAdapter("select * from Set_Windows", con);
+                adapt.Fill(dt);
+                dataGridView1.DataSource = dt;
+                con.Close();
+            }
+            catch (ArgumentOutOfRangeException) { }
         }
         //Clear Data  
         private void ClearData()
         {
-            info_MAC.Text = "";
-            info_ServicingOffice.SelectedIndex = 0;
-            info_Windows.SelectedIndex = 0;
+            try
+            {
+                info_MAC.Text = "";
+                info_ServicingOffice.SelectedIndex = 0;
+                info_Windows.SelectedIndex = 0;
+            }
+            catch (ArgumentOutOfRangeException) { }
         }
         //dataGridView1 RowHeaderMouseClick Event  
         private void dataGridView1_RowHeaderMouseClick(object sender, DataGridViewCellMouseEventArgs e)

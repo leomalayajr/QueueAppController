@@ -51,7 +51,7 @@ namespace a3
         EditWindows frmWindows = new EditWindows();
         Evaluation evalForm = new Evaluation();
         settingsForm settings_Form_Quick = (settingsForm)Application.OpenForms["settingsForm"];
-        ViewOfficeTransaction frmViewOT = new ViewOfficeTransaction();
+        OfficeTransactions frmOfTr = new OfficeTransactions();
         #endregion
         public main()
         {
@@ -877,7 +877,9 @@ namespace a3
                                         {
                                             Console.WriteLine("WE -> " + e.Transaction_Type);
                                             int firstServicingOffice = getFirstServicingOffice(e.Transaction_Type);
+                                            Console.WriteLine("B ->" + firstServicingOffice);
                                             int newQueueNumber = getQueueNumber(firstServicingOffice);
+                                            Console.WriteLine("QQQQQ"+ newQueueNumber);
                                             _pq_mq = new _Main_Queue
                                             {
                                                 Queue_Number = newQueueNumber,
@@ -992,10 +994,12 @@ namespace a3
                 // increment queue number 
                 SqlCommand cmd4;
                 String query2 = "update Queue_Info set Current_Queue = Current_Queue+1 OUTPUT Inserted.Current_Queue where Servicing_Office = @Servicing_Office";
+                Console.WriteLine(query2 + " >>> "+q_so);
                 cmd4 = new SqlCommand(query2, con);
                 cmd4.Parameters.AddWithValue("@Servicing_Office", q_so);
                 b = (int)cmd4.ExecuteScalar();
                 con.Close();
+                
 
             }
 
@@ -1271,9 +1275,9 @@ namespace a3
 
         private void button1_Click_1(object sender, EventArgs e)
         {
-            if (frmViewOT.IsDisposed)
-                frmViewOT = new ViewOfficeTransaction();
-            frmViewOT.Show();
+            if (frmOfTr.IsDisposed)
+                frmOfTr = new OfficeTransactions();
+            frmOfTr.Show();
         }
     }
 }

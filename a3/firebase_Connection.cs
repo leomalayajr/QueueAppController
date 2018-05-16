@@ -330,6 +330,14 @@ namespace a3
             catch (OperationCanceledException e) { Console.WriteLine("Cancelled -> Method: Delete PreQueue"); }
 
         }
+        public async Task App_Delete_PreQueueAsyncNoCTS()
+        {
+            string node = "Pre_Queue/";
+            try { await Task.Run(() => firebase.Child(node).DeleteAsync()); }
+            catch (FirebaseException e) { Console.Write("Problem -> Method: Delete PreQueue"); throw; }
+            catch (OperationCanceledException e) { Console.WriteLine("Cancelled -> Method: Delete PreQueue"); }
+
+        }
         public async Task App_Delete_MainQueueAsync()
         {
             string node = "Main_Queue/";

@@ -219,32 +219,43 @@ namespace a3
                                      MessageBoxButtons.YesNo);
                 if (confirmResult == DialogResult.Yes)
                 {
-                    // Add to database
                     SqlConnection con = new SqlConnection(connection_string);
-                    string _query = "insert into Servicing_Office (Name,Address) OUTPUT Inserted.id values (@param1,@param2)";
-                    SqlCommand _cmd = new SqlCommand(_query, con);
-                    string _b = "insert into Queue_Info (Current_Number,Current_Queue,Servicing_Office,Counter," +
-                        "Mode,Status,Avg_Serving_Time,Office_Name) values " +
-                        "(0,1,@param_newID,0,1,@param_online,0,@param_newName)";
-                    SqlCommand _cmd2 = new SqlCommand(_b, con);
-                    try
+                    con.Open();
+                    string __query = "select * from Servicing_Office where Name = @param1";
+                    SqlCommand __cmd = new SqlCommand(__query, con);
+                    __cmd.Parameters.AddWithValue("@param1", textBox1.Text);
+                    var __a = __cmd.ExecuteScalar();
+                    if (__a != null)
+                        MessageBox.Show(textBox1.Text+" already exists!", "Error!");
+                    else
                     {
-                        con.Open();
-                        _cmd.Parameters.AddWithValue("@param1", textBox1.Text);
-                        _cmd.Parameters.AddWithValue("@param2", textBox2.Text);
-                        int a = (int)_cmd.ExecuteScalar();
-                        _cmd.Parameters.Clear();
-                        _cmd2.Parameters.AddWithValue("@param_newID", a);
-                        _cmd2.Parameters.AddWithValue("@param_newName", textBox1.Text);
-                        _cmd2.Parameters.AddWithValue("@param_online", "Online");
-                        _cmd2.ExecuteNonQuery();
-                        generateDeleteItems();
-                        MessageBox.Show(textBox1.Text + " added on Servicing Offices!", "Success!");
+                        // Add to database
+                        string _query = "insert into Servicing_Office (Name,Address) OUTPUT Inserted.id values (@param1,@param2)";
+                        SqlCommand _cmd = new SqlCommand(_query, con);
+                        string _b = "insert into Queue_Info (Current_Number,Current_Queue,Servicing_Office,Counter," +
+                            "Mode,Status,Avg_Serving_Time,Office_Name) values " +
+                            "(0,1,@param_newID,0,1,@param_online,0,@param_newName)";
+                        SqlCommand _cmd2 = new SqlCommand(_b, con);
+                        try
+                        {
+                            
+                            _cmd.Parameters.AddWithValue("@param1", textBox1.Text);
+                            _cmd.Parameters.AddWithValue("@param2", textBox2.Text);
+                            int a = (int)_cmd.ExecuteScalar();
+                            _cmd.Parameters.Clear();
+                            _cmd2.Parameters.AddWithValue("@param_newID", a);
+                            _cmd2.Parameters.AddWithValue("@param_newName", textBox1.Text);
+                            _cmd2.Parameters.AddWithValue("@param_online", "Online");
+                            _cmd2.ExecuteNonQuery();
+                            generateDeleteItems();
+                            MessageBox.Show(textBox1.Text + " added on Servicing Offices!", "Success!");
+                        }
+                        catch (SqlException ea)
+                        {
+                            MessageBox.Show("Database error. -> " + ea.Message);
+                        }
                     }
-                    catch (SqlException ea)
-                    {
-                        MessageBox.Show("Database error. -> " + ea.Message);
-                    }
+                    con.Close();
                 }
             }
             else
@@ -491,7 +502,7 @@ namespace a3
                     cmd_saveRating.Transaction = tran;
                     SqlDataReader rdr_rating;
                     List<_Rating_Office> evaluationForToday = new List<_Rating_Office>();
-                    String query0 = "TRUNCATE TABLE Main_Queue; TRUNCATE TABLE Queue_Info; TRUNCATE TABLE Serving_Time; TRUNCATE TABLE Servicing_Terminal; TRUNCATE TABLE Rating_Office;";
+                    String query0 = "TRUNCATE TABLE Main_Queue; TRUNCATE TABLE Queue_Info; TRUNCATE TABLE Serving_Time; TRUNCATE TABLE Servicing_Terminal; TRUNCATE TABLE Rating_Office; TRUNCATE TABLE Serving_Info;";
                     // retrieve the evaluations first 
                     rdr_rating = cmd_getRating.ExecuteReader();
                     while (rdr_rating.Read())
@@ -529,6 +540,7 @@ namespace a3
                     firebase_Connection fcon = new firebase_Connection();
                     await fcon.Truncate_Firebase();
                     fcon.Controller_SetAllToInactive();
+                    fcon.App_Delete_PreQueueAsyncNoCTS();
                     progressBar1.Increment(1);
                     tran.Commit();
                     MessageBox.Show("All queue at the system and information about it have been cleared.","Clean Success!");

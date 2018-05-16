@@ -165,9 +165,9 @@
             this.listBox1.ItemHeight = 25;
             this.listBox1.Items.AddRange(new object[] {
             "Please select a transaction type"});
-            this.listBox1.Location = new System.Drawing.Point(122, 387);
+            this.listBox1.Location = new System.Drawing.Point(144, 387);
             this.listBox1.Name = "listBox1";
-            this.listBox1.Size = new System.Drawing.Size(366, 79);
+            this.listBox1.Size = new System.Drawing.Size(344, 79);
             this.listBox1.TabIndex = 23;
             // 
             // button1
@@ -195,7 +195,7 @@
             this.label9.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label9.Location = new System.Drawing.Point(12, 387);
             this.label9.Name = "label9";
-            this.label9.Size = new System.Drawing.Size(104, 25);
+            this.label9.Size = new System.Drawing.Size(126, 33);
             this.label9.TabIndex = 26;
             this.label9.Text = "Office List:";
             // 

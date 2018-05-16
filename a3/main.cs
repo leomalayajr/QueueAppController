@@ -87,76 +87,72 @@ namespace a3
         private async void cleanDB()
         {
             Enabled = false;
-            var confirmResult = MessageBox.Show("Are you sure to restart the queuing system? ",
-                                     "Clean queue confirmation",
-                                     MessageBoxButtons.YesNo);
-            if (confirmResult == DialogResult.Yes)
+            SqlConnection con = new SqlConnection(connection_string);
+            con.Open();
+            SqlTransaction tran = con.BeginTransaction();
+            try
             {
-                SqlConnection con = new SqlConnection(connection_string);
-                con.Open();
-                SqlTransaction tran = con.BeginTransaction();
-                try
+                String getRating = "select * from Rating_Office";
+                String saveRating = "insert into Feedbacks (Servicing_Office,Score,Transaction_ID,Date_Of_Feedback,isStudent) values " +
+                    " (@param_so,@param_score,@param_tt_ID,@param_date,@param_isStudent)";
+                SqlCommand cmd_getRating = new SqlCommand(getRating, con);
+                SqlCommand cmd_saveRating = new SqlCommand(saveRating, con);
+                cmd_getRating.Transaction = tran;
+                cmd_saveRating.Transaction = tran;
+                SqlDataReader rdr_rating;
+                List<_Rating_Office> evaluationForToday = new List<_Rating_Office>();
+                String query0 = "TRUNCATE TABLE Main_Queue; TRUNCATE TABLE Queue_Info; TRUNCATE TABLE Serving_Time; TRUNCATE TABLE Servicing_Terminal; TRUNCATE TABLE Rating_Office;";
+                // retrieve the evaluations first 
+                rdr_rating = cmd_getRating.ExecuteReader();
+                while (rdr_rating.Read())
                 {
-                    String getRating = "select * from Rating_Office";
-                    String saveRating = "insert into Feedbacks (Servicing_Office,Score,Transaction_ID,Date_Of_Feedback,isStudent) values " +
-                        " (@param_so,@param_score,@param_tt_ID,@param_date,@param_isStudent)";
-                    SqlCommand cmd_getRating = new SqlCommand(getRating, con);
-                    SqlCommand cmd_saveRating = new SqlCommand(saveRating, con);
-                    cmd_getRating.Transaction = tran;
-                    cmd_saveRating.Transaction = tran;
-                    SqlDataReader rdr_rating;
-                    List<_Rating_Office> evaluationForToday = new List<_Rating_Office>();
-                    String query0 = "TRUNCATE TABLE Main_Queue; TRUNCATE TABLE Queue_Info; TRUNCATE TABLE Serving_Time; TRUNCATE TABLE Servicing_Terminal; TRUNCATE TABLE Rating_Office;";
-                    // retrieve the evaluations first 
-                    rdr_rating = cmd_getRating.ExecuteReader();
-                    while (rdr_rating.Read())
+                    _Rating_Office a = new _Rating_Office
                     {
-                        _Rating_Office a = new _Rating_Office
-                        {
-                            Customer_Queue_Number = (string)rdr_rating["Customer_Queue_Number"],
-                            isStudent = (bool)rdr_rating["isStudent"],
-                            score = (int)rdr_rating["Score"],
-                            Servicing_OFfice = (int)rdr_rating["Servicing_Office"],
-                            Transaction_ID = (int)rdr_rating["Transaction_ID"]
-                        };
-                        evaluationForToday.Add(a);
-                    }
-                    // save the evaluations
-                    DateTime today = DateTime.Today;
-                    foreach (_Rating_Office b in evaluationForToday)
-                    {
-                        cmd_saveRating.Parameters.AddWithValue("@param_so", b.Servicing_OFfice);
-                        cmd_saveRating.Parameters.AddWithValue("@param_score", b.score);
-                        cmd_saveRating.Parameters.AddWithValue("@param_tt_ID", b.Transaction_ID);
-                        cmd_saveRating.Parameters.AddWithValue("@param_date", today);
-                        cmd_saveRating.Parameters.AddWithValue("@param_isStudent", b.isStudent);
-                        cmd_saveRating.ExecuteNonQuery();
-                        cmd_saveRating.Parameters.Clear();
-                    }
-                    // clean all
-                    SqlCommand cmd0 = new SqlCommand(query0, con);
-                    cmd0.Transaction = tran;
-                    cmd0.ExecuteNonQuery();
-                    // Doing the work on firebase too
-                    firebase_Connection fcon = new firebase_Connection();
-                    await fcon.Truncate_Firebase();
-                    tran.Commit();
-                    MessageBox.Show("All queue at the system and information about it have been cleared.", "Clean Success!");
-                    
+                        Customer_Queue_Number = (string)rdr_rating["Customer_Queue_Number"],
+                        isStudent = (bool)rdr_rating["isStudent"],
+                        score = (int)rdr_rating["Score"],
+                        Servicing_OFfice = (int)rdr_rating["Servicing_Office"],
+                        Transaction_ID = (int)rdr_rating["Transaction_ID"]
+                    };
+                    evaluationForToday.Add(a);
                 }
-                catch (FirebaseException exd)
+                // save the evaluations
+                DateTime today = DateTime.Today;
+                foreach (_Rating_Office b in evaluationForToday)
                 {
-                    try { tran.Rollback(); } catch (Exception exRollback) { MessageBox.Show("Error at -> " + exRollback.Message); }
-                    MessageBox.Show("An error occured while connecting to firebase DB. Error ->" + exd.Message, "Database error");
+                    cmd_saveRating.Parameters.AddWithValue("@param_so", b.Servicing_OFfice);
+                    cmd_saveRating.Parameters.AddWithValue("@param_score", b.score);
+                    cmd_saveRating.Parameters.AddWithValue("@param_tt_ID", b.Transaction_ID);
+                    cmd_saveRating.Parameters.AddWithValue("@param_date", today);
+                    cmd_saveRating.Parameters.AddWithValue("@param_isStudent", b.isStudent);
+                    cmd_saveRating.ExecuteNonQuery();
+                    cmd_saveRating.Parameters.Clear();
                 }
-                catch (SqlException eb)
-                {
-                    try { tran.Rollback(); } catch (Exception exRollback) { MessageBox.Show("Error at -> " + exRollback.Message); }
-                    MessageBox.Show("An error occured while connecting to local DB. Error -> " + eb.Message, "Databse error");
-                }
-                con.Close();
+                // clean all
+                SqlCommand cmd0 = new SqlCommand(query0, con);
+                cmd0.Transaction = tran;
+                cmd0.ExecuteNonQuery();
+                // Doing the work on firebase too
+                firebase_Connection fcon = new firebase_Connection();
+                await fcon.Truncate_Firebase();
+                fcon.Controller_SetAllToInactive();
+                tran.Commit();
+                MessageBox.Show("All queue at the system and information about it have been cleared.", "Clean Success!");
+
             }
-            
+            catch (FirebaseException exd)
+            {
+                try { tran.Rollback(); } catch (Exception exRollback) { MessageBox.Show("Error at -> " + exRollback.Message); }
+                MessageBox.Show("An error occured while connecting to firebase DB. Error ->" + exd.Message, "Database error");
+            }
+            catch (SqlException eb)
+            {
+                try { tran.Rollback(); } catch (Exception exRollback) { MessageBox.Show("Error at -> " + exRollback.Message); }
+                MessageBox.Show("An error occured while connecting to local DB. Error -> " + eb.Message, "Databse error");
+            }
+            con.Close();
+
+
         }
         private void btnSettings_Click(object sender, EventArgs e)
         {
@@ -422,7 +418,6 @@ namespace a3
                     SqlConnection con = new SqlConnection(connection_string);
                     firebase_Connection fcon = new firebase_Connection();
                     string QUERY_InsertTransactions = "select * from Transaction_Type";
-
                     SqlCommand COMMAND_syncOnce = new SqlCommand(QUERY_InsertTransactions, con);
 
                     using (con)
@@ -501,6 +496,7 @@ namespace a3
             try
             {
                 HttpWebResponse response = (HttpWebResponse)request.GetResponse();
+                firebase_Connection fcon = new firebase_Connection();
                 if (response == null || response.StatusCode != HttpStatusCode.OK)
                 {
                     logWrite("Online", "Internet is OK but can't reach Google Firebase.");
@@ -524,7 +520,8 @@ namespace a3
                 var src = System.DateTime.Now.Hour;
                 var srcm = System.DateTime.Now.Minute;
                 if (src == 0 && srcm == 0)
-                    cleanDB();
+                    cleanDB(); // clean queue
+
             }
             catch (SqlException)
             {

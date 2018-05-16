@@ -143,6 +143,7 @@
     <Compile Include="_Pre_Queue.cs" />
     <Compile Include="_Queue_Request.cs" />
     <Compile Include="_Queue_Request_String.cs" />
+    <Compile Include="_Queue_Status.cs" />
     <Compile Include="_Rating_Office.cs" />
     <Compile Include="_Servicing_Office.cs" />
     <Compile Include="_Transaction_List.cs" />

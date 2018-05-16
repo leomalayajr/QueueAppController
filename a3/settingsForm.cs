@@ -409,6 +409,9 @@ namespace a3
                         con.Open();
                         truncate_cmd.ExecuteNonQuery();
                         progressBar1.Maximum = excel._userCount*4;
+                        //drop queue_status and accounts first
+                        await fcon.Controller_TruncateQueueStatus();
+                        await fcon.Controller_DeleteAllAccounts();
                         foreach (_App_User b in results)
                         {
                             string password = Cryptography.Encrypt(b.password.ToString());
@@ -525,6 +528,7 @@ namespace a3
                     // Doing the work on firebase too
                     firebase_Connection fcon = new firebase_Connection();
                     await fcon.Truncate_Firebase();
+                    fcon.Controller_SetAllToInactive();
                     progressBar1.Increment(1);
                     tran.Commit();
                     MessageBox.Show("All queue at the system and information about it have been cleared.","Clean Success!");

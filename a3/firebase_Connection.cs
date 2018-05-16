@@ -30,6 +30,30 @@ namespace a3
             this.ap = new FirebaseAuthProvider(new FirebaseConfig(databaseKey));
 
         }
+        public async Task Controller_TruncateQueueStatus()
+        {
+            await firebase.Child("Queue_Status/").DeleteAsync();
+        }
+        public async Task Controller_SetAllToInactive()
+        {
+            
+            List<string> returned_list = new List<string>();
+            try
+            {
+                var b = await firebase.Child("Queue_Status").OnceAsync<string>();
+                foreach (var a in b)
+                {
+                    Console.WriteLine(a.Key);
+                    await firebase.Child("Queue_Status").Child(a.Key).PutAsync<string>("Inactive");
+                }
+            }
+            catch (FirebaseException aa)
+            {
+                Console.WriteLine(aa.Message);
+                Console.WriteLine(aa.RequestUrl);
+                Console.WriteLine(aa.InnerException);
+            }
+        }
         public async Task Controller_RegisterThisUser(_App_User _new_user)
         {
             try
@@ -368,13 +392,17 @@ namespace a3
             }
 
         }
+        public async Task Controller_DeleteAllAccounts()
+        {
+            await firebase.Child("Accounts/").DeleteAsync();
+        }
         public async Task Controller_ImportUsers(_App_User _au)
         {
             string Student_No = "unknown";
             try
             {
                 Student_No = _au.accountNumber;
-                await Task.Run(() => firebase.Child("AccountsTest/").Child(Student_No).PutAsync<_App_User>(_au));
+                await Task.Run(() => firebase.Child("Accounts/").Child(Student_No).Child("Profile/").PutAsync<_App_User>(_au));
             }
             catch (FirebaseException e) { Console.WriteLine("Problem -> Method: Controller ImportUsers"); throw; }
             

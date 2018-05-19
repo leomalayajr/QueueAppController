@@ -52,6 +52,7 @@ namespace a3
         Evaluation evalForm = new Evaluation();
         settingsForm settings_Form_Quick = (settingsForm)Application.OpenForms["settingsForm"];
         OfficeTransactions frmOfTr = new OfficeTransactions();
+        Logs frmLogs = new Logs();
         #endregion
         public main()
         {
@@ -101,7 +102,8 @@ namespace a3
                 cmd_saveRating.Transaction = tran;
                 SqlDataReader rdr_rating;
                 List<_Rating_Office> evaluationForToday = new List<_Rating_Office>();
-                String query0 = "TRUNCATE TABLE Main_Queue; TRUNCATE TABLE Queue_Info; TRUNCATE TABLE Serving_Time; TRUNCATE TABLE Servicing_Terminal; TRUNCATE TABLE Rating_Office;";
+                String query0 = "TRUNCATE TABLE Main_Queue; TRUNCATE TABLE Queue_Info; TRUNCATE TABLE Serving_Time; TRUNCATE TABLE Servicing_Terminal; TRUNCATE TABLE Rating_Office; TRUNCATE TABLE Serving_Info";
+                
                 // retrieve the evaluations first 
                 rdr_rating = cmd_getRating.ExecuteReader();
                 while (rdr_rating.Read())
@@ -136,7 +138,10 @@ namespace a3
                 firebase_Connection fcon = new firebase_Connection();
                 await fcon.Truncate_Firebase();
                 fcon.Controller_SetAllToInactive();
+                fcon.App_Delete_PreQueueAsyncNoCTS();
                 tran.Commit();
+                try { Queue_Info_Update(); }
+                catch (SqlException aa) { }
                 MessageBox.Show("All queue at the system and information about it have been cleared.", "Clean Success!");
 
             }
@@ -191,7 +196,7 @@ namespace a3
         private void btnWindows_Click(object sender, EventArgs e)
         {
             if (frmWindows.IsDisposed)
-                frmWindows = new EditWindows();
+             frmWindows = new EditWindows(); 
 
             frmWindows.Show();
         }
@@ -502,6 +507,7 @@ namespace a3
                     logWrite("Online", "Internet is OK but can't reach Google Firebase.");
                     MessageBox.Show("Internet is OK but can't reach Google Firebase.");
                 }
+                else { Console.WriteLine("Online Connect = OK"); }
                 response.Close();
             }
             catch (WebException)
@@ -517,11 +523,17 @@ namespace a3
                 SqlCommand TEST_CMD = new SqlCommand("select top 1 id from Users", localSQLcheck);
                 int q = (int)TEST_CMD.ExecuteScalar();
                 localSQLcheck.Close();
+
+                table_Servicing_Office = getServicingOffice();
+                table_Transactions = getTransactionList();
+                table_Transaction_Table = getTransactionType();
+
+                //auto clean on midnight
                 var src = System.DateTime.Now.Hour;
                 var srcm = System.DateTime.Now.Minute;
                 if (src == 0 && srcm == 0)
                     cleanDB(); // clean queue
-
+                else { Console.WriteLine("Local Connect = OK"); }
             }
             catch (SqlException)
             {
@@ -912,6 +924,7 @@ namespace a3
                                             {
 
                                                 Console.WriteLine("PREQUEUE {0} ==", f.Customer_Queue_Number);
+                                                logWrite("New online queue -> ", f.Full_Name);
                                                 // Add to local DB -> MainQueue
                                                 cmdPreQueue.Parameters.AddWithValue("@q_qn", f.Queue_Number);
                                                 cmdPreQueue.Parameters.AddWithValue("@q_fn", f.Full_Name);
@@ -937,12 +950,16 @@ namespace a3
                                     );
 
 
-                                logWrite("Online", "-----");
+                                logWrite("Online", "Running sync tasks...");
                                 await Task.WhenAll(i6);
+                                Console.WriteLine("i6 done");
                                 await Task.WhenAll(i1);
+                                Console.WriteLine("i1 done");
                                 await Task.WhenAll(i3, i5);
+                                Console.WriteLine("i3 i5 done");
                                 //await Task.WhenAll(i1, i2, i3, i4, i5);
                                 await Task.WhenAll(i2, i4);
+                                Console.WriteLine("i2 i4 done");
                                 logWrite("Online", "Sync successful at " + DateTime.Now + " !");
                             }
                             catch (OperationCanceledException)
@@ -971,6 +988,11 @@ namespace a3
                         Console.WriteLine("Minutes at " + stopp.Elapsed.Minutes);
                         Console.WriteLine("Seconds at " + stopp.Elapsed.Seconds);
                         Console.WriteLine("TotalSeconds at " + stopp.Elapsed.TotalSeconds);
+                        if (counter >= 2000)
+                        {
+                            _wholeTextLog = string.Empty;
+                            counter = 0;
+                        }
                     }
                 }
                 else
@@ -997,10 +1019,9 @@ namespace a3
                 Console.WriteLine(query2 + " >>> "+q_so);
                 cmd4 = new SqlCommand(query2, con);
                 cmd4.Parameters.AddWithValue("@Servicing_Office", q_so);
+                Console.WriteLine(">>>>>" + q_so);
                 b = (int)cmd4.ExecuteScalar();
                 con.Close();
-                
-
             }
 
         }
@@ -1278,6 +1299,13 @@ namespace a3
             if (frmOfTr.IsDisposed)
                 frmOfTr = new OfficeTransactions();
             frmOfTr.Show();
+        }
+
+        private void btnLog_Click(object sender, EventArgs e)
+        {
+            if (frmLogs.IsDisposed)
+                frmLogs = new Logs();
+            frmLogs.Show();
         }
     }
 }

@@ -18,11 +18,13 @@ namespace a3
         private String connection_string = System.Configuration.ConfigurationManager.ConnectionStrings["dbString"].ConnectionString;
         main mainForm = (main)Application.OpenForms["main"];
         addTransactionType form_tt = (addTransactionType)Application.OpenForms["addTransactionType"];
+        DataTable table_Servicing_Office;
         public settingsForm()
         {
             InitializeComponent();
             StartPosition = FormStartPosition.CenterParent;
             generateDeleteItems();
+            table_Servicing_Office = getServicingOffice();
         }
         private List<_Servicing_Office> LIST_getServicingOffices()
         {
@@ -46,6 +48,7 @@ namespace a3
                         Address = (string)_rdr["Address"],
                         id = (int)_rdr["ID"]
                     });
+                    Console.WriteLine((string)_rdr["Name"]);
                 }
                 con.Close();
             }
@@ -214,53 +217,63 @@ namespace a3
         {
             if (textBox1.TextLength < 100 && textBox1.TextLength >= 2 && textBox2.TextLength < 100)
             {
-                var confirmResult = MessageBox.Show("Are you sure to add " + textBox1.Text + "?",
-                                     "Confirm Add",
-                                     MessageBoxButtons.YesNo);
-                if (confirmResult == DialogResult.Yes)
+                if (string.IsNullOrWhiteSpace(textBox1.Text))
+                    MessageBox.Show("Name must not be empty!", "Error");
+                else
                 {
-                    SqlConnection con = new SqlConnection(connection_string);
-                    con.Open();
-                    string __query = "select * from Servicing_Office where Name = @param1";
-                    SqlCommand __cmd = new SqlCommand(__query, con);
-                    __cmd.Parameters.AddWithValue("@param1", textBox1.Text);
-                    var __a = __cmd.ExecuteScalar();
-                    if (__a != null)
-                        MessageBox.Show(textBox1.Text+" already exists!", "Error!");
-                    else
+                    var confirmResult = MessageBox.Show("Are you sure to add " + textBox1.Text + "?",
+                                         "Confirm Add",
+                                         MessageBoxButtons.YesNo);
+                    if (confirmResult == DialogResult.Yes)
                     {
-                        // Add to database
-                        string _query = "insert into Servicing_Office (Name,Address) OUTPUT Inserted.id values (@param1,@param2)";
-                        SqlCommand _cmd = new SqlCommand(_query, con);
-                        string _b = "insert into Queue_Info (Current_Number,Current_Queue,Servicing_Office,Counter," +
-                            "Mode,Status,Avg_Serving_Time,Office_Name) values " +
-                            "(0,1,@param_newID,0,1,@param_online,0,@param_newName)";
-                        SqlCommand _cmd2 = new SqlCommand(_b, con);
-                        try
+                        SqlConnection con = new SqlConnection(connection_string);
+                        con.Open();
+                        string __query = "select * from Servicing_Office where Name = @param1";
+                        SqlCommand __cmd = new SqlCommand(__query, con);
+                        __cmd.Parameters.AddWithValue("@param1", textBox1.Text);
+                        var __a = __cmd.ExecuteScalar();
+
+                        if (__a != null)
+                            MessageBox.Show(textBox1.Text + " already exists!", "Error!");
+                        else
                         {
-                            
-                            _cmd.Parameters.AddWithValue("@param1", textBox1.Text);
-                            _cmd.Parameters.AddWithValue("@param2", textBox2.Text);
-                            int a = (int)_cmd.ExecuteScalar();
-                            _cmd.Parameters.Clear();
-                            _cmd2.Parameters.AddWithValue("@param_newID", a);
-                            _cmd2.Parameters.AddWithValue("@param_newName", textBox1.Text);
-                            _cmd2.Parameters.AddWithValue("@param_online", "Online");
-                            _cmd2.ExecuteNonQuery();
-                            generateDeleteItems();
-                            MessageBox.Show(textBox1.Text + " added on Servicing Offices!", "Success!");
+                            // Add to database
+                            string _query = "insert into Servicing_Office (Name,Address) OUTPUT Inserted.id values (@param1,@param2)";
+                            SqlCommand _cmd = new SqlCommand(_query, con);
+                            string _b = "insert into Queue_Info (Current_Number,Current_Queue,Servicing_Office,Counter," +
+                                "Mode,Status,Avg_Serving_Time,Office_Name) values " +
+                                "(0,1,@param_newID,0,1,@param_online,0,@param_newName)";
+                            SqlCommand _cmd2 = new SqlCommand(_b, con);
+                            try
+                            {
+
+                                _cmd.Parameters.AddWithValue("@param1", textBox1.Text);
+                                _cmd.Parameters.AddWithValue("@param2", textBox2.Text);
+                                int a = (int)_cmd.ExecuteScalar();
+                                _cmd.Parameters.Clear();
+                                _cmd2.Parameters.AddWithValue("@param_newID", a);
+                                _cmd2.Parameters.AddWithValue("@param_newName", textBox1.Text);
+                                _cmd2.Parameters.AddWithValue("@param_online", "Online");
+                                _cmd2.ExecuteNonQuery();
+                                generateDeleteItems();
+                                textBox1.Clear();
+                                textBox2.Clear();
+                                MessageBox.Show(textBox1.Text + " added on Servicing Offices!", "Success!");
+                            }
+                            catch (SqlException ea)
+                            {
+                                MessageBox.Show("Database error. -> " + ea.Message);
+                            }
                         }
-                        catch (SqlException ea)
-                        {
-                            MessageBox.Show("Database error. -> " + ea.Message);
-                        }
+                        con.Close();
                     }
-                    con.Close();
                 }
             }
             else
             {
-                MessageBox.Show("Name or address length exceeds the limit!");
+                //textBox1.TextLength < 100 && textBox1.TextLength >= 2 && textBox2.TextLength < 100
+                //MessageBox.Show("Name or address length exceeds the limit!");
+                MessageBox.Show("Name length should 2 to 100, address is less than 100.", "Length error!");
             }
 
 
@@ -278,14 +291,113 @@ namespace a3
 
 
         }
+        private DataTable getServicingOffice()
+        {
+            DataTable b = new DataTable();
+            b.Columns.Add("id", typeof(int));
+            b.Columns.Add("Name", typeof(string));
+            b.Columns.Add("Address", typeof(string));
+            SqlConnection con = new SqlConnection(connection_string);
+            using (con)
+            {
+                con.Open();
+                SqlCommand b_cmd = con.CreateCommand();
+                SqlDataReader b_rdr;
 
+                String b_q = "select * from Servicing_Office";
+                b_cmd = new SqlCommand(b_q, con);
+
+                b_rdr = b_cmd.ExecuteReader();
+                while (b_rdr.Read())
+                {
+                    b.Rows.Add(
+                       (int)b_rdr["id"],
+                       (string)b_rdr["Name"],
+                       (string)b_rdr["Address"]);
+                }
+                con.Close();
+            }
+            return b;
+        }
+        private string getServicingOfficeName(int _so)
+        {
+            string servicing_office_Name = "";
+            foreach (DataRow row in table_Servicing_Office.Rows)
+            {
+                int temp_id = (int)row["id"];
+                if (_so == temp_id)
+                {
+                    servicing_office_Name = (string)row["Name"];
+                    break;
+                }
+            }
+            return servicing_office_Name;
+        }
+        private void Queue_Info_Update()
+        {
+            //Checks whether Queue_Info is available.
+            //Writes default data.
+            //Always executed when a Kiosk have been opened.
+            Console.WriteLine("Info update have been called.");
+            SqlConnection con = new SqlConnection(connection_string);
+            using (con)
+            {
+                con.Open();
+                SqlCommand cmd = con.CreateCommand();
+                SqlCommand cmd2 = con.CreateCommand();
+                SqlCommand cmd3 = con.CreateCommand();
+                cmd.CommandType = CommandType.Text;
+                cmd2.CommandType = CommandType.Text;
+
+                String query = "select * from Queue_Info";
+                String query2 = "";
+
+                SqlDataReader rdr;
+                cmd = new SqlCommand(query, con);
+
+                rdr = cmd.ExecuteReader();
+                int rowCount = 0;
+                while (rdr.Read())
+                { rowCount++; { if (rowCount > 0) { break; } } }
+                if (rowCount > 0)
+                {
+                    //MessageBox.Show(Status+" already");
+                }
+                else
+                {
+                    foreach (DataRow a in table_Servicing_Office.Rows)
+                    {
+                        int _so = (int)a["id"];
+                        query2 = "insert into Queue_Info (Current_Number,Current_Queue,Servicing_Office,Mode,Status,Counter,Office_Name) values (@cn,@cq,@so,@m,@sn,@c,@o_n)";
+                        cmd2 = new SqlCommand(query2, con);
+                        cmd2.Parameters.AddWithValue("@cn", 0);
+                        cmd2.Parameters.AddWithValue("@cq", 1);
+                        cmd2.Parameters.AddWithValue("@so", _so);
+                        cmd2.Parameters.AddWithValue("@m", 1);
+                        cmd2.Parameters.AddWithValue("@sn", "Online");
+                        cmd2.Parameters.AddWithValue("@c", "0");
+                        cmd2.Parameters.AddWithValue("@o_n", getServicingOfficeName(_so));
+                        int result = cmd2.ExecuteNonQuery();
+                        Console.WriteLine("Queue info inserting something...");
+                        // Inserting data to firebase
+                        // FirebaseFunction: Kiosk_Insert_QueueInfo(_so);
+                    }
+                }
+
+            }
+            con.Close();
+        }
         private void button4_Click(object sender, EventArgs e)
         {
             SqlConnection con = new SqlConnection(connection_string);
             string SERVICINGOFFICE_Delete = "delete from Servicing_Office where id = @param1";
             string QUEUEINFO_Delete = "delete from Queue_Info where Servicing_Office = @param1";
+            string WINDOW_Delete = "delete from Set_Windows where Servicing_Office_ID = @param1";
+            string TERMINAL_Delete = "delete from Servicing_Terminal where Servicing_Office = @param1";
             SqlCommand _cmd = new SqlCommand(SERVICINGOFFICE_Delete, con);
             SqlCommand __cmd = new SqlCommand(QUEUEINFO_Delete, con);
+            SqlCommand ___cmd = new SqlCommand(WINDOW_Delete, con);
+            SqlCommand ____cmd = new SqlCommand(TERMINAL_Delete, con);
             var confirmResult = MessageBox.Show("Are you sure to delete this?",
                                      "Confirm Delete",
                                      MessageBoxButtons.YesNo);
@@ -300,11 +412,19 @@ namespace a3
                     _cmd.ExecuteNonQuery();
                     __cmd.Parameters.AddWithValue("@param1", _id);
                     __cmd.ExecuteNonQuery();
+                    ___cmd.Parameters.AddWithValue("@param1", _id);
+                    ___cmd.ExecuteNonQuery();
+                    ____cmd.Parameters.AddWithValue("@param1", _id);
+                    ____cmd.ExecuteNonQuery();
                     con.Close();
                 }
                 catch (SqlException ex)
                 {
                     MessageBox.Show("Error ->" + ex.Message);
+                }
+                catch (NullReferenceException)
+                {
+                    Console.WriteLine("Selecting nothing...");
                 }
             }
             else
@@ -343,6 +463,10 @@ namespace a3
                 {
                     MessageBox.Show("Error ->" + ex.Message);
                 }
+                catch (NullReferenceException)
+                {
+                    Console.WriteLine("Selecting nothing...");
+                }
             }
             else
             {
@@ -374,6 +498,10 @@ namespace a3
                 catch (SqlException ex)
                 {
                     MessageBox.Show("Error ->" + ex.Message);
+                }
+                catch (NullReferenceException)
+                {
+                    Console.WriteLine("Selecting nothing...");
                 }
             }
             else
@@ -419,35 +547,44 @@ namespace a3
 
                         con.Open();
                         truncate_cmd.ExecuteNonQuery();
-                        progressBar1.Maximum = excel._userCount*4;
+                        int max = excel._userCount * 4;
+                        progressBar1.Maximum = max;
                         //drop queue_status and accounts first
                         await fcon.Controller_TruncateQueueStatus();
                         await fcon.Controller_DeleteAllAccounts();
                         foreach (_App_User b in results)
                         {
                             string password = Cryptography.Encrypt(b.password.ToString());
-                            //upload to local db
-                            
-                            cmd.Parameters.AddWithValue("@param_fn", b.lastName.ToUpper() + "," + b.firstName + " " + b.middleName);
-                            cmd.Parameters.AddWithValue("@param_sn", b.accountNumber);
-                            cmd.Parameters.AddWithValue("@param_cl", b.college);
-                            cmd.Parameters.AddWithValue("@param_cs", b.course);
-                            cmd.Parameters.AddWithValue("@param_s", b.status);
-                            cmd.Parameters.AddWithValue("@param_y", b.year);
-                            cmd.Parameters.AddWithValue("@param_p", password);
-                            cmd.ExecuteNonQuery();
-                            cmd.Parameters.Clear();
-                            
+
                             progressBar1.Increment(1);
                             //upload to the Firebase DB
-                            await fcon.Controller_ImportUsers(b);
-                            progressBar1.Increment(1);
-                            await fcon.Controller_RegisterThisUser(b);
-                            progressBar1.Increment(1);
-                            await fcon.Controller_InsertQueueStatus(b.accountNumber);
-                            progressBar1.Increment(1);
+                            try
+                            {
+                                await fcon.Controller_ImportUsers(b);
+                                progressBar1.Increment(1);
+                                await fcon.Controller_RegisterThisUser(b);
+                                progressBar1.Increment(1);
+                                await fcon.Controller_InsertQueueStatus(b.accountNumber);
+                                progressBar1.Increment(1);
+
+                                //upload to local db
+                                cmd.Parameters.AddWithValue("@param_fn", b.lastName.ToUpper() + "," + b.firstName + " " + b.middleName);
+                                cmd.Parameters.AddWithValue("@param_sn", b.accountNumber);
+                                cmd.Parameters.AddWithValue("@param_cl", b.college);
+                                cmd.Parameters.AddWithValue("@param_cs", b.course);
+                                cmd.Parameters.AddWithValue("@param_s", b.status);
+                                cmd.Parameters.AddWithValue("@param_y", b.year);
+                                cmd.Parameters.AddWithValue("@param_p", password);
+                                cmd.ExecuteNonQuery();
+                                cmd.Parameters.Clear();
+                            }
+                            catch (FirebaseAuthException exd) {
+                                Console.WriteLine(exd.Message);
+                            }
+                            
                         }
                         con.Close();
+                        progressBar1.Value = max;
                         MessageBox.Show("Import finished!", "Success!");
                         progressBar1.Value = 0;
                     }
@@ -458,8 +595,8 @@ namespace a3
                     }
                     catch (FirebaseAuthException exd)
                     {
-                        progressBar1.Value = 0;
-                        MessageBox.Show("Make sure all of the Student_No contains no spaces and special characters. Error Code: "+exd.Reason,"Online Database error!");
+                        //progressBar1.Value = 0;
+                        //MessageBox.Show("Make sure all of the Student_No contains no spaces and special characters. Error Code: "+exd.Reason,"Online Database error!");
                     }
                     catch (FirebaseException)
                     {
@@ -483,7 +620,7 @@ namespace a3
         private async void button7_Click(object sender, EventArgs e)
         {
             Enabled = false;
-            var confirmResult = MessageBox.Show("Are you sure to restart the queuing system? " + textBox1.Text,
+            var confirmResult = MessageBox.Show("Are you sure to restart the queuing system? ",
                                      "Clean queue confirmation",
                                      MessageBoxButtons.YesNo);
             if (confirmResult == DialogResult.Yes)
@@ -543,18 +680,22 @@ namespace a3
                     fcon.App_Delete_PreQueueAsyncNoCTS();
                     progressBar1.Increment(1);
                     tran.Commit();
+                    Queue_Info_Update(); 
                     MessageBox.Show("All queue at the system and information about it have been cleared.","Clean Success!");
                     progressBar1.Value = 0;
                 }
                 catch (FirebaseException exd)
                 {
                     try { tran.Rollback(); } catch (Exception exRollback) { MessageBox.Show("Error at -> " + exRollback.Message); }
-                    MessageBox.Show("An error occured while connecting to firebase DB. Error ->" + exd.Message, "Database error");
+                    Console.WriteLine("An error occured while connecting to firebase DB. Error ->" + exd.Message);
+                    MessageBox.Show("Please check your internet connection.", "Could not connect online");
+                    progressBar1.Value = 0;
                 }
                 catch (SqlException eb)
                 {
                     try { tran.Rollback(); } catch (Exception exRollback) { MessageBox.Show("Error at -> " + exRollback.Message); }
                     MessageBox.Show("An error occured while connecting to local DB. Error -> " + eb.Message, "Databse error");
+                    progressBar1.Value = 0;
                 }
                 con.Close();
             }

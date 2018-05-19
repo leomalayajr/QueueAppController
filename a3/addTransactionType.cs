@@ -141,6 +141,32 @@ namespace a3
             con.Close();
             return office;
         }
+        private bool checkTransactionIfExists(string name, string shortname)
+        {
+            SqlConnection con = new SqlConnection(connection_string);
+            string query = "select count(id) from Transaction_Type where Transaction_Name = @param1 or Short_Name = @param2";
+            SqlCommand cmd = new SqlCommand(query,con);
+            cmd.Parameters.AddWithValue("@param1", name);
+            cmd.Parameters.AddWithValue("@param2", shortname);
+            con.Close();
+            try
+            {
+                con.Open();
+                var a = (int)cmd.ExecuteScalar();
+                con.Close();
+                if (a > 0)
+                {
+                    MessageBox.Show("Transaction already exists!"+a, "Request failed");
+                    return true;
+                }
+                else
+                    return false;
+            }
+            catch (NullReferenceException) { return false; }
+            catch (SqlException) { return true; }
+
+
+        }
         private void button3_Click(object sender, EventArgs e)
         {
             // Finish Button
@@ -160,56 +186,65 @@ namespace a3
             con.Open();
             transaction = con.BeginTransaction("newTransactionType");
 
-            // Write to Transaction_Type
-            string _query = "insert into Transaction_Type (Transaction_Name,Description,Pattern_Max,Short_Name) OUTPUT Inserted.ID " +
-                "values (@param1,@param2,@param3,@param4) ";
-            SqlCommand _cmd = new SqlCommand(_query, con);
-            _cmd.Parameters.AddWithValue("@param1", Transaction_Name);
-            _cmd.Parameters.AddWithValue("@param2", Transaction_Description);
-            _cmd.Parameters.AddWithValue("@param3", Pattern_Max);
-            _cmd.Parameters.AddWithValue("@param4", Transaction_ShortName);
-            try
+            // check if transaction exists
+            if (!checkTransactionIfExists(Transaction_Name, Transaction_ShortName))
             {
-                _cmd.Transaction = transaction;
+                // Write to Transaction_Type
+                string _query = "insert into Transaction_Type (Transaction_Name,Description,Pattern_Max,Short_Name) OUTPUT Inserted.ID " +
+                    "values (@param1,@param2,@param3,@param4) ";
+                SqlCommand _cmd = new SqlCommand(_query, con);
+                _cmd.Parameters.AddWithValue("@param1", Transaction_Name);
+                _cmd.Parameters.AddWithValue("@param2", Transaction_Description);
+                _cmd.Parameters.AddWithValue("@param3", Pattern_Max);
+                _cmd.Parameters.AddWithValue("@param4", Transaction_ShortName);
+                try
+                {
+                    _cmd.Transaction = transaction;
 
-                new_id = (int)_cmd.ExecuteScalar();
+                    new_id = (int)_cmd.ExecuteScalar();
 
-                // Write to Transaction_List
-                string __query = "insert into Transaction_List (Transaction_ID,Servicing_Office,Pattern_No,Servicing_Office_Name) " +
-                    "values (@param5,@param6,@param7,@param8)";
-                _cmd.CommandText = __query;
-                foreach (FlowLayoutPanel a in flowLayoutPanel1.Controls.OfType<FlowLayoutPanel>())
-                    foreach (ComboBox b in a.Controls.OfType<ComboBox>())
-                    {
-                        _cmd.Parameters.AddWithValue("@param5", new_id);
-                        _cmd.Parameters.AddWithValue("@param6", b.SelectedValue);
-                        _cmd.Parameters.AddWithValue("@param7", Pattern_Current);
-                        _cmd.Parameters.AddWithValue("@param8", getServicingOfficeName((int)b.SelectedValue));
-                        Pattern_Current++;
-                        _cmd.ExecuteNonQuery();
-                        _cmd.Parameters.Clear();
+                    // Write to Transaction_List
+                    string __query = "insert into Transaction_List (Transaction_ID,Servicing_Office,Pattern_No,Servicing_Office_Name) " +
+                        "values (@param5,@param6,@param7,@param8)";
+                    _cmd.CommandText = __query;
+                    foreach (FlowLayoutPanel a in flowLayoutPanel1.Controls.OfType<FlowLayoutPanel>())
+                        foreach (ComboBox b in a.Controls.OfType<ComboBox>())
+                        {
+                            _cmd.Parameters.AddWithValue("@param5", new_id);
+                            _cmd.Parameters.AddWithValue("@param6", b.SelectedValue);
+                            _cmd.Parameters.AddWithValue("@param7", Pattern_Current);
+                            _cmd.Parameters.AddWithValue("@param8", getServicingOfficeName((int)b.SelectedValue));
+                            Pattern_Current++;
+                            _cmd.ExecuteNonQuery();
+                            _cmd.Parameters.Clear();
 
-                    }
-                transaction.Commit();
-                con.Close();
-                if (sForm != null)
-                    sForm.generateDeleteItems();
-                MessageBox.Show(Transaction_Name + " added as new Transaction!", "Success!");
+                        }
+                    transaction.Commit();
+                    con.Close();
+                    if (sForm != null)
+                        sForm.generateDeleteItems();
+                    MessageBox.Show(Transaction_Name + " added as new Transaction!", "Success!");
+                }
+                catch (SqlException ex)
+                {
+                    transaction.Rollback();
+                    MessageBox.Show("Message {0}" + ex.Message);
+                }
+                catch (NullReferenceException)
+                {
+                    MessageBox.Show("One of the office does not exist.", "Error!");
+                }
+
+                button1.Enabled = true;
+                button2.Enabled = false;
+                button3.Enabled = false;
+                textBox1.Clear();
+                textBox2.Clear();
+                textBox3.Clear();
+                flowLayoutPanel1.Controls.Clear();
+                flowLayoutPanel1.Height = 0;
+                addTransactionType.ActiveForm.Height = 260;
             }
-            catch (SqlException ex) {
-                transaction.Rollback();
-                MessageBox.Show("Message {0}"+ex.Message);
-            }
-
-            button1.Enabled = true;
-            button2.Enabled = false;
-            button3.Enabled = false;
-            textBox1.Clear();
-            textBox2.Clear();
-            textBox3.Clear();
-            flowLayoutPanel1.Controls.Clear();
-            flowLayoutPanel1.Height = 0;
-            addTransactionType.ActiveForm.Height = 260;
         }
     }
 }

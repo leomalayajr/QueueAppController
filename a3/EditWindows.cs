@@ -40,6 +40,10 @@ namespace a3
             
             dataGridView1.AutoResizeColumns();
         }
+        private void Form1_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            Dispose();
+        }
         private void _SelectedIndexChanged(object sender, EventArgs e)
         {
             
@@ -77,23 +81,90 @@ namespace a3
             info_ServicingOffice.ValueMember = "id";
             info_ServicingOffice.DisplayMember = "Name";
         }
+        private bool checkIfSame(int id, int Servicing_Office_ID, int Window)
+        {
+            SqlConnection con = new SqlConnection(connection_string);
+            string query = "select id from Set_Windows where Servicing_Office_ID = @param1 AND Window = @param2";
+            SqlCommand cmd = new SqlCommand(query, con);
+            cmd.Parameters.AddWithValue("@param1", Servicing_Office_ID);
+            cmd.Parameters.AddWithValue("@param2", Window);
+            Console.WriteLine("office id = " + Servicing_Office_ID + "  WINDOW" + Window);
+            
+            try
+            {
+                con.Open();
+                var a = (int)cmd.ExecuteScalar();
+                con.Close();
+                if (a >= 0)
+                    if (a != id)
+                    {
+                        MessageBox.Show("Office and window should be unique to one terminal.", "Request failed");
+                        return true;
+                    }
+                    else
+                        return false;
+                else
+                    return true;
+            }
+            catch (NullReferenceException) { return false; }
+            catch (SqlException) { return true; }
+        }
+        private bool checkMACIfExists(int id,string _MAC)
+        {
+            SqlConnection con = new SqlConnection(connection_string);
+            string query = "select id from Set_Windows where MAC_Address = @param1";
+            SqlCommand cmd = new SqlCommand(query, con);
+            cmd.Parameters.AddWithValue("@param1", _MAC);
+            
+            try
+            {
+                con.Open();
+                var a = (int)cmd.ExecuteScalar();
+                con.Close();
+                if (a >= 0)
+                    if (a != id)
+                    {
+                        MessageBox.Show("You entered a MAC address that is already used.", "Request failed");
+                        return true;
+                    }
+                    else
+                        return false;
+                else
+                    return true;
+            }
+            catch (NullReferenceException) { return false; }
+            catch (SqlException) { return true; }
+        }
         private void btn_Insert_Click(object sender, EventArgs e)
         {
             if (info_MAC.Text != "")
             {
-                string __name = info_ServicingOffice.Text;
-                string query = "insert into Set_Windows(Name,Servicing_Office_ID,Window,MAC_Address) values(@office_name,@office_id,@window,@MAC)";
-                cmd = new SqlCommand(query, con);
-                con.Open();
-                cmd.Parameters.AddWithValue("@office_name", __name);
-                cmd.Parameters.AddWithValue("@office_id", info_ServicingOffice.SelectedValue);
-                cmd.Parameters.AddWithValue("@window", info_Windows.SelectedValue);
-                cmd.Parameters.AddWithValue("@MAC", info_MAC.Text);
-                cmd.ExecuteNonQuery();
-                con.Close();
-                MessageBox.Show("Record Inserted Successfully");
-                DisplayData();
-                ClearData();
+                if (!checkIfSame(ID,(int)info_ServicingOffice.SelectedValue, (int)info_Windows.SelectedValue))
+                {
+                    if (!checkMACIfExists(ID,info_MAC.Text))
+                    {
+                        try
+                        {
+                            string __name = info_ServicingOffice.Text;
+                            string query = "insert into Set_Windows(Name,Servicing_Office_ID,Window,MAC_Address) values(@office_name,@office_id,@window,@MAC)";
+                            cmd = new SqlCommand(query, con);
+                            con.Open();
+                            cmd.Parameters.AddWithValue("@office_name", __name);
+                            cmd.Parameters.AddWithValue("@office_id", info_ServicingOffice.SelectedValue);
+                            cmd.Parameters.AddWithValue("@window", info_Windows.SelectedValue);
+                            cmd.Parameters.AddWithValue("@MAC", info_MAC.Text);
+                            cmd.ExecuteNonQuery();
+                            con.Close();
+                            MessageBox.Show("Record Inserted Successfully");
+                            DisplayData();
+                            ClearData();
+                        }
+                        catch (NullReferenceException)
+                        {
+                            MessageBox.Show("One of the office does not exist.", "Error!");
+                        }
+                    }
+                }
             }
             else
             {
@@ -134,7 +205,7 @@ namespace a3
             info_MAC.Text = dataGridView1.Rows[e.RowIndex].Cells[4].Value.ToString();
             info_ServicingOffice.SelectedValue = (dataGridView1.Rows[e.RowIndex].Cells[2].Value);
             info_Windows.SelectedIndex = info_Windows.Items.IndexOf(dataGridView1.Rows[e.RowIndex].Cells[3].Value);
-
+            Console.WriteLine("**" + (dataGridView1.Rows[e.RowIndex].Cells[2].Value));
         }
         //Update Record  
         private void btn_Update_Click(object sender, EventArgs e)
@@ -142,18 +213,35 @@ namespace a3
             Console.WriteLine("ID is " + ID);
             if (info_MAC.Text != "")
             {
-                cmd = new SqlCommand("update Set_Windows set Name=@param3,Servicing_Office_ID=@param1,Window=@param2,MAC_Address=@param6 where ID=@param0", con);
-                con.Open();
-                cmd.Parameters.AddWithValue("@param0", ID);
-                cmd.Parameters.AddWithValue("@param1", (int)info_ServicingOffice.SelectedValue);
-                cmd.Parameters.AddWithValue("@param2", (int)info_Windows.SelectedValue);
-                cmd.Parameters.AddWithValue("@param3", info_ServicingOffice.Text);
-                cmd.Parameters.AddWithValue("@param6", info_MAC.Text);
-                cmd.ExecuteNonQuery();
-                MessageBox.Show("Record Updated Successfully");
-                con.Close();
-                DisplayData();
-                ClearData();
+                if (!checkIfSame(ID,(int)info_ServicingOffice.SelectedValue, (int)info_Windows.SelectedValue))
+                {
+                    if (!checkMACIfExists(ID,info_MAC.Text))
+                    {
+                        try
+                        {
+                            cmd = new SqlCommand("update Set_Windows set Name=@param3,Servicing_Office_ID=@param1,Window=@param2,MAC_Address=@param6 where ID=@param0", con);
+                            con.Open();
+                            cmd.Parameters.AddWithValue("@param0", ID);
+                            cmd.Parameters.AddWithValue("@param1", (int)info_ServicingOffice.SelectedValue);
+                            cmd.Parameters.AddWithValue("@param2", (int)info_Windows.SelectedValue);
+                            cmd.Parameters.AddWithValue("@param3", info_ServicingOffice.Text);
+                            cmd.Parameters.AddWithValue("@param6", info_MAC.Text);
+                            cmd.ExecuteNonQuery();
+                            MessageBox.Show("Record Updated Successfully");
+                            con.Close();
+                            DisplayData();
+                            ClearData();
+                        }
+                        catch (SqlException eb)
+                        {
+                            MessageBox.Show(eb.Message + "Error!");
+                        }
+                        catch (NullReferenceException)
+                        {
+                            MessageBox.Show("One of the office does not exist.", "Error!");
+                        }
+                    }
+                }
             }
             else
             {

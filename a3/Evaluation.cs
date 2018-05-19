@@ -18,7 +18,10 @@ namespace a3
         public Evaluation()
         {
             InitializeComponent();
-            StartPosition = FormStartPosition.CenterParent;
+            StartPosition = FormStartPosition.CenterScreen;
+            this.FormBorderStyle = FormBorderStyle.FixedSingle;
+            MaximizeBox = false;
+            MinimizeBox = false;
         }
         private List<_Servicing_Office> LIST_getServicingOffices()
         {
@@ -30,6 +33,12 @@ namespace a3
             SqlDataReader _rdr;
             SqlCommand __cmd = new SqlCommand(retrieve_servicing_offices, con);
 
+            dataSource.Add(new _Servicing_Office()
+            {
+                Name = "All Offices",
+                Address = "None",
+                id = -1
+            });
             try
             {
                 con.Open();
@@ -50,12 +59,6 @@ namespace a3
                 MessageBox.Show("Can't connect to local DB!");
                 Environment.Exit(0);
             }
-            dataSource.Add(new _Servicing_Office()
-            {
-                Name = "All Offices",
-                Address = "None",
-                id = -1
-            });
             return dataSource;
         }
         private void Evaluation_Load(object sender, EventArgs e)
@@ -77,12 +80,14 @@ namespace a3
                 con.Open();
                 int Students = 0; int Guests = 0; float all_score = 0; float stud_score = 0; float guest_score = 0;
                 int temp1 = 0; int temp2 = 0; int temp3 = 0;
-                string feedback_query = "select * from Feedbacks where Date_Of_Feedback BETWEEN @param1 and @param2 ";
-                string feedback2_query = "select * from Feedbacks where Date_Of_Feedback BETWEEN @param1 and @param2 and Servicing_Office = @param3";
+                string feedback_query = "select * from Feedbacks where Date_Of_Feedback BETWEEN @param1 and @param2 and Score > 0";
+                string feedback2_query = "select * from Feedbacks where Date_Of_Feedback BETWEEN @param1 and @param2 and Servicing_Office = @param3 and Score > 0";
                 SqlDataReader rdr;
                 SqlCommand f_cmd = new SqlCommand();
                 if ((int)officeBox.SelectedValue > 0)
                 {
+                    Console.WriteLine(feedback2_query);
+                    Console.WriteLine((int)officeBox.SelectedValue);
                     f_cmd = new SqlCommand(feedback2_query, con);
                     f_cmd.Parameters.AddWithValue("@param1", dateTimePicker1.Value);
                     f_cmd.Parameters.AddWithValue("@param2", dateTimePicker2.Value);
@@ -90,6 +95,7 @@ namespace a3
                 }
                 else
                 {
+                    Console.WriteLine(feedback_query);
                     f_cmd = new SqlCommand(feedback_query, con);
                     f_cmd.Parameters.AddWithValue("@param1", dateTimePicker1.Value);
                     f_cmd.Parameters.AddWithValue("@param2", dateTimePicker2.Value);

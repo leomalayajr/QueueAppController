@@ -42,7 +42,7 @@ namespace a3
                     int id = Int32.Parse(hold_id);
                     appUser.ID = id;
                 }
-                catch (FormatException) { throw new FormatException();}
+                catch (FormatException) { throw new FormatException(); }
 
                 appUser.accountNumber = wr.Cells[i, 2].Value2.ToString();
                 appUser.college = wr.Cells[i, 3].Value2.ToString();

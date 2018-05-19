@@ -40,11 +40,11 @@ namespace a3
             List<string> returned_list = new List<string>();
             try
             {
-                var b = await firebase.Child("Queue_Status").OnceAsync<string>();
+                var b =  await firebase.Child("Queue_Status").OnceAsync<string>();
                 foreach (var a in b)
                 {
                     Console.WriteLine(a.Key);
-                    await firebase.Child("Queue_Status").Child(a.Key).PutAsync<string>("Inactive");
+                      firebase.Child("Queue_Status").Child(a.Key).PutAsync<string>("Inactive");
                 }
             }
             catch (FirebaseException aa)

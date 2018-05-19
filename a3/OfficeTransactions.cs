@@ -18,13 +18,16 @@ namespace a3
         public OfficeTransactions()
         {
             InitializeComponent();
-            InitTimer();
-            initItems();
-            refreshTerminalList();
+            StartPosition = FormStartPosition.CenterScreen;
+            this.FormBorderStyle = FormBorderStyle.FixedSingle;
+            MaximizeBox = false;
+            MinimizeBox = false;
         }
         private void OfficeTransactions_Load(object sender, EventArgs e)
         {
-
+            InitTimer();
+            initItems();
+            refreshTerminalList();
         }
         private List<_Transaction_Type> LIST_getTransactionType()
         {

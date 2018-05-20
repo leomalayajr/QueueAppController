@@ -389,48 +389,112 @@ namespace a3
         }
         private void button4_Click(object sender, EventArgs e)
         {
-            SqlConnection con = new SqlConnection(connection_string);
-            string SERVICINGOFFICE_Delete = "delete from Servicing_Office where id = @param1";
-            string QUEUEINFO_Delete = "delete from Queue_Info where Servicing_Office = @param1";
-            string WINDOW_Delete = "delete from Set_Windows where Servicing_Office_ID = @param1";
-            string TERMINAL_Delete = "delete from Servicing_Terminal where Servicing_Office = @param1";
-            SqlCommand _cmd = new SqlCommand(SERVICINGOFFICE_Delete, con);
-            SqlCommand __cmd = new SqlCommand(QUEUEINFO_Delete, con);
-            SqlCommand ___cmd = new SqlCommand(WINDOW_Delete, con);
-            SqlCommand ____cmd = new SqlCommand(TERMINAL_Delete, con);
-            var confirmResult = MessageBox.Show("Are you sure to delete this?",
-                                     "Confirm Delete",
-                                     MessageBoxButtons.YesNo);
-            if (confirmResult == DialogResult.Yes)
+            try
             {
-                // If 'Yes', do something here.
-                try
+                int _id = (int)comboBox1.SelectedValue;
+                SqlConnection con = new SqlConnection(connection_string);
+                string SERVICINGOFFICE_Delete = "delete from Servicing_Office where id = @param1";
+                string QUEUEINFO_Delete = "delete from Queue_Info where Servicing_Office = @param1";
+                string WINDOW_Delete = "delete from Set_Windows where Servicing_Office_ID = @param1";
+                string TERMINAL_Delete = "delete from Servicing_Terminal where Servicing_Office = @param1";
+                string search_office_on_other_transactions = "select Transaction_ID from Transaction_List where Servicing_Office = @param_so ";
+                string TRANSACTIONTYPE_DELETE = "delete from Transaction_Type where id = @param_id";
+                string TRANSACTIONLIST_DELETE = "delete from Transaction_List where Transaction_ID = @param_id";
+                SqlCommand _cmd = new SqlCommand(SERVICINGOFFICE_Delete, con);
+                SqlCommand __cmd = new SqlCommand(QUEUEINFO_Delete, con);
+                SqlCommand ___cmd = new SqlCommand(WINDOW_Delete, con);
+                SqlCommand ____cmd = new SqlCommand(TERMINAL_Delete, con);
+                SqlCommand _____cmd = new SqlCommand(TRANSACTIONTYPE_DELETE, con);
+                SqlCommand ______cmd = new SqlCommand(TRANSACTIONLIST_DELETE, con);
+                SqlCommand cmd_ = new SqlCommand(search_office_on_other_transactions, con);
+                SqlDataReader rdr;
+                var confirmResult = MessageBox.Show("Are you sure to delete this?",
+                                         "Confirm Delete",
+                                         MessageBoxButtons.YesNo);
+                if (confirmResult == DialogResult.Yes)
                 {
                     con.Open();
-                    int _id = (int)comboBox1.SelectedValue;
-                    _cmd.Parameters.AddWithValue("@param1", _id);
-                    _cmd.ExecuteNonQuery();
-                    __cmd.Parameters.AddWithValue("@param1", _id);
-                    __cmd.ExecuteNonQuery();
-                    ___cmd.Parameters.AddWithValue("@param1", _id);
-                    ___cmd.ExecuteNonQuery();
-                    ____cmd.Parameters.AddWithValue("@param1", _id);
-                    ____cmd.ExecuteNonQuery();
+                    // If 'Yes', do something here.
+                    // Check if Servicing_Office exists on other Transaction Type
+                    String transaction_list = string.Empty;
+                    List<int> transaction_id_where_offices_exists = new List<int>();
+                    cmd_.Parameters.AddWithValue("@param_so", _id);
+                    rdr = cmd_.ExecuteReader();
+                    while (rdr.Read())
+                    {
+                        transaction_id_where_offices_exists.Add((int)rdr["Transaction_ID"]);
+                    }
+                    foreach (int a in transaction_id_where_offices_exists)
+                    {
+                        _____cmd.Parameters.AddWithValue("@param_id", a);
+                        _____cmd.ExecuteNonQuery();
+                        _____cmd.Parameters.Clear();
+                        ______cmd.Parameters.AddWithValue("@param_id", a);
+                        ______cmd.ExecuteNonQuery();
+                        ______cmd.Parameters.Clear();
+                    }
+                    //{
+                    //   transaction_list += Environment.NewLine + (string)rdr[""]
+                    //}
+                    if (transaction_id_where_offices_exists.Count > 0)
+                    {
+                        var confirmresult2 = MessageBox.Show("You are about to delete an office that is used on transaction type/s."+Environment.NewLine+" Deleting this will also delete transaction type/s where it is used.",
+                                             "Confirm Delete",
+                                             MessageBoxButtons.YesNo);
+                        if (confirmresult2 == DialogResult.Yes)
+                        {
+                            try
+                            {
+                                _cmd.Parameters.AddWithValue("@param1", _id);
+                                _cmd.ExecuteNonQuery();
+                                __cmd.Parameters.AddWithValue("@param1", _id);
+                                __cmd.ExecuteNonQuery();
+                                ___cmd.Parameters.AddWithValue("@param1", _id);
+                                ___cmd.ExecuteNonQuery();
+                                ____cmd.Parameters.AddWithValue("@param1", _id);
+                                ____cmd.ExecuteNonQuery();
+                            }
+                            catch (SqlException ex)
+                            {
+                                MessageBox.Show("Error ->" + ex.Message);
+                            }
+                            catch (NullReferenceException)
+                            {
+                                Console.WriteLine("Selecting nothing...");
+                            }
+                        }
+                    }
+                    else
+                    {
+                        try
+                        {
+                            
+                            _cmd.Parameters.AddWithValue("@param1", _id);
+                            _cmd.ExecuteNonQuery();
+                            __cmd.Parameters.AddWithValue("@param1", _id);
+                            __cmd.ExecuteNonQuery();
+                            ___cmd.Parameters.AddWithValue("@param1", _id);
+                            ___cmd.ExecuteNonQuery();
+                            ____cmd.Parameters.AddWithValue("@param1", _id);
+                            ____cmd.ExecuteNonQuery();
+                        }
+                        catch (SqlException ex)
+                        {
+                            MessageBox.Show("Error ->" + ex.Message);
+                        }
+                        catch (NullReferenceException)
+                        {
+                            Console.WriteLine("Selecting nothing...");
+                        }
+                    }
                     con.Close();
                 }
-                catch (SqlException ex)
+                else
                 {
-                    MessageBox.Show("Error ->" + ex.Message);
-                }
-                catch (NullReferenceException)
-                {
-                    Console.WriteLine("Selecting nothing...");
+                    // If 'No', do something here.
                 }
             }
-            else
-            {
-                // If 'No', do something here.
-            }
+            catch (NullReferenceException) { }
             generateDeleteItems();
 
 
@@ -443,7 +507,7 @@ namespace a3
             string TRANSACTION_Delete_List = "delete from Transaction_List where Transaction_ID = @param1";
             SqlCommand _cmd = new SqlCommand(TRANSACTION_Delete, con);
 
-            var confirmResult = MessageBox.Show("Are you sure to delete this?",
+            var confirmResult = MessageBox.Show("Are you sure to delete this transaction?",
                                      "Confirm Delete",
                                      MessageBoxButtons.YesNo);
             if (confirmResult == DialogResult.Yes)

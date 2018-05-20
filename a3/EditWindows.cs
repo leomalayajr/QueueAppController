@@ -50,7 +50,7 @@ namespace a3
         } 
         private void AddWindows()
         {
-            for (int x = 1; x <= 10; x++)
+            for (int x = 1; x <= 5; x++)
                 LIST_Windows.Add(x);
 
             info_Windows.DataSource = LIST_Windows;

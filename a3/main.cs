@@ -28,7 +28,8 @@ namespace a3
         private static System.Windows.Forms.Timer timer1;
         private static System.Windows.Forms.Timer timer2;
         private static int counter = 0;
-        private static string _wholeTextLog = string.Empty;
+        private static StringBuilder _wholeTextLog = new StringBuilder();
+        private static StringBuilder _wholeTextQueue = new StringBuilder();
         private static _Main_Queue _mq;
         private static _Main_Queue _mq_t;
         private static _Main_Queue _pq_mq;
@@ -37,7 +38,9 @@ namespace a3
         private static _Servicing_Terminal _st;
         private static _Transaction_Type _tt_t;
         private static _Log _log;
+        private static _Log _queue;
         private static bool DEBUG_deleteEveryRun = false;
+        private Dictionary<int, string> Dictionary_CQL = new Dictionary<int, string>();
         public int user_id = 7;
         Stopwatch stopp = new Stopwatch();
         Stopwatch temp_clock = new Stopwatch();
@@ -58,8 +61,8 @@ namespace a3
         {
             #region MAIN CONSTRUCTOR
             InitializeComponent();
-
-            FormBorderStyle = FormBorderStyle.FixedDialog;
+            
+            FormBorderStyle = FormBorderStyle.FixedSingle;
             MaximizeBox = false;
             MinimizeBox = false;
             StartPosition = FormStartPosition.CenterScreen;
@@ -75,11 +78,13 @@ namespace a3
             table_Servicing_Office = getServicingOffice();
             table_Transactions = getTransactionList();
             table_Transaction_Table = getTransactionType();
+            
+
             PROGRAM_Sync_Once();
             Queue_Info_Update();
 
             // Functions that will be always updated
-            //    PROGRAM_Online_Sync(); //This can be transferred on a button (switch) to manually start. Currently on automatic.
+            //    PROGRAM_Online_Sync(); 
             //    InitSyncTimer();
             #endregion
 
@@ -217,14 +222,26 @@ namespace a3
         {
             // Set default values for UI
             if (VARIABLE_FIREBASE_IsOnline)
+            {
                 txtOnlineStatus.Invoke(new Action(() => txtOnlineStatus.Text = "Online"));
+                txtOnlineStatus.Invoke(new Action(() => txtOnlineStatus.ForeColor = Color.Black));
+            }
             else
+            {
                 txtOnlineStatus.Invoke(new Action(() => txtOnlineStatus.Text = "Offline"));
+                txtOnlineStatus.Invoke(new Action(() => txtOnlineStatus.ForeColor = Color.Red));
+            }
 
             if (VARIABLE_SQL_IsOnline)
+            {
                 txtLocalStatus.Invoke(new Action(() => txtLocalStatus.Text = "Online"));
+                txtLocalStatus.Invoke(new Action(() => txtLocalStatus.ForeColor = Color.Black));
+            }
             else
+            {
                 txtLocalStatus.Invoke(new Action(() => txtLocalStatus.Text = "Offline"));
+                txtLocalStatus.Invoke(new Action(() => txtLocalStatus.ForeColor = Color.Red));
+            }
         }
         private void main_FormClosing(object sender, FormClosingEventArgs e)
         {
@@ -273,14 +290,93 @@ namespace a3
         }
         public void logWrite(string name, string text)
         {
-            _log = new _Log
+            //_log = new _Log
+            //{
+            //    Name = name,
+            //    Text = text,
+            //    Date = DateTime.Now
+            //};
+            //_wholeTextLog.AppendLine(name + text);
+                _wholeTextLog.Insert(0, name+text+Environment.NewLine);
+            // txtLog.Text = _wholeTextLog.ToString();
+            // txtLog.Text = "ginagawa mo"; 
+            SetText(_wholeTextLog.ToString());
+            // SetText("ginagawa mo");
+        }
+        private void retrieveQueueWrites()
+        {
+            // Shown on the right side of the controller
+
+            SqlConnection con = new SqlConnection(connection_string);
+            string query = "select * from Controller_Queue_Log";
+            SqlCommand cmd = new SqlCommand(query, con);
+            SqlDataReader rdr;
+            con.Open();
+            rdr = cmd.ExecuteReader();
+            while (rdr.Read())
             {
-                Name = name,
-                Text = text,
-                Date = DateTime.Now
-            };
-            _wholeTextLog = _log.Name + ": " + _log.Text + Environment.NewLine + _wholeTextLog;
-            txtLog.Invoke(new Action(() => txtLog.Text = _wholeTextLog));
+                Console.WriteLine("controller select");
+                int id = (int)rdr["id"];
+                Console.WriteLine("inserted");
+                // Check if not on yet saved on this program 
+                try
+                {
+                    if (!Dictionary_CQL.ContainsKey(id))
+                    {
+                        Console.WriteLine("inserted");
+                        // combine title and text
+                        string value = (string)rdr["Log_Title"] + " : " + (string)rdr["Log_Text"];
+                        Dictionary_CQL.Add(id, value);
+                        _wholeTextQueue.Insert(0, value + Environment.NewLine);
+                        SetText2(_wholeTextQueue.ToString());
+                        Console.WriteLine("wew");
+                    }
+                }
+                catch (NullReferenceException bb)
+                {
+                    Console.WriteLine(bb.Message);
+                }
+            }
+            con.Close();
+
+
+
+        }
+        public void queueWrite(string text)
+        {
+            _wholeTextQueue.AppendLine(text);
+            SetText2(_wholeTextQueue.ToString());
+        }
+        delegate void StringArgReturningVoidDelegate(string text);
+        private void SetText(string text)
+        {
+            // InvokeRequired required compares the thread ID of the  
+            // calling thread to the thread ID of the creating thread.  
+            // If these threads are different, it returns true.  
+            if (txtLog.InvokeRequired)
+            {
+                StringArgReturningVoidDelegate d = new StringArgReturningVoidDelegate(SetText);
+                Invoke(d, new object[] { text });
+            }
+            else
+            {
+                txtLog.Text = text;
+            }
+        }
+        private void SetText2(string text)
+        {
+            // InvokeRequired required compares the thread ID of the  
+            // calling thread to the thread ID of the creating thread.  
+            // If these threads are different, it returns true.  
+            if (txtQueue.InvokeRequired)
+            {
+                StringArgReturningVoidDelegate d = new StringArgReturningVoidDelegate(SetText2);
+                Invoke(d, new object[] { text });
+            }
+            else
+            {
+                txtQueue.Text = text;
+            }
         }
         private DataTable getTransactionList()
         {
@@ -471,7 +567,7 @@ namespace a3
                             }
                             );
 
-                            logWrite("Program", "Items to work on first sync done.");
+                            logWrite("Program -> ", "Items to work on first sync done.");
                         }
                         catch (FirebaseException)
                         {
@@ -494,6 +590,7 @@ namespace a3
         private async Task PROGRAM_Online_Sync(CancellationToken cancelToken)
         {
             Queue_Info_Update();
+            retrieveQueueWrites();
             VARIABLE_FIREBASE_IsOnline = true;
             VARIABLE_SQL_IsOnline = true;
             // Check if the app can connect to online DB
@@ -504,7 +601,7 @@ namespace a3
                 firebase_Connection fcon = new firebase_Connection();
                 if (response == null || response.StatusCode != HttpStatusCode.OK)
                 {
-                    logWrite("Online", "Internet is OK but can't reach Google Firebase.");
+                    logWrite("Online -> ", "Internet is OK but can't reach Google Firebase.");
                     MessageBox.Show("Internet is OK but can't reach Google Firebase.");
                 }
                 else { Console.WriteLine("Online Connect = OK"); }
@@ -708,7 +805,7 @@ namespace a3
                                 );
 
                             await Task.WhenAll(t1, t2, t3, t4);
-                            logWrite("Local", "Preparing lists for sync done.");
+                            //logWrite("Local -> ", "Preparing lists for sync done.");
                             
                             Console.WriteLine("Initializing lists finished.");
                             try
@@ -924,7 +1021,7 @@ namespace a3
                                             {
 
                                                 Console.WriteLine("PREQUEUE {0} ==", f.Customer_Queue_Number);
-                                                logWrite("New online queue -> ", f.Full_Name);
+                                                SetText2("New online queue -> " +  f.Full_Name); // Mobile write to QueueLog
                                                 // Add to local DB -> MainQueue
                                                 cmdPreQueue.Parameters.AddWithValue("@q_qn", f.Queue_Number);
                                                 cmdPreQueue.Parameters.AddWithValue("@q_fn", f.Full_Name);
@@ -950,7 +1047,7 @@ namespace a3
                                     );
 
 
-                                logWrite("Online", "Running sync tasks...");
+                                logWrite("Online -> ", "Running sync tasks...");
                                 await Task.WhenAll(i6);
                                 Console.WriteLine("i6 done");
                                 await Task.WhenAll(i1);
@@ -960,16 +1057,16 @@ namespace a3
                                 //await Task.WhenAll(i1, i2, i3, i4, i5);
                                 await Task.WhenAll(i2, i4);
                                 Console.WriteLine("i2 i4 done");
-                                logWrite("Online", "Sync successful at " + DateTime.Now + " !");
+                                logWrite("Online -> ", "Sync successful at " + DateTime.Now + " !");
                             }
                             catch (OperationCanceledException)
                             {
-                                logWrite("Program", "Cancelled!");
+                                logWrite("Program -> ", "Cancelled!");
                                 return;
                             }
                             catch (FirebaseException)
                             {
-                                logWrite("Online", "Can't connect!");
+                                logWrite("Online -> ", "Can't connect!");
                             }
                             catch (NullReferenceException b)
                             {
@@ -982,15 +1079,19 @@ namespace a3
 
                             con.Close();
                         }
-                        counter++;
                         Console.WriteLine("How many times update run? -> " + counter + " at TIME -> " + stopp.Elapsed);
                         Console.WriteLine("Hours at " + stopp.Elapsed.Hours);
                         Console.WriteLine("Minutes at " + stopp.Elapsed.Minutes);
                         Console.WriteLine("Seconds at " + stopp.Elapsed.Seconds);
                         Console.WriteLine("TotalSeconds at " + stopp.Elapsed.TotalSeconds);
-                        if (counter >= 2000)
-                        {
-                            _wholeTextLog = string.Empty;
+                        var src = System.DateTime.Now.Hour;
+                        var srcm = System.DateTime.Now.Minute;
+                        if (src == 0 && srcm == 0)
+                        { 
+                            cleanDB(); // clean queue
+                            // if midnight
+                            _wholeTextLog.Clear();
+                            _wholeTextQueue.Clear();
                             counter = 0;
                         }
                     }
@@ -1149,11 +1250,11 @@ namespace a3
                 }
                 catch (TaskCanceledException)
                 {
-                    logWrite("Online", "Online sync is turned off.");
+                    logWrite("Online -> ", "Online sync is turned off.");
                 }
                 catch (OperationCanceledException)
                 {
-                    logWrite("Online", "Online sync is turned off.");
+                    logWrite("Online -> ", "Online sync is turned off.");
                 }
                     // Post the action back to the block.
                     block.Post(DateTimeOffset.Now);
@@ -1203,7 +1304,7 @@ namespace a3
                     catch (FirebaseException) { Console.WriteLine("Disconnected!!!"); }
                     catch (OperationCanceledException) { Console.WriteLine("cancelled"); return; }
                     Console.WriteLine("{0} -> {1}", mq.Customer_Queue_Number, mq.Key);
-                    logWrite("debug", mq.Customer_Queue_Number);
+                    logWrite("debug -> ", mq.Customer_Queue_Number);
 
 
 

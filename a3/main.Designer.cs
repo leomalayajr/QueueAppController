@@ -289,6 +289,7 @@
             this.txtQueue.Multiline = true;
             this.txtQueue.Name = "txtQueue";
             this.txtQueue.ReadOnly = true;
+            this.txtQueue.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.txtQueue.Size = new System.Drawing.Size(755, 358);
             this.txtQueue.TabIndex = 34;
             this.txtQueue.WordWrap = false;

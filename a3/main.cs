@@ -40,6 +40,8 @@ namespace a3
         private static _Log _log;
         private static _Log _queue;
         private static bool DEBUG_deleteEveryRun = false;
+        private bool PROGRAM_isDBCleanDone = false;
+        private bool PROGRAM_isLogsCleanDone = false;
         private Dictionary<int, string> Dictionary_CQL = new Dictionary<int, string>();
         public int user_id = 7;
         Stopwatch stopp = new Stopwatch();
@@ -75,10 +77,7 @@ namespace a3
 
             // Function Init
             // Functions that will be run once
-            table_Servicing_Office = getServicingOffice();
-            table_Transactions = getTransactionList();
-            table_Transaction_Table = getTransactionType();
-            
+            initDataTables();
 
             PROGRAM_Sync_Once();
             Queue_Info_Update();
@@ -89,8 +88,26 @@ namespace a3
             #endregion
 
         }
+        public void initDataTables()
+        {
+            table_Servicing_Office = getServicingOffice();
+            table_Transactions = getTransactionList();
+            table_Transaction_Table = getTransactionType();
+        }
         #region BASIC METHODS
-        private async void cleanDB()
+        private void WriteToControllerLog(string subtext)
+        {
+            SqlConnection con = new SqlConnection(connection_string);
+            con.Open();
+            // write to Controller_Queue_log
+            String QUERY_create_newControllerLog = "insert into Controller_Queue_Log (Log_Title,Log_Text) values (@param1,@param2)";
+            SqlCommand Command9 = new SqlCommand(QUERY_create_newControllerLog, con);
+            Command9.Parameters.AddWithValue("@param1", "Controller");
+            Command9.Parameters.AddWithValue("@param2", subtext);
+            Command9.ExecuteNonQuery();
+            con.Close();
+        }
+        private async Task cleanDB()
         {
             Enabled = false;
             SqlConnection con = new SqlConnection(connection_string);
@@ -303,7 +320,27 @@ namespace a3
             SetText(_wholeTextLog.ToString());
             // SetText("ginagawa mo");
         }
-        private void retrieveQueueWrites()
+        private void saveAndDeleteQueueLogs()
+        {
+            SqlConnection con = new SqlConnection(connection_string);
+            string query = "select * from Controller_Queue_Log";
+            string query_save = "insert into Controller_Queue_Log_Old (Saved_On,Log_Title,Log_Text) values " +
+                " (GETDATE(),@param2,@param3)";
+            SqlCommand cmd = new SqlCommand(query, con);
+            SqlCommand cmd_save = new SqlCommand(query_save, con);
+            SqlDataReader rdr;
+            rdr = cmd.ExecuteReader();
+            while (rdr.Read())
+            {
+                string Log_Title = (string)rdr["Log_Title"];
+                string Log_Text = (string)rdr["Log_Text"];
+                cmd_save.Parameters.AddWithValue("@param2", Log_Title);
+                cmd_save.Parameters.AddWithValue("@param3", Log_Text);
+                cmd_save.ExecuteNonQuery();
+                cmd_save.Parameters.Clear();
+            }
+        }
+        private void retrieveQueueLogs()
         {
             // Shown on the right side of the controller
 
@@ -315,21 +352,17 @@ namespace a3
             rdr = cmd.ExecuteReader();
             while (rdr.Read())
             {
-                Console.WriteLine("controller select");
                 int id = (int)rdr["id"];
-                Console.WriteLine("inserted");
                 // Check if not on yet saved on this program 
                 try
                 {
                     if (!Dictionary_CQL.ContainsKey(id))
                     {
-                        Console.WriteLine("inserted");
                         // combine title and text
                         string value = (string)rdr["Log_Title"] + " : " + (string)rdr["Log_Text"];
                         Dictionary_CQL.Add(id, value);
                         _wholeTextQueue.Insert(0, value + Environment.NewLine);
                         SetText2(_wholeTextQueue.ToString());
-                        Console.WriteLine("wew");
                     }
                 }
                 catch (NullReferenceException bb)
@@ -590,11 +623,11 @@ namespace a3
         private async Task PROGRAM_Online_Sync(CancellationToken cancelToken)
         {
             Queue_Info_Update();
-            retrieveQueueWrites();
+            retrieveQueueLogs();
             VARIABLE_FIREBASE_IsOnline = true;
-            VARIABLE_SQL_IsOnline = true;
-            // Check if the app can connect to online DB
-            WebRequest request = WebRequest.Create("http://firebase.google.com");
+            VARIABLE_SQL_IsOnline = true; 
+             // Check if the app can connect to online DB
+             WebRequest request = WebRequest.Create("http://firebase.google.com");
             try
             {
                 HttpWebResponse response = (HttpWebResponse)request.GetResponse();
@@ -628,9 +661,16 @@ namespace a3
                 //auto clean on midnight
                 var src = System.DateTime.Now.Hour;
                 var srcm = System.DateTime.Now.Minute;
-                if (src == 0 && srcm == 0)
-                    cleanDB(); // clean queue
-                else { Console.WriteLine("Local Connect = OK"); }
+                if (src == 0 && (srcm >= 0 && srcm <= 60))
+                {
+                    if(!PROGRAM_isDBCleanDone)
+                    {
+                        Console.WriteLine("cleaning queue...");
+                        await cleanDB(); // clean queue
+                        PROGRAM_isDBCleanDone = true;
+                    }
+                }
+                else { Console.WriteLine("skipping clean."); PROGRAM_isDBCleanDone = false; }
             }
             catch (SqlException)
             {
@@ -917,6 +957,7 @@ namespace a3
                                                     SqlCommand _cmd = new SqlCommand(_query, _temp_connection);
                                                     _cmd.Parameters.AddWithValue("@param1", c.ID);
                                                     _cmd.ExecuteNonQuery();
+                                                    WriteToControllerLog("Cancel request of ID "+c.ID+" at Servicing_Office "+c.Servicing_Office+" with Queue_ID "+c.Queue_ID+".");
                                                     Console.WriteLine(c.ID + " is now deleted");
                                                     break;
                                                 case "Move":
@@ -952,14 +993,10 @@ namespace a3
 
                                                         _update_cmd.ExecuteNonQuery();
 
-                                                        // Call a function to send a successful change request
-
-                                                        /**/
+                                                        WriteToControllerLog("Move request of ID " + c.ID + " at Servicing_Office " + c.Servicing_Office + " with Queue_ID " + c.Queue_ID + ". Value : "+c.Value);
                                                     }
                                                     else
                                                     {
-                                                        // Call a function to send a notification denying request
-                                                        /**/
                                                     }
                                                     break;
                                                 default:
@@ -989,6 +1026,7 @@ namespace a3
                                             Console.WriteLine("B ->" + firstServicingOffice);
                                             int newQueueNumber = getQueueNumber(firstServicingOffice);
                                             Console.WriteLine("QQQQQ"+ newQueueNumber);
+
                                             _pq_mq = new _Main_Queue
                                             {
                                                 Queue_Number = newQueueNumber,
@@ -1021,7 +1059,7 @@ namespace a3
                                             {
 
                                                 Console.WriteLine("PREQUEUE {0} ==", f.Customer_Queue_Number);
-                                                SetText2("New online queue -> " +  f.Full_Name); // Mobile write to QueueLog
+                                                WriteToControllerLog(f.Customer_Queue_Number + "(Mobile) requested Transaction ID: " + f.Transaction_Type +".");
                                                 // Add to local DB -> MainQueue
                                                 cmdPreQueue.Parameters.AddWithValue("@q_qn", f.Queue_Number);
                                                 cmdPreQueue.Parameters.AddWithValue("@q_fn", f.Full_Name);
@@ -1086,14 +1124,21 @@ namespace a3
                         Console.WriteLine("TotalSeconds at " + stopp.Elapsed.TotalSeconds);
                         var src = System.DateTime.Now.Hour;
                         var srcm = System.DateTime.Now.Minute;
-                        if (src == 0 && srcm == 0)
-                        { 
-                            cleanDB(); // clean queue
+                        if (src == 0 && (srcm >= 0 && srcm <= 60))
+                        {
+                            // clean logs
                             // if midnight
-                            _wholeTextLog.Clear();
-                            _wholeTextQueue.Clear();
-                            counter = 0;
+                            if (!PROGRAM_isLogsCleanDone)
+                            {
+                                Console.WriteLine("Cleaning queue logs and saving it to old.");
+                                saveAndDeleteQueueLogs();
+                                _wholeTextLog.Clear();
+                                _wholeTextQueue.Clear();
+                                PROGRAM_isLogsCleanDone = true;
+                                //counter = 0;
+                            }
                         }
+                        else { Console.WriteLine("not cleaning logs yet"); PROGRAM_isLogsCleanDone = false; }
                     }
                 }
                 else

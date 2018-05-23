@@ -199,7 +199,7 @@ namespace a3
         private DataTable getShownItems()
         {
             DataTable a = new DataTable();
-            a.Columns.Add("Servicing_Office", typeof(string));
+            a.Columns.Add("Servicing_Office_Name", typeof(string));
             a.Columns.Add("Date", typeof(string));
             a.Columns.Add("Transaction_Name", typeof(string));
             a.Columns.Add("Type", typeof(string));

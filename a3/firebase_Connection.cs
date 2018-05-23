@@ -152,6 +152,32 @@ namespace a3
             return list_from_online;
 
         }
+        public async Task<List<_Rating>> App_Retrieve_Rating()
+        {
+            string node = "EvaluationResults/";
+            List<_Rating> list_from_online = new List<_Rating>();
+            try
+            {
+                var retrieved_objects = await firebase.Child(node).OnceAsync<_Rating>();
+                foreach (var a in retrieved_objects)
+                {
+                    //Console.WriteLine("AAAAAAAAAAAA"+a.Object.Evaluation);
+                    //Console.WriteLine("AAAAAAAAAAAA" + a.Object.Queue_Number);
+                    //Console.WriteLine("AAAAAAAAAAAA" + a.Object.Servicing_Office);
+                    //Console.WriteLine("AAAAAAAAAAAA" + a.Object.Evaluation);
+                    list_from_online.Add(a.Object);
+                }
+            }
+            catch (FirebaseException e)
+            {
+                Console.WriteLine("Problem -> Method: Retrieve Rating");
+                throw;
+            }
+
+            catch (OperationCanceledException e) { Console.WriteLine("Cancelled -> Method: Retrieve Rating"); }
+            return list_from_online;
+
+        }
         public async Task<List<_Main_Queue>> App_Retrieve_MainQueueAsync(CancellationToken cts)
         {
             string node = "Main_Queue/";
@@ -291,6 +317,7 @@ namespace a3
             catch (OperationCanceledException e) { Console.WriteLine("Cancelled -> Method: Insert TransferQueue"); }
 
         }
+        
         public async Task App_Insert_ServicingTerminalAsync(_Servicing_Terminal _st,CancellationToken cts)
         {
             
@@ -328,6 +355,14 @@ namespace a3
             try { cts.ThrowIfCancellationRequested(); await Task.Run(() => firebase.Child(node).DeleteAsync()); }
             catch (FirebaseException e) { Console.Write("Problem -> Method: Delete PreQueue"); throw; }
             catch (OperationCanceledException e) { Console.WriteLine("Cancelled -> Method: Delete PreQueue"); }
+
+        }
+        public async Task App_Delete_RatingAsync(CancellationToken cts)
+        {
+            string node = "EvaluationResults/";
+            try { cts.ThrowIfCancellationRequested(); await Task.Run(() => firebase.Child(node).DeleteAsync()); }
+            catch (FirebaseException e) { Console.Write("Problem -> Method: Delete Rating"); throw; }
+            catch (OperationCanceledException e) { Console.WriteLine("Cancelled -> Method: Delete Rating"); }
 
         }
         public async Task App_Delete_PreQueueAsyncNoCTS()

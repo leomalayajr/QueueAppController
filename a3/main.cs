@@ -42,6 +42,7 @@ namespace a3
         private static bool DEBUG_deleteEveryRun = false;
         private bool PROGRAM_isDBCleanDone = false;
         private bool PROGRAM_isLogsCleanDone = false;
+        private bool PROGRAM_showOnce = false;
         private Dictionary<int, string> Dictionary_CQL = new Dictionary<int, string>();
         public int user_id = 7;
         Stopwatch stopp = new Stopwatch();
@@ -484,6 +485,23 @@ namespace a3
             }
             return servicing_office_Name;
         }
+        private List<int> getTransactionListIDOnly(int _tt_id)
+        {
+            List<int> return_ = new List<int>();
+            SqlConnection aa = new SqlConnection(connection_string);
+            string query = "select * from Transaction_List where Transaction_ID = @param1";
+            SqlCommand cmd = new SqlCommand(query, aa);
+            cmd.Parameters.AddWithValue("@param1",_tt_id);
+            SqlDataReader rdr;
+            aa.Open();
+            rdr = cmd.ExecuteReader();
+            while (rdr.Read())
+            {
+                return_.Add((int)rdr["Servicing_Office"]);
+            }
+            aa.Close();
+            return return_;
+        }
         private void Queue_Info_Update()
         {
             //Checks whether Queue_Info is available.
@@ -604,7 +622,7 @@ namespace a3
                         }
                         catch (FirebaseException)
                         {
-                            logWrite("Error -> Online", "Can't connect to the database.");
+                            logWrite("Online -> ", "Can't connect to the database.");
                             MessageBox.Show("Can't connect online.");
                             Environment.Exit(0);
                         }
@@ -639,11 +657,16 @@ namespace a3
                 }
                 else { Console.WriteLine("Online Connect = OK"); }
                 response.Close();
+                PROGRAM_showOnce = false;
             }
             catch (WebException)
             {
                 VARIABLE_FIREBASE_IsOnline = false;
-                logWrite("Error -> Online", "Can't connect!");
+                if (!PROGRAM_showOnce)
+                {
+                    logWrite("Online -> ", "Can't connect!");
+                    PROGRAM_showOnce = true;
+                }
             }
             // Check if the app can connect to local DB
             try
@@ -724,6 +747,9 @@ namespace a3
 
                         List<_Main_Queue> PREQUEUE_TO_MAINQUEUE = new List<_Main_Queue>();
                         List<_Pre_Queue> PREQUEUE_LIST = new List<_Pre_Queue>();
+
+                        List<_Rating> RETRIEVED_LIST_Rating = new List<_Rating>();
+                        List<_Rating_Office> CONVERTED_LIST_Rating = new List<_Rating_Office>();
                         using (con)
                         {
                             Console.WriteLine("Checking if local db is online.");
@@ -751,7 +777,65 @@ namespace a3
 
 
                             firebase_Connection fcon = new firebase_Connection();
+                            var t7 = Task.Run(async () =>
+                                    {
+                                        RETRIEVED_LIST_Rating = await fcon.App_Retrieve_Rating();
+                                        await fcon.App_Delete_RatingAsync(cancelToken);
+                                        foreach (_Rating w in RETRIEVED_LIST_Rating)
+                                        {
+                                            int a = 0;
+                                            switch (w.Evaluation)
+                                            {
+                                                case "I'm Satisfied":
+                                                    a = 3;
+                                                    break;
+                                                case "Neutral":
+                                                    a = 2;
+                                                    break;
+                                                case "I'm not Satisfied":
+                                                    a = 1;
+                                                    break;
+                                                default:
+                                                    break;
+                                            }
+                                            CONVERTED_LIST_Rating.Add(new _Rating_Office
+                                            {
+                                                Customer_Queue_Number = w.Queue_Number,
+                                                isGiven = true,
+                                                isStudent = true,
+                                                score = a,
+                                                Servicing_OFfice = w.Servicing_Office,
+                                                Transaction_ID = w.Transaction_Type
 
+                                            });
+                                        }
+                                        string QUERY_Add_RatingToSave = "insert into Feedbacks (Servicing_Office, Score, Transaction_ID, Date_Of_Feedback, isStudent) values " +
+                                        " @param_so,@param2,@param3,GETDATE(),true";
+                                        SqlConnection temp_con = new SqlConnection(connection_string);
+                                        SqlCommand cmdRating = new SqlCommand(QUERY_Add_RatingToSave, temp_con);
+                                        using (temp_con)
+                                        {
+                                            temp_con.Open();
+                                            foreach (_Rating_Office t in CONVERTED_LIST_Rating)
+                                            {
+                                                // fix here
+                                                Console.WriteLine(QUERY_Add_RatingToSave + "for each offices" + " " + t.score + " " + t.Transaction_ID);
+                                                // retrieve each offices
+                                                foreach (int n in getTransactionListIDOnly(t.Transaction_ID))
+                                                {
+                                                    cmdRating.Parameters.AddWithValue("@param_so",n);
+                                                    cmdRating.Parameters.AddWithValue("@param2", t.score);
+                                                    cmdRating.Parameters.AddWithValue("@param3", t.Transaction_ID);
+                                                    cmdRating.Parameters.Clear();
+                                                    cmdRating.ExecuteNonQuery();
+                                                }
+                                            }
+                                            temp_con.Close();
+                                        }
+                                        // Delete after retrieving all Rating and inserting them to Local DB
+
+                                    }
+                                    );
                             var t1 = Task.Run(() =>
                                 {
                                     RDR_mq_select = CMD_select_MainQueue.ExecuteReader();
@@ -843,7 +927,7 @@ namespace a3
                                 }
 
                                 );
-
+                            // not retrieving online items
                             await Task.WhenAll(t1, t2, t3, t4);
                             //logWrite("Local -> ", "Preparing lists for sync done.");
                             
@@ -943,6 +1027,7 @@ namespace a3
                                 var i3 = Task.Run(async () =>
                                     {
                                         LIST_QueueRequest = await fcon.App_Retrieve_QueueRequest(cancelToken);
+                                        await fcon.App_Delete_QueueRequest(cancelToken);
                                         foreach (_Queue_Request c in LIST_QueueRequest)
                                         {
                                             SqlConnection _temp_connection = new SqlConnection(connection_string);
@@ -1004,7 +1089,6 @@ namespace a3
                                             }
                                             _temp_connection.Close();
                                         }
-                                        await fcon.App_Delete_QueueRequest(cancelToken);
                                     });
                                 var i4 = Task.Run(async () =>
                                     {
@@ -1019,6 +1103,7 @@ namespace a3
                                 var i5 = Task.Run(async () =>
                                     {
                                         PREQUEUE_LIST = await fcon.App_Retrieve_PreQueue(cancelToken);
+                                        await fcon.App_Delete_PreQueueAsync(cancelToken);
                                         foreach (_Pre_Queue e in PREQUEUE_LIST)
                                         {
                                             Console.WriteLine("WE -> " + e.Transaction_Type);
@@ -1080,7 +1165,7 @@ namespace a3
                                         }
                                         // Delete after retrieving all PreQueue and inserting them to MainQueue
 
-                                        await fcon.App_Delete_PreQueueAsync(cancelToken);
+                                        
                                     }
                                     );
 

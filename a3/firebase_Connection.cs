@@ -6,6 +6,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Reactive.Linq;
+using Firebase.Database.Offline;
+using System.Windows.Forms;
 
 namespace a3
 {
@@ -18,6 +21,8 @@ namespace a3
         //private const String node = "Queue_Info/";
         private FirebaseClient firebase;
         private FirebaseAuthProvider ap;
+        main main_frm = (main)Application.OpenForms["main"];
+        private bool runKey = false;
         public firebase_Connection()
         {
 
@@ -28,6 +33,104 @@ namespace a3
                     AuthTokenAsyncFactory = () => Task.FromResult(databaseSecret)
                 });
             this.ap = new FirebaseAuthProvider(new FirebaseConfig(databaseKey));
+
+        }
+        public async Task Specific_Delete_PreQueueAsync(string key, CancellationToken cts)
+        {
+            string node = "testingdb/";
+            try { cts.ThrowIfCancellationRequested(); await firebase.Child(node).Child(key).DeleteAsync(); }
+            catch (FirebaseException e) { Console.WriteLine("Problem -> Method: (Specific Delete) PreQueue"); throw; }
+            catch (OperationCanceledException e) { Console.WriteLine("Cancelled -> Method: (Specific Delete) PreQueue"); }
+
+        }
+        public async Task active_insert()
+        {
+            test __temp = new test
+            {
+                name = DateTime.Now.TimeOfDay.ToString(),
+                value = DateTime.Now.Second.ToString()
+            };
+            string node = "testingdb/";
+            var tests_db = await firebase.Child(node).PostAsync<test>(__temp);
+            Console.WriteLine("Successfully inserted a new entry for test.");
+        }
+        public void Internal_Insert_PreQueue(string Key, _Pre_Queue _pq_mq, CancellationToken cts)
+        {
+            if (_pq_mq == null)
+                Console.WriteLine("No objects yet on PreQueue.");
+            else
+            {
+                //Console.WriteLine(_pq_mq.Full_Name + " " + _pq_mq.Key);
+                Console.WriteLine("passing to main form ->" + _pq_mq.Student_No);
+                _pq_mq.Key = Key;
+                main_frm.fromFirebase_Insert_PreQueue(_pq_mq, cts);
+            }
+
+        }
+        public async Task Active_Retrieve_PreQueue(CancellationToken cts)
+        {
+            string node = "Pre_Queue/";
+            var prequeue_db = firebase.Child(node).AsRealtimeDatabase<_Pre_Queue>("", "", StreamingOptions.LatestOnly, InitialPullStrategy.MissingOnly, true);
+            //List<test> list_from_online = new List<test>();
+            prequeue_db.SyncExceptionThrown += (s, ex) => Console.WriteLine(ex.Exception);
+            prequeue_db.Post(new _Pre_Queue {Full_Name = "gPxP5sIxON",
+                Student_No = "IB7^HS0$GiFuB#+",
+                Transaction_Type = -749});
+
+            var q = (from new_prequeue in prequeue_db.AsObservable()
+                     select new { new_prequeue });
+
+            try
+            {
+                cts.ThrowIfCancellationRequested();
+                q.Subscribe(this_item =>
+                //Console.WriteLine($"" +
+                //$"Inserting : {this_item.test.Object.name}: " +
+                //$"with value : {this_item.test.Object.value} " +
+                //$"with key : {this_item.test.Key} " +
+                //$"from:({this_item.test.EventSource})"));
+                Internal_Insert_PreQueue(this_item.new_prequeue.Key, this_item.new_prequeue.Object, cts)
+                );
+
+            }
+            catch (FirebaseException e)
+            {
+                Console.WriteLine("Problem -> Method: Retrieve PreQueue");
+                throw;
+            }
+            catch (OperationCanceledException e) { Console.WriteLine("Cancelled -> Method: Retrieve PreQueue"); }
+            catch(NullReferenceException e) { Console.WriteLine("External ->" + e); }
+            //var myKey = tests_db.Post(new test { name = "wew", value = "val" });
+
+            
+
+            //return list_from_online;
+
+        }
+        public async Task active()
+        {
+
+            //var messagesDb = client.Child("offlinemessages").AsRealtimeDatabase<Message>("", "", StreamingOptions.LatestOnly, InitialPullStrategy.MissingOnly, true);
+            var tests_db = firebase.Child("testingdb").AsRealtimeDatabase<test>("", "", StreamingOptions.LatestOnly, InitialPullStrategy.MissingOnly, true);
+            tests_db.SyncExceptionThrown += (s, ex) => Console.WriteLine(ex.Exception);
+            
+            var myKey = tests_db.Post(new test { name = "wew", value="val" });
+
+            var q = (from test in tests_db.AsObservable()
+                     select new { test });
+
+            q.Subscribe(pair => Console.WriteLine($"{pair.test.Object.name}: {pair.test.Object.value} ({pair.test.EventSource})"));
+
+            //while (true)
+            //{
+            //    var message = Console.ReadLine();
+
+            //    if (message?.ToLower() == "q")
+            //    {
+            //        break;
+            //    }
+            //    messagesDb.Post(new Message { Author = myKey, Content = message });
+            //}
 
         }
         public async Task Controller_TruncateQueueStatus()

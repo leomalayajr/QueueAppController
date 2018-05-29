@@ -33,12 +33,19 @@ namespace a3
             this.FormBorderStyle = FormBorderStyle.FixedSingle;
             this.StartPosition = FormStartPosition.CenterScreen;
             dataGridView1.Columns["id"].ReadOnly = true;
+            dataGridView1.Columns["id"].Visible = false;
             dataGridView1.Columns["Name"].ReadOnly = true;
+            dataGridView1.Columns["Name"].HeaderText = "Office Name";
             dataGridView1.Columns["Servicing_Office_ID"].ReadOnly = true;
+            dataGridView1.Columns["Servicing_Office_ID"].Visible = false;
             dataGridView1.Columns["Window"].ReadOnly = true;
+            dataGridView1.Columns["Window"].HeaderText = "Window #";
             dataGridView1.Columns["MAC_Address"].ReadOnly = true;
-            
-            dataGridView1.AutoResizeColumns();
+            dataGridView1.Columns["MAC_Address"].HeaderText = "MAC Address";
+
+            dataGridView1.Columns["Window"].Width = 125;
+            dataGridView1.Columns["Name"].Width = 180;
+            dataGridView1.Columns["MAC_Address"].Width = 195;
         }
         private void Form1_FormClosed(object sender, FormClosedEventArgs e)
         {

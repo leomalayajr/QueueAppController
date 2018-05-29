@@ -132,6 +132,7 @@
     <Compile Include="Loading.Designer.cs">
       <DependentUpon>Loading.cs</DependentUpon>
     </Compile>
+    <Compile Include="test.cs" />
     <Compile Include="_Controller_Queue_Log.cs" />
     <Compile Include="_Rating.cs" />
     <Compile Include="__Log.cs" />

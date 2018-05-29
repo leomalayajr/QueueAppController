@@ -70,24 +70,33 @@ namespace a3
             MinimizeBox = false;
             StartPosition = FormStartPosition.CenterScreen;
             // Variable Init
-            VARIABLE_Allowed_To_Sync = true;
+            VARIABLE_Allowed_To_Sync = false;
             VARIABLE_Priority_Sync_Time = 60000;
             stopp.Start();
             txtLog.ScrollBars = ScrollBars.Both; // use scroll bars; no text wrapping
-            toggleSync.Enabled = false;
+            toggleSync.Enabled = true;
 
             // Function Init
             // Functions that will be run once
             initDataTables();
 
-            PROGRAM_Sync_Once();
+            //PROGRAM_Sync_Once();
             Queue_Info_Update();
 
             // Functions that will be always updated
             //    PROGRAM_Online_Sync(); 
             //    InitSyncTimer();
+
+            //tests
+            //tests();
             #endregion
 
+        }
+        public async void tests(CancellationToken cts)
+        {
+            firebase_Connection fcon = new firebase_Connection();
+            //await fcon.active();
+            await fcon.Active_Retrieve_PreQueue(cts);
         }
         public void initDataTables()
         {
@@ -96,6 +105,87 @@ namespace a3
             table_Transaction_Table = getTransactionType();
         }
         #region BASIC METHODS
+        public async Task fromFirebase_Insert_PreQueue(_Pre_Queue new_prequeue,CancellationToken cts)
+        {
+            Console.WriteLine("Implied to be inserted >>>>>> " + _pq_mq.Student_No + " " + _pq_mq.Key);
+            /*
+            //SqlConnection con = new SqlConnection(connection_string);
+            //string query = "insert into memes (meme) values (@param1)";
+            //con.Open();
+            //SqlCommand cmd = new SqlCommand(query,con);
+            //cmd.Parameters.AddWithValue("@param1", wew.name + wew.value + wew.Key);
+            //cmd.ExecuteNonQuery();
+            //con.Close();
+            */
+
+            // Code to insert PreQueue to MainQueue - Start
+            await Controller_Internal_PreQueueToLocal(new_prequeue);
+            // Code to insert PreQueue to MainQueue - End
+
+            //Delete after inserting -- no need, only do once per day / every SyncOnce on init
+            //firebase_Connection fcon = new firebase_Connection();
+            //await fcon.Specific_Delete_PreQueueAsync(wew.Key,cts);
+        }
+        private async Task Controller_Internal_PreQueueToLocal(_Pre_Queue e)
+        {
+            await Task.Run(() =>
+            {
+                Console.WriteLine("WE -> " + e.Transaction_Type);
+                int firstServicingOffice = getFirstServicingOffice(e.Transaction_Type);
+                Console.WriteLine("B ->" + firstServicingOffice);
+                int newQueueNumber = getQueueNumber(firstServicingOffice);
+                Console.WriteLine("QQQQQ" + newQueueNumber);
+
+                _pq_mq = new _Main_Queue
+                {
+                    Queue_Number = newQueueNumber,
+                    Servicing_Office = firstServicingOffice,
+                    Pattern_Max = retrievePatternMax(e.Transaction_Type),
+                    Customer_Queue_Number = generateQueueShortName(e.Transaction_Type, newQueueNumber),
+                    Full_Name = e.Full_Name,
+                    Student_No = e.Student_No,
+                    Transaction_Type = e.Transaction_Type,
+                    Time = UnixTimeStampToDateTime(e.timestamp_date),
+                    Pattern_Current = 1,
+                    Queue_Status = "Waiting",
+                    Type = "Student",
+                    Customer_From = "Mobile"
+                };
+
+                string QUERY_Add_PreQueue_To_MainQueue = "insert into Main_Queue " +
+                "(Queue_Number,Full_Name,Servicing_Office,Student_No," +
+                "Transaction_Type,Type,Time,Pattern_Current,Pattern_Max," +
+                "Customer_Queue_Number,Queue_Status,Customer_From) " +
+                " values (@q_qn,@q_fn,@q_so,@q_sn,@q_tt,@q_type,GETDATE(),@q_pc,@q_pm,@q_cqn,@q_qs,@q_cf)";
+                SqlConnection temp_con = new SqlConnection(connection_string);
+                SqlCommand cmdPreQueue = new SqlCommand(QUERY_Add_PreQueue_To_MainQueue, temp_con);
+                using (temp_con)
+                {
+                    temp_con.Open();
+                    _Main_Queue f = _pq_mq;
+
+                    Console.WriteLine("PREQUEUE {0} ==", f.Customer_Queue_Number);
+                    WriteToControllerLog(f.Customer_Queue_Number + "(Mobile) requested Transaction ID: " + f.Transaction_Type + ".");
+                    // Add to local DB -> MainQueue
+                    cmdPreQueue.Parameters.AddWithValue("@q_qn", f.Queue_Number);
+                    cmdPreQueue.Parameters.AddWithValue("@q_fn", f.Full_Name);
+                    cmdPreQueue.Parameters.AddWithValue("@q_so", f.Servicing_Office);
+                    cmdPreQueue.Parameters.AddWithValue("@q_sn", f.Student_No);
+                    cmdPreQueue.Parameters.AddWithValue("@q_tt", f.Transaction_Type);
+                    cmdPreQueue.Parameters.AddWithValue("@q_type", 0); // 0 = student
+                    cmdPreQueue.Parameters.AddWithValue("@q_pc", f.Pattern_Current);
+                    cmdPreQueue.Parameters.AddWithValue("@q_pm", f.Pattern_Max);
+                    cmdPreQueue.Parameters.AddWithValue("@q_cqn", f.Customer_Queue_Number);
+                    cmdPreQueue.Parameters.AddWithValue("@q_qs", f.Queue_Status);
+                    cmdPreQueue.Parameters.AddWithValue("@q_cf", 1); // 1 = mobile
+                    cmdPreQueue.ExecuteNonQuery();
+                    cmdPreQueue.Parameters.Clear();
+
+                    temp_con.Close();
+                }
+                // Delete after retrieving all PreQueue and inserting them to MainQueue
+            });
+        }
         private void WriteToControllerLog(string subtext)
         {
             SqlConnection con = new SqlConnection(connection_string);
@@ -587,10 +677,10 @@ namespace a3
                             Task k2 = Task.Run(async () => { await fcon.App_Delete_MainQueueAsync(); });
                             Task k3 = Task.Run(async () => { await fcon.App_Delete_TransferQueueAsync(); });
                             Task k4 = Task.Run(async () => { await fcon.App_Delete_ServicingTerminalAsync(); });
-
+                            Task k5 = Task.Run(async () => { await fcon.App_Delete_PreQueueAsyncNoCTS(); });
                             if (DEBUG_deleteEveryRun)
                             {
-                                await Task.WhenAll(k1, k2, k3, k4);
+                                await Task.WhenAll(k1, k2, k3, k4, k5);
                                 logWrite("Online", "Online DB cleared.");
                             }
                             SqlDataReader RDR_Transaction;
@@ -612,7 +702,7 @@ namespace a3
                             await Task.Run(
                             async () =>
                             {
-                                 fcon.App_Delete_TransactionTypeAsync();
+                                fcon.App_Delete_TransactionTypeAsync();
                                 foreach (_Transaction_Type a in LIST_Transaction_Type)
                                      fcon.App_Insert_TransactionTypeAsync(a);
                             }
@@ -1100,74 +1190,7 @@ namespace a3
                                     foreach (_Transaction_Type g in LIST_TransactionTypes)
                                         await fcon.App_Insert_TransactionTypeAsync(g);
                                 });
-                                var i5 = Task.Run(async () =>
-                                    {
-                                        PREQUEUE_LIST = await fcon.App_Retrieve_PreQueue(cancelToken);
-                                        await fcon.App_Delete_PreQueueAsync(cancelToken);
-                                        foreach (_Pre_Queue e in PREQUEUE_LIST)
-                                        {
-                                            Console.WriteLine("WE -> " + e.Transaction_Type);
-                                            int firstServicingOffice = getFirstServicingOffice(e.Transaction_Type);
-                                            Console.WriteLine("B ->" + firstServicingOffice);
-                                            int newQueueNumber = getQueueNumber(firstServicingOffice);
-                                            Console.WriteLine("QQQQQ"+ newQueueNumber);
-
-                                            _pq_mq = new _Main_Queue
-                                            {
-                                                Queue_Number = newQueueNumber,
-                                                Servicing_Office = firstServicingOffice,
-                                                Pattern_Max = retrievePatternMax(e.Transaction_Type),
-                                                Customer_Queue_Number = generateQueueShortName(e.Transaction_Type, newQueueNumber),
-                                                Full_Name = e.Full_Name,
-                                                Student_No = e.Student_No,
-                                                Transaction_Type = e.Transaction_Type,
-                                                Time = UnixTimeStampToDateTime(e.timestamp_date),
-                                                Pattern_Current = 1,
-                                                Queue_Status = "Waiting",
-                                                Type = "Student",
-                                                Customer_From = "Mobile"
-                                            };
-                                            PREQUEUE_TO_MAINQUEUE.Add(_pq_mq);
-                                        }
-
-                                        string QUERY_Add_PreQueue_To_MainQueue = "insert into Main_Queue " +
-                                        "(Queue_Number,Full_Name,Servicing_Office,Student_No," +
-                                        "Transaction_Type,Type,Time,Pattern_Current,Pattern_Max," +
-                                        "Customer_Queue_Number,Queue_Status,Customer_From) " +
-                                        " values (@q_qn,@q_fn,@q_so,@q_sn,@q_tt,@q_type,GETDATE(),@q_pc,@q_pm,@q_cqn,@q_qs,@q_cf)";
-                                        SqlConnection temp_con = new SqlConnection(connection_string);
-                                        SqlCommand cmdPreQueue = new SqlCommand(QUERY_Add_PreQueue_To_MainQueue, temp_con);
-                                        using (temp_con)
-                                        {
-                                            temp_con.Open();
-                                            foreach (_Main_Queue f in PREQUEUE_TO_MAINQUEUE)
-                                            {
-
-                                                Console.WriteLine("PREQUEUE {0} ==", f.Customer_Queue_Number);
-                                                WriteToControllerLog(f.Customer_Queue_Number + "(Mobile) requested Transaction ID: " + f.Transaction_Type +".");
-                                                // Add to local DB -> MainQueue
-                                                cmdPreQueue.Parameters.AddWithValue("@q_qn", f.Queue_Number);
-                                                cmdPreQueue.Parameters.AddWithValue("@q_fn", f.Full_Name);
-                                                cmdPreQueue.Parameters.AddWithValue("@q_so", f.Servicing_Office);
-                                                cmdPreQueue.Parameters.AddWithValue("@q_sn", f.Student_No);
-                                                cmdPreQueue.Parameters.AddWithValue("@q_tt", f.Transaction_Type);
-                                                cmdPreQueue.Parameters.AddWithValue("@q_type", 0); // 0 = student
-                                                cmdPreQueue.Parameters.AddWithValue("@q_pc", f.Pattern_Current);
-                                                cmdPreQueue.Parameters.AddWithValue("@q_pm", f.Pattern_Max);
-                                                cmdPreQueue.Parameters.AddWithValue("@q_cqn", f.Customer_Queue_Number);
-                                                cmdPreQueue.Parameters.AddWithValue("@q_qs", f.Queue_Status);
-                                                cmdPreQueue.Parameters.AddWithValue("@q_cf", 1); // 1 = mobile
-                                                cmdPreQueue.ExecuteNonQuery();
-                                                cmdPreQueue.Parameters.Clear();
-
-                                            }
-                                            temp_con.Close();
-                                        }
-                                        // Delete after retrieving all PreQueue and inserting them to MainQueue
-
-                                        
-                                    }
-                                    );
+                                
 
 
                                 logWrite("Online -> ", "Running sync tasks...");
@@ -1175,8 +1198,8 @@ namespace a3
                                 Console.WriteLine("i6 done");
                                 await Task.WhenAll(i1);
                                 Console.WriteLine("i1 done");
-                                await Task.WhenAll(i3, i5);
-                                Console.WriteLine("i3 i5 done");
+                                await Task.WhenAll(i3);
+                                Console.WriteLine("i3 done");
                                 //await Task.WhenAll(i1, i2, i3, i4, i5);
                                 await Task.WhenAll(i2, i4);
                                 Console.WriteLine("i2 i4 done");
@@ -1447,7 +1470,10 @@ namespace a3
         {
             // Create the token source.
             wtoken = new CancellationTokenSource();
-
+            
+            // Methods only executed once per run
+            tests(wtoken.Token);
+            
             // Set the task.
             wtask = CreateNeverEndingTask((now, ct) => PROGRAM_Online_Sync(ct), wtoken.Token);
 
@@ -1537,6 +1563,8 @@ namespace a3
             if (frmLogs.IsDisposed)
                 frmLogs = new Logs();
             frmLogs.Show();
+            //firebase_Connection fcon = new firebase_Connection();
+            //fcon.active_insert();
         }
     }
 }

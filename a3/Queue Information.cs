@@ -54,10 +54,10 @@ namespace a3
         }
         private void Queue_Information_onLoad()
         {
-            comboBox1.Items.Clear();
-            comboBox1.DataSource = LIST_getServicingOffices();
-            comboBox1.DisplayMember = "Name";
-            comboBox1.ValueMember = "id";
+            //comboBox1.Items.Clear();
+            //comboBox1.DataSource = LIST_getServicingOffices();
+            //comboBox1.DisplayMember = "Name";
+            //comboBox1.ValueMember = "id";
         }
         private List<_Servicing_Office> LIST_getServicingOffices()
         {

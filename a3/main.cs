@@ -69,24 +69,37 @@ namespace a3
             MaximizeBox = false;
             MinimizeBox = false;
             StartPosition = FormStartPosition.CenterScreen;
-            // Variable Init
-            VARIABLE_Allowed_To_Sync = false;
-            VARIABLE_Priority_Sync_Time = 60000;
-            stopp.Start();
             txtLog.ScrollBars = ScrollBars.Both; // use scroll bars; no text wrapping
+
+            // Initialize important variables here! 
+
+            // Turn this to true to allow online sync
+            VARIABLE_Allowed_To_Sync = true;
+
+            // VARIABLE_Priority_Sync_Time = 60000;
+
+            // This stopwatch counts the runtimme of the controller, only to be restarted once every run / every day
+            stopp.Start();
+
             toggleSync.Enabled = true;
 
-            // Function Init
+            // Initialize important functions here!
+
             // Functions that will be run once
             initDataTables();
 
-            //PROGRAM_Sync_Once();
+            PROGRAM_Sync_Once();
+
             Queue_Info_Update();
 
-            // Functions that will be always updated
+            // Methods that will sync the system; no need to enable these items.
             //    PROGRAM_Online_Sync(); 
             //    InitSyncTimer();
 
+            /* Methods for testing something. 
+             * You can set VARIABLE_Allowed_To_Sync to false 
+             * and use tests functions on the Main Sync Method.
+             */
             //tests
             //tests();
             #endregion
@@ -191,7 +204,7 @@ namespace a3
             SqlConnection con = new SqlConnection(connection_string);
             con.Open();
             // write to Controller_Queue_log
-            String QUERY_create_newControllerLog = "insert into Controller_Queue_Log (Log_Title,Log_Text) values (@param1,@param2)";
+            String QUERY_create_newControllerLog = "insert into Controller_Queue_Log (Log_Title,Log_Text,Activity_Date) values (@param1,@param2,GETDATE())";
             SqlCommand Command9 = new SqlCommand(QUERY_create_newControllerLog, con);
             Command9.Parameters.AddWithValue("@param1", "Controller");
             Command9.Parameters.AddWithValue("@param2", subtext);
@@ -415,21 +428,26 @@ namespace a3
         {
             SqlConnection con = new SqlConnection(connection_string);
             string query = "select * from Controller_Queue_Log";
-            string query_save = "insert into Controller_Queue_Log_Old (Saved_On,Log_Title,Log_Text) values " +
-                " (GETDATE(),@param2,@param3)";
+            string query_save = "insert into Controller_Queue_Log_Old (Log_Title,Log_Text,Activity_Date) values " +
+                " (@param2,@param3,@param4)";
+            string query_delete = "TRUNCATE TABLE Controller_Queue_Log";
             SqlCommand cmd = new SqlCommand(query, con);
             SqlCommand cmd_save = new SqlCommand(query_save, con);
+            SqlCommand cmd_del = new SqlCommand(query_delete, con);
             SqlDataReader rdr;
             rdr = cmd.ExecuteReader();
             while (rdr.Read())
             {
                 string Log_Title = (string)rdr["Log_Title"];
                 string Log_Text = (string)rdr["Log_Text"];
+                DateTime Log_Activity_Date = (DateTime)rdr["Activity_Date"];
                 cmd_save.Parameters.AddWithValue("@param2", Log_Title);
                 cmd_save.Parameters.AddWithValue("@param3", Log_Text);
+                cmd_save.Parameters.AddWithValue("@param4", Log_Activity_Date);
                 cmd_save.ExecuteNonQuery();
                 cmd_save.Parameters.Clear();
             }
+            cmd_del.ExecuteNonQuery();
         }
         private void retrieveQueueLogs()
         {
@@ -1471,8 +1489,8 @@ namespace a3
             // Create the token source.
             wtoken = new CancellationTokenSource();
             
-            // Methods only executed once per run
-            tests(wtoken.Token);
+            // Methods only executed once per run; For testing only
+            // tests(wtoken.Token);
             
             // Set the task.
             wtask = CreateNeverEndingTask((now, ct) => PROGRAM_Online_Sync(ct), wtoken.Token);

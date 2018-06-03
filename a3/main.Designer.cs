@@ -28,7 +28,10 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(main));
             this.panel1 = new System.Windows.Forms.Panel();
+            this.label5 = new System.Windows.Forms.Label();
+            this.label3 = new System.Windows.Forms.Label();
             this.btnLog = new System.Windows.Forms.Button();
             this.button1 = new System.Windows.Forms.Button();
             this.btnRate = new System.Windows.Forms.Button();
@@ -47,15 +50,19 @@
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.panel4 = new System.Windows.Forms.Panel();
+            this.panel2 = new System.Windows.Forms.Panel();
+            this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.panel1.SuspendLayout();
             this.panel4.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
             // 
             // panel1
             // 
-            this.panel1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left)));
-            this.panel1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(32)))), ((int)(((byte)(41)))), ((int)(((byte)(50)))));
+            this.panel1.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.panel1.BackColor = System.Drawing.Color.White;
+            this.panel1.Controls.Add(this.label5);
+            this.panel1.Controls.Add(this.label3);
             this.panel1.Controls.Add(this.btnLog);
             this.panel1.Controls.Add(this.button1);
             this.panel1.Controls.Add(this.btnRate);
@@ -69,23 +76,46 @@
             this.panel1.Controls.Add(this.txtOnlineStatus);
             this.panel1.Controls.Add(this.lbllocalDBStatus);
             this.panel1.Controls.Add(this.lblonlineDBStatus);
-            this.panel1.Location = new System.Drawing.Point(15, 15);
-            this.panel1.Margin = new System.Windows.Forms.Padding(4);
+            this.panel1.Location = new System.Drawing.Point(8, 109);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(597, 736);
+            this.panel1.Size = new System.Drawing.Size(448, 598);
             this.panel1.TabIndex = 0;
+            // 
+            // label5
+            // 
+            this.label5.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.label5.AutoSize = true;
+            this.label5.Font = new System.Drawing.Font("Calibri", 16.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label5.ForeColor = System.Drawing.Color.Black;
+            this.label5.Location = new System.Drawing.Point(39, 401);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(106, 35);
+            this.label5.TabIndex = 40;
+            this.label5.Text = "Reports";
+            // 
+            // label3
+            // 
+            this.label3.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.label3.AutoSize = true;
+            this.label3.Font = new System.Drawing.Font("Calibri", 16.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label3.ForeColor = System.Drawing.Color.Black;
+            this.label3.Location = new System.Drawing.Point(39, 282);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(74, 35);
+            this.label3.TabIndex = 39;
+            this.label3.Text = "View";
             // 
             // btnLog
             // 
-            this.btnLog.BackColor = System.Drawing.Color.DarkSlateGray;
-            this.btnLog.FlatAppearance.BorderSize = 0;
+            this.btnLog.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.btnLog.BackColor = System.Drawing.Color.DarkRed;
+            this.btnLog.FlatAppearance.BorderColor = System.Drawing.Color.Black;
             this.btnLog.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnLog.Font = new System.Drawing.Font("Calibri", 12.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnLog.ForeColor = System.Drawing.Color.White;
-            this.btnLog.Location = new System.Drawing.Point(307, 486);
-            this.btnLog.Margin = new System.Windows.Forms.Padding(4);
+            this.btnLog.Location = new System.Drawing.Point(240, 431);
             this.btnLog.Name = "btnLog";
-            this.btnLog.Size = new System.Drawing.Size(220, 63);
+            this.btnLog.Size = new System.Drawing.Size(165, 55);
             this.btnLog.TabIndex = 38;
             this.btnLog.Text = "Logs";
             this.btnLog.UseVisualStyleBackColor = false;
@@ -93,15 +123,15 @@
             // 
             // button1
             // 
-            this.button1.BackColor = System.Drawing.Color.DarkSlateGray;
-            this.button1.FlatAppearance.BorderSize = 0;
+            this.button1.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.button1.BackColor = System.Drawing.Color.DarkRed;
+            this.button1.FlatAppearance.BorderColor = System.Drawing.Color.Black;
             this.button1.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.button1.Font = new System.Drawing.Font("Calibri", 12.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.button1.ForeColor = System.Drawing.Color.White;
-            this.button1.Location = new System.Drawing.Point(307, 388);
-            this.button1.Margin = new System.Windows.Forms.Padding(4);
+            this.button1.Location = new System.Drawing.Point(240, 312);
             this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(220, 63);
+            this.button1.Size = new System.Drawing.Size(165, 55);
             this.button1.TabIndex = 36;
             this.button1.Text = "Offices and Transactions";
             this.button1.UseVisualStyleBackColor = false;
@@ -109,15 +139,15 @@
             // 
             // btnRate
             // 
-            this.btnRate.BackColor = System.Drawing.Color.DarkSlateGray;
-            this.btnRate.FlatAppearance.BorderSize = 0;
+            this.btnRate.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.btnRate.BackColor = System.Drawing.Color.DarkRed;
+            this.btnRate.FlatAppearance.BorderColor = System.Drawing.Color.Black;
             this.btnRate.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnRate.Font = new System.Drawing.Font("Calibri", 12.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnRate.ForeColor = System.Drawing.Color.White;
-            this.btnRate.Location = new System.Drawing.Point(68, 486);
-            this.btnRate.Margin = new System.Windows.Forms.Padding(4);
+            this.btnRate.Location = new System.Drawing.Point(61, 431);
             this.btnRate.Name = "btnRate";
-            this.btnRate.Size = new System.Drawing.Size(220, 63);
+            this.btnRate.Size = new System.Drawing.Size(165, 55);
             this.btnRate.TabIndex = 34;
             this.btnRate.Text = "Evaluations";
             this.btnRate.UseVisualStyleBackColor = false;
@@ -125,59 +155,59 @@
             // 
             // label4
             // 
+            this.label4.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.label4.AutoSize = true;
             this.label4.Font = new System.Drawing.Font("Calibri", 16.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label4.ForeColor = System.Drawing.Color.White;
-            this.label4.Location = new System.Drawing.Point(203, 224);
-            this.label4.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label4.ForeColor = System.Drawing.Color.Black;
+            this.label4.Location = new System.Drawing.Point(39, 163);
             this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(203, 35);
+            this.label4.Size = new System.Drawing.Size(82, 35);
             this.label4.TabIndex = 32;
-            this.label4.Text = "System Controls";
+            this.label4.Text = "Setup";
             // 
             // btnWindows
             // 
-            this.btnWindows.BackColor = System.Drawing.Color.DarkSlateGray;
-            this.btnWindows.FlatAppearance.BorderSize = 0;
+            this.btnWindows.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.btnWindows.BackColor = System.Drawing.Color.DarkRed;
+            this.btnWindows.FlatAppearance.BorderColor = System.Drawing.Color.Black;
             this.btnWindows.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnWindows.Font = new System.Drawing.Font("Calibri", 12.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnWindows.ForeColor = System.Drawing.Color.White;
-            this.btnWindows.Location = new System.Drawing.Point(307, 287);
-            this.btnWindows.Margin = new System.Windows.Forms.Padding(4);
+            this.btnWindows.Location = new System.Drawing.Point(240, 193);
             this.btnWindows.Name = "btnWindows";
-            this.btnWindows.Size = new System.Drawing.Size(220, 63);
+            this.btnWindows.Size = new System.Drawing.Size(165, 55);
             this.btnWindows.TabIndex = 31;
-            this.btnWindows.Text = "Windows Setup";
+            this.btnWindows.Text = "Windows";
             this.btnWindows.UseVisualStyleBackColor = false;
             this.btnWindows.Click += new System.EventHandler(this.btnWindows_Click);
             // 
             // btnInfo
             // 
-            this.btnInfo.BackColor = System.Drawing.Color.DarkSlateGray;
-            this.btnInfo.FlatAppearance.BorderSize = 0;
+            this.btnInfo.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.btnInfo.BackColor = System.Drawing.Color.DarkRed;
+            this.btnInfo.FlatAppearance.BorderColor = System.Drawing.Color.Black;
             this.btnInfo.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnInfo.Font = new System.Drawing.Font("Calibri", 12.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnInfo.ForeColor = System.Drawing.Color.White;
-            this.btnInfo.Location = new System.Drawing.Point(68, 388);
-            this.btnInfo.Margin = new System.Windows.Forms.Padding(4);
+            this.btnInfo.Location = new System.Drawing.Point(61, 312);
             this.btnInfo.Name = "btnInfo";
-            this.btnInfo.Size = new System.Drawing.Size(220, 63);
+            this.btnInfo.Size = new System.Drawing.Size(165, 55);
             this.btnInfo.TabIndex = 29;
-            this.btnInfo.Text = "Terminals";
+            this.btnInfo.Text = "Active\r\nTerminals";
             this.btnInfo.UseVisualStyleBackColor = false;
             this.btnInfo.Click += new System.EventHandler(this.btnInfo_Click);
             // 
             // btnSettings
             // 
-            this.btnSettings.BackColor = System.Drawing.Color.DarkSlateGray;
-            this.btnSettings.FlatAppearance.BorderSize = 0;
+            this.btnSettings.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.btnSettings.BackColor = System.Drawing.Color.DarkRed;
+            this.btnSettings.FlatAppearance.BorderColor = System.Drawing.Color.Black;
             this.btnSettings.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnSettings.Font = new System.Drawing.Font("Calibri", 12.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnSettings.ForeColor = System.Drawing.Color.White;
-            this.btnSettings.Location = new System.Drawing.Point(68, 287);
-            this.btnSettings.Margin = new System.Windows.Forms.Padding(4);
+            this.btnSettings.Location = new System.Drawing.Point(61, 193);
             this.btnSettings.Name = "btnSettings";
-            this.btnSettings.Size = new System.Drawing.Size(220, 63);
+            this.btnSettings.Size = new System.Drawing.Size(165, 55);
             this.btnSettings.TabIndex = 27;
             this.btnSettings.Text = "Settings";
             this.btnSettings.UseVisualStyleBackColor = false;
@@ -185,15 +215,15 @@
             // 
             // toggleSync
             // 
+            this.toggleSync.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.toggleSync.BackColor = System.Drawing.Color.Gray;
             this.toggleSync.FlatAppearance.BorderSize = 0;
             this.toggleSync.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.toggleSync.Font = new System.Drawing.Font("Calibri", 12.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.toggleSync.ForeColor = System.Drawing.Color.White;
-            this.toggleSync.Location = new System.Drawing.Point(307, 642);
-            this.toggleSync.Margin = new System.Windows.Forms.Padding(4);
+            this.toggleSync.Location = new System.Drawing.Point(325, 534);
             this.toggleSync.Name = "toggleSync";
-            this.toggleSync.Size = new System.Drawing.Size(220, 52);
+            this.toggleSync.Size = new System.Drawing.Size(80, 42);
             this.toggleSync.TabIndex = 25;
             this.toggleSync.Text = "OFF";
             this.toggleSync.UseVisualStyleBackColor = false;
@@ -201,11 +231,11 @@
             // 
             // lblMobileQ
             // 
+            this.lblMobileQ.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.lblMobileQ.AutoSize = true;
             this.lblMobileQ.Font = new System.Drawing.Font("Calibri", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblMobileQ.ForeColor = System.Drawing.Color.White;
-            this.lblMobileQ.Location = new System.Drawing.Point(144, 656);
-            this.lblMobileQ.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.lblMobileQ.ForeColor = System.Drawing.Color.Black;
+            this.lblMobileQ.Location = new System.Drawing.Point(211, 546);
             this.lblMobileQ.Name = "lblMobileQ";
             this.lblMobileQ.Size = new System.Drawing.Size(131, 24);
             this.lblMobileQ.TabIndex = 15;
@@ -213,37 +243,37 @@
             // 
             // txtLocalStatus
             // 
-            this.txtLocalStatus.BackColor = System.Drawing.Color.White;
+            this.txtLocalStatus.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.txtLocalStatus.BackColor = System.Drawing.Color.LightGray;
             this.txtLocalStatus.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.txtLocalStatus.Font = new System.Drawing.Font("Calibri", 15.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.txtLocalStatus.ForeColor = System.Drawing.Color.Black;
-            this.txtLocalStatus.Location = new System.Drawing.Point(271, 111);
-            this.txtLocalStatus.Margin = new System.Windows.Forms.Padding(4);
+            this.txtLocalStatus.Location = new System.Drawing.Point(203, 86);
             this.txtLocalStatus.Name = "txtLocalStatus";
-            this.txtLocalStatus.Size = new System.Drawing.Size(304, 33);
+            this.txtLocalStatus.Size = new System.Drawing.Size(228, 33);
             this.txtLocalStatus.TabIndex = 13;
             this.txtLocalStatus.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // txtOnlineStatus
             // 
-            this.txtOnlineStatus.BackColor = System.Drawing.Color.White;
+            this.txtOnlineStatus.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.txtOnlineStatus.BackColor = System.Drawing.Color.LightGray;
             this.txtOnlineStatus.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.txtOnlineStatus.Font = new System.Drawing.Font("Calibri", 15.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.txtOnlineStatus.ForeColor = System.Drawing.Color.Black;
-            this.txtOnlineStatus.Location = new System.Drawing.Point(271, 60);
-            this.txtOnlineStatus.Margin = new System.Windows.Forms.Padding(4);
+            this.txtOnlineStatus.Location = new System.Drawing.Point(203, 45);
             this.txtOnlineStatus.Name = "txtOnlineStatus";
-            this.txtOnlineStatus.Size = new System.Drawing.Size(304, 33);
+            this.txtOnlineStatus.Size = new System.Drawing.Size(228, 33);
             this.txtOnlineStatus.TabIndex = 12;
             this.txtOnlineStatus.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // lbllocalDBStatus
             // 
+            this.lbllocalDBStatus.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.lbllocalDBStatus.AutoSize = true;
             this.lbllocalDBStatus.Font = new System.Drawing.Font("Calibri", 15.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lbllocalDBStatus.ForeColor = System.Drawing.Color.White;
-            this.lbllocalDBStatus.Location = new System.Drawing.Point(17, 111);
-            this.lbllocalDBStatus.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.lbllocalDBStatus.ForeColor = System.Drawing.Color.Black;
+            this.lbllocalDBStatus.Location = new System.Drawing.Point(26, 86);
             this.lbllocalDBStatus.Name = "lbllocalDBStatus";
             this.lbllocalDBStatus.Size = new System.Drawing.Size(192, 33);
             this.lbllocalDBStatus.TabIndex = 11;
@@ -251,11 +281,11 @@
             // 
             // lblonlineDBStatus
             // 
+            this.lblonlineDBStatus.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.lblonlineDBStatus.AutoSize = true;
             this.lblonlineDBStatus.Font = new System.Drawing.Font("Calibri", 15.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblonlineDBStatus.ForeColor = System.Drawing.Color.White;
-            this.lblonlineDBStatus.Location = new System.Drawing.Point(17, 58);
-            this.lblonlineDBStatus.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.lblonlineDBStatus.ForeColor = System.Drawing.Color.Black;
+            this.lblonlineDBStatus.Location = new System.Drawing.Point(20, 46);
             this.lblonlineDBStatus.Name = "lblonlineDBStatus";
             this.lblonlineDBStatus.Size = new System.Drawing.Size(209, 33);
             this.lblonlineDBStatus.TabIndex = 10;
@@ -263,90 +293,103 @@
             // 
             // txtLog
             // 
-            this.txtLog.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Right)));
+            this.txtLog.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.txtLog.BackColor = System.Drawing.Color.Gainsboro;
             this.txtLog.CausesValidation = false;
             this.txtLog.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.txtLog.Location = new System.Drawing.Point(19, 457);
-            this.txtLog.Margin = new System.Windows.Forms.Padding(4);
+            this.txtLog.ForeColor = System.Drawing.Color.Black;
+            this.txtLog.Location = new System.Drawing.Point(12, 357);
             this.txtLog.MaxLength = 800000;
             this.txtLog.Multiline = true;
             this.txtLog.Name = "txtLog";
             this.txtLog.ReadOnly = true;
-            this.txtLog.Size = new System.Drawing.Size(755, 258);
+            this.txtLog.Size = new System.Drawing.Size(471, 234);
             this.txtLog.TabIndex = 15;
             this.txtLog.WordWrap = false;
             // 
             // txtQueue
             // 
-            this.txtQueue.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Right)));
+            this.txtQueue.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.txtQueue.BackColor = System.Drawing.Color.Gainsboro;
             this.txtQueue.CausesValidation = false;
             this.txtQueue.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.txtQueue.Location = new System.Drawing.Point(19, 51);
-            this.txtQueue.Margin = new System.Windows.Forms.Padding(4);
+            this.txtQueue.ForeColor = System.Drawing.Color.Black;
+            this.txtQueue.Location = new System.Drawing.Point(8, 41);
             this.txtQueue.MaxLength = 800000;
             this.txtQueue.Multiline = true;
             this.txtQueue.Name = "txtQueue";
             this.txtQueue.ReadOnly = true;
             this.txtQueue.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.txtQueue.Size = new System.Drawing.Size(755, 358);
+            this.txtQueue.Size = new System.Drawing.Size(475, 268);
             this.txtQueue.TabIndex = 34;
             this.txtQueue.WordWrap = false;
             // 
             // label1
             // 
-            this.label1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Right)));
+            this.label1.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.label1.Font = new System.Drawing.Font("Calibri", 16.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label1.ForeColor = System.Drawing.Color.White;
-            this.label1.Location = new System.Drawing.Point(265, 413);
-            this.label1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label1.ForeColor = System.Drawing.Color.Black;
+            this.label1.Location = new System.Drawing.Point(13, 322);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(281, 40);
+            this.label1.Size = new System.Drawing.Size(193, 32);
             this.label1.TabIndex = 35;
             this.label1.Text = "Synchronization";
-            this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // label2
             // 
-            this.label2.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Right)));
+            this.label2.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.label2.Font = new System.Drawing.Font("Calibri", 16.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label2.ForeColor = System.Drawing.Color.White;
-            this.label2.Location = new System.Drawing.Point(275, 7);
-            this.label2.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label2.ForeColor = System.Drawing.Color.Black;
+            this.label2.Location = new System.Drawing.Point(3, 6);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(281, 40);
+            this.label2.Size = new System.Drawing.Size(211, 32);
             this.label2.TabIndex = 36;
             this.label2.Text = "Queue Updates";
-            this.label2.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.label2.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // panel4
             // 
-            this.panel4.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.panel4.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(32)))), ((int)(((byte)(41)))), ((int)(((byte)(50)))));
+            this.panel4.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.panel4.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.panel4.BackColor = System.Drawing.Color.White;
             this.panel4.Controls.Add(this.label2);
             this.panel4.Controls.Add(this.label1);
             this.panel4.Controls.Add(this.txtLog);
             this.panel4.Controls.Add(this.txtQueue);
-            this.panel4.Location = new System.Drawing.Point(620, 13);
-            this.panel4.Margin = new System.Windows.Forms.Padding(4);
+            this.panel4.Location = new System.Drawing.Point(462, 109);
             this.panel4.Name = "panel4";
-            this.panel4.Size = new System.Drawing.Size(793, 736);
+            this.panel4.Size = new System.Drawing.Size(491, 598);
             this.panel4.TabIndex = 6;
+            // 
+            // panel2
+            // 
+            this.panel2.BackColor = System.Drawing.Color.Maroon;
+            this.panel2.Location = new System.Drawing.Point(0, 708);
+            this.panel2.Name = "panel2";
+            this.panel2.Size = new System.Drawing.Size(967, 22);
+            this.panel2.TabIndex = 8;
+            // 
+            // pictureBox1
+            // 
+            this.pictureBox1.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox1.Image")));
+            this.pictureBox1.Location = new System.Drawing.Point(-4, 0);
+            this.pictureBox1.Name = "pictureBox1";
+            this.pictureBox1.Size = new System.Drawing.Size(1065, 108);
+            this.pictureBox1.TabIndex = 7;
+            this.pictureBox1.TabStop = false;
             // 
             // main
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(181)))), ((int)(((byte)(41)))), ((int)(((byte)(42)))));
-            this.ClientSize = new System.Drawing.Size(1422, 764);
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
+            this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.BackColor = System.Drawing.Color.White;
+            this.ClientSize = new System.Drawing.Size(960, 728);
+            this.Controls.Add(this.panel2);
+            this.Controls.Add(this.pictureBox1);
             this.Controls.Add(this.panel4);
             this.Controls.Add(this.panel1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.Fixed3D;
-            this.Margin = new System.Windows.Forms.Padding(4);
             this.Name = "main";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Queue Controller";
@@ -355,6 +398,7 @@
             this.panel1.PerformLayout();
             this.panel4.ResumeLayout(false);
             this.panel4.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -380,5 +424,9 @@
         internal System.Windows.Forms.Label label1;
         internal System.Windows.Forms.Label label2;
         private System.Windows.Forms.Panel panel4;
+        private System.Windows.Forms.PictureBox pictureBox1;
+        internal System.Windows.Forms.Label label5;
+        internal System.Windows.Forms.Label label3;
+        private System.Windows.Forms.Panel panel2;
     }
 }

@@ -94,7 +94,7 @@ namespace a3
             ListView1.Items.Clear();
             ListView1.View = View.Details;
 
-            string ID = " ";
+            //string ID = " ";
             string Name = " ";
             string Address = " ";
             SqlConnection con = new SqlConnection(connection_string);
@@ -105,11 +105,11 @@ namespace a3
             rdr1 = cmd1.ExecuteReader();
             while (rdr1.Read())
             {
-                ID = rdr1["id"].ToString();
+                //ID = rdr1["id"].ToString();
                 Name = (string)rdr1["Name"];
                 Address = rdr1["Address"].ToString();
 
-                string[] row = { ID, Name, Address };
+                string[] row = { Name, Address };
 
                 var lvi = new ListViewItem(row);
                 ListView1.Items.Add(lvi);

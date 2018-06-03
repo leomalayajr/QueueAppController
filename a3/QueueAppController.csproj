@@ -295,6 +295,33 @@
       <EmbedInteropTypes>True</EmbedInteropTypes>
     </COMReference>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\banner70.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\USeP_University_Eagle.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\banner701.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\USeP_University_Eagle1.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\logo3.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\logo4.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\logo41.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\banner702.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\logo5.jpg" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

@@ -56,26 +56,32 @@ namespace a3
         }
         public void Internal_Insert_PreQueue(string Key, _Pre_Queue _pq_mq, CancellationToken cts)
         {
-            if (_pq_mq == null)
-                Console.WriteLine("No objects yet on PreQueue.");
-            else
+            try
             {
-                //Console.WriteLine(_pq_mq.Full_Name + " " + _pq_mq.Key);
-                Console.WriteLine("passing to main form ->" + _pq_mq.Student_No);
-                _pq_mq.Key = Key;
-                main_frm.fromFirebase_Insert_PreQueue(_pq_mq, cts);
+                if (_pq_mq == null)
+                    Console.WriteLine("No objects yet on PreQueue.");
+                else if (_pq_mq.Student_No == "N/A")
+                    Console.WriteLine("Received an unknown or unset PreQueue.");
+                else
+                {
+                    //Console.WriteLine(_pq_mq.Full_Name + " " + _pq_mq.Key);
+                    Console.WriteLine("passing to main form ->" + _pq_mq.Student_No);
+                    _pq_mq.Key = Key;
+                    main_frm.fromFirebase_Insert_PreQueue(_pq_mq, cts);
+                }
             }
+            catch (NullReferenceException bb) { Console.WriteLine("Null reference at Internal Insert Prequeue"); }
 
         }
         public async Task Active_Retrieve_PreQueue(CancellationToken cts)
         {
             string node = "Pre_Queue/";
-            var prequeue_db = firebase.Child(node).AsRealtimeDatabase<_Pre_Queue>("", "", StreamingOptions.LatestOnly, InitialPullStrategy.MissingOnly, true);
+            var prequeue_db = firebase.Child(node).AsRealtimeDatabase<_Pre_Queue>("", "", StreamingOptions.LatestOnly , InitialPullStrategy.MissingOnly, true);
             //List<test> list_from_online = new List<test>();
-            prequeue_db.SyncExceptionThrown += (s, ex) => Console.WriteLine(ex.Exception);
-            prequeue_db.Post(new _Pre_Queue {Full_Name = "gPxP5sIxON",
-                Student_No = "IB7^HS0$GiFuB#+",
-                Transaction_Type = -749});
+            prequeue_db.SyncExceptionThrown += (s, ex) => Console.WriteLine("Hello?"+ex.Exception);
+            //prequeue_db.Post(new _Pre_Queue {Full_Name = "gPxP5sIxON",
+            //    Student_No = "IB7^HS0$GiFuB#+",
+            //    Transaction_Type = -749});
 
             var q = (from new_prequeue in prequeue_db.AsObservable()
                      select new { new_prequeue });

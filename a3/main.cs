@@ -100,15 +100,16 @@ namespace a3
              * You can set VARIABLE_Allowed_To_Sync to false 
              * and use tests functions on the Main Sync Method.
              */
-            //tests
             //tests();
             #endregion
 
         }
-        public async void tests(CancellationToken cts)
+        public async Task StartRetrievingPrequeue()
         {
+            CancellationToken cts = new CancellationToken();
             firebase_Connection fcon = new firebase_Connection();
             //await fcon.active();
+            Console.WriteLine("START_RETRIEVING_PREQUEUE");
             await fcon.Active_Retrieve_PreQueue(cts);
         }
         public void initDataTables()
@@ -141,6 +142,7 @@ namespace a3
         }
         private async Task Controller_Internal_PreQueueToLocal(_Pre_Queue e)
         {
+            Console.WriteLine("Controller Internal PreQueue");
             await Task.Run(() =>
             {
                 Console.WriteLine("WE -> " + e.Transaction_Type);
@@ -544,7 +546,7 @@ namespace a3
                        (int)t_rdr["Transaction_ID"],
                        (int)t_rdr["Servicing_Office"],
                        (int)t_rdr["Pattern_No"]);
-                    Console.Write(" getTransactions -> Added a row! ");
+                    //Console.Write(" getTransactions -> Added a row! ");
                 }
                 con.Close();
             }
@@ -670,6 +672,7 @@ namespace a3
         {
             // Sync items that are default for queuing 
             // Or items need to be inserted and not always updated
+            
             await Task.Run(async () =>
             {
                 if (VARIABLE_Allowed_To_Sync)
@@ -1203,6 +1206,15 @@ namespace a3
                                         foreach (_Servicing_Terminal d in LIST_ServicingTerminal)
                                             await fcon.App_Insert_ServicingTerminalAsync(d, cancelToken);
                                     });
+                                var i5 = Task.Run(async () => 
+                                {
+                                    PREQUEUE_LIST = await fcon.App_Retrieve_PreQueue(cancelToken);
+                                    foreach (_Pre_Queue new_prequeue in PREQUEUE_LIST)
+                                    {
+                                        await Controller_Internal_PreQueueToLocal(new_prequeue);
+                                    }
+                                    await fcon.App_Delete_PreQueueAsync(cancelToken);
+                                });
                                 var i6 = Task.Run(async () => 
                                 {
                                     foreach (_Transaction_Type g in LIST_TransactionTypes)
@@ -1211,16 +1223,16 @@ namespace a3
                                 
 
 
-                                logWrite("Online -> ", "Running sync tasks...");
-                                await Task.WhenAll(i6);
-                                Console.WriteLine("i6 done");
+                                //logWrite("Online -> ", "Running sync tasks...");
+                                await Task.WhenAll(i6,i5);
+                                Console.WriteLine("Synching Transaction and Retrieving Prequeue...");
                                 await Task.WhenAll(i1);
-                                Console.WriteLine("i1 done");
+                                Console.WriteLine("Synching Queue Info");
                                 await Task.WhenAll(i3);
-                                Console.WriteLine("i3 done");
+                                Console.WriteLine("Retrieving Queue Requests");
                                 //await Task.WhenAll(i1, i2, i3, i4, i5);
                                 await Task.WhenAll(i2, i4);
-                                Console.WriteLine("i2 i4 done");
+                                Console.WriteLine("Synching Main Queue and Servicing Terminal");
                                 logWrite("Online -> ", "Sync successful at " + DateTime.Now + " !");
                             }
                             catch (OperationCanceledException)
@@ -1488,15 +1500,16 @@ namespace a3
         {
             // Create the token source.
             wtoken = new CancellationTokenSource();
-            
-            // Methods only executed once per run; For testing only
-            // tests(wtoken.Token);
-            
+
+
             // Set the task.
             wtask = CreateNeverEndingTask((now, ct) => PROGRAM_Online_Sync(ct), wtoken.Token);
 
             // Start the task.  Post the time.
             wtask.Post(DateTimeOffset.Now);
+
+            // Methods only executed once per run; For testing only
+            // StartRetrievingPrequeue(wtoken.Token);
 
         }
         private void StopWork()
